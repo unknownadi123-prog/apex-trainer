@@ -13,6 +13,7 @@
       --accent: #7000ff;
       --stop: #ff0055;
       --warning: #ffaa00;
+      --warmup: #00ff88;
       --text: #e0e6ed;
       --glow: rgba(0, 240, 255, 0.15);
     }
@@ -148,6 +149,11 @@
       box-shadow: 0 0 10px var(--stop);
     }
 
+    .status-box.warmup .progress-bar-fill {
+      background: var(--warmup);
+      box-shadow: 0 0 10px var(--warmup);
+    }
+
     .status-box {
       background: #06060c;
       border: 2px solid var(--primary);
@@ -163,6 +169,11 @@
       box-shadow: 0 0 35px rgba(255, 0, 85, 0.35);
     }
 
+    .status-box.warmup {
+      border-color: var(--warmup);
+      box-shadow: 0 0 35px rgba(0, 255, 136, 0.25);
+    }
+
     .prompt-text {
       font-size: 1.3rem;
       font-weight: 700;
@@ -173,6 +184,10 @@
 
     .status-box.pause .prompt-text {
       color: var(--stop);
+    }
+
+    .status-box.warmup .prompt-text {
+      color: var(--warmup);
     }
 
     .sub-prompt {
@@ -200,6 +215,12 @@
       border-color: var(--stop);
       color: var(--stop);
       background: rgba(255, 0, 85, 0.1);
+    }
+
+    .status-box.warmup .technique-tag {
+      border-color: var(--warmup);
+      color: var(--warmup);
+      background: rgba(0, 255, 136, 0.1);
     }
 
     .control-panel {
@@ -497,7 +518,7 @@
   let phaseTimeLeft = 0;
   let totalPhaseDuration = 1;
 
-  let currentPhase = 'idle';
+  let currentPhase = 'idle'; // 'warmup', 'action', 'pause'
   let pyramidStep = 1;
   let currentBpm = 60;
   let currentIntensity = 0;
@@ -598,11 +619,11 @@
 
     currentBpm = bpm;
 
-    document.getElementById('bpmVal').innerText = active && currentPhase === 'action' ? bpm : '--';
+    document.getElementById('bpmVal').innerText = active && (currentPhase === 'action' || currentPhase === 'warmup') ? bpm : '--';
 
     if (metronomeInterval) clearInterval(metronomeInterval);
 
-    if (!active || currentPhase !== 'action' || bpm <= 0) return;
+    if (!active || currentPhase === 'pause' || bpm <= 0) return;
 
     const intervalMs = (60 / bpm) * 1000;
 
@@ -666,10 +687,13 @@
         Math.PI * 2
       );
 
-      mainCtx.strokeStyle =
-        currentPhase === 'action'
-          ? (currentIntensity > 7 ? '#ff0055' : '#00f0ff')
-          : '#ff0055';
+      if (currentPhase === 'warmup') {
+        mainCtx.strokeStyle = '#00ff88';
+      } else if (currentPhase === 'action') {
+        mainCtx.strokeStyle = currentIntensity > 7 ? '#ff0055' : '#00f0ff';
+      } else {
+        mainCtx.strokeStyle = '#ff0055';
+      }
 
       mainCtx.lineWidth = 4;
 
@@ -723,10 +747,9 @@
     const totalLen = bottomY - topY;
 
 
-    const strokeColor =
-      currentPhase === 'action'
-        ? '#00f0ff'
-        : '#ff0055';
+    let strokeColor = '#00f0ff';
+    if (currentPhase === 'warmup') strokeColor = '#00ff88';
+    else if (currentPhase === 'pause') strokeColor = '#ff0055';
 
 
     // Draw geometric linear motion track
@@ -763,7 +786,7 @@
 
     strokeCtx.lineTo(midX + 15, maxY);
 
-    strokeCtx.strokeStyle = 'rgba(0, 240, 255, 0.3)';
+    strokeCtx.strokeStyle = currentPhase === 'warmup' ? 'rgba(0, 255, 136, 0.3)' : 'rgba(0, 240, 255, 0.3)';
 
     strokeCtx.lineWidth = 2;
 
@@ -772,7 +795,7 @@
 
     // Calculate slider position
 
-    if (active && currentPhase === 'action') {
+    if (active && (currentPhase === 'action' || currentPhase === 'warmup')) {
 
       strokePos += strokeSpeed * strokeDirection;
 
@@ -955,10 +978,10 @@
       playTone(660, 'sine', 0.2);
 
 
-      speak("Session initiated. Sync with cadence and target intensity.");
+      speak("Initiating warm up phase. Focus on breathing and gentle rhythm.");
 
 
-      startNextPhase('action');
+      startNextPhase('warmup');
 
     } else {
 
@@ -980,7 +1003,17 @@
 
     } else {
 
-      currentPhase = currentPhase === 'action' ? 'pause' : 'action';
+      if (currentPhase === 'warmup') {
+
+        currentPhase = 'action';
+
+        speak("Warm up complete. Main training sequence starting now.");
+
+      } else {
+
+        currentPhase = currentPhase === 'action' ? 'pause' : 'action';
+
+      }
 
     }
 
@@ -996,9 +1029,41 @@
     const tag = document.getElementById('techniqueTag');
 
 
-    if (currentPhase === 'action') {
+    if (currentPhase === 'warmup') {
 
       box.classList.remove('pause');
+
+      box.classList.add('warmup');
+
+      playTone(440, 'sine', 0.2);
+
+
+      phaseTimeLeft = 60; // 60s warm up
+
+      updateIntensityMeter(2);
+
+      setMetronome(45);
+
+
+      strokeSpeed = 0.015;
+
+      strokeRangeMin = 0.1;
+
+      strokeRangeMax = 0.9;
+
+
+      prompt.innerText = 'WARM-UP PHASE';
+
+      sub.innerText = 'Low Cadence Conditioning';
+
+      tag.innerText = 'Focus: Gentle Motion';
+
+
+    } else if (currentPhase === 'action') {
+
+      box.classList.remove('pause');
+
+      box.classList.remove('warmup');
 
       playTone(520, 'sine', 0.15);
 
@@ -1092,6 +1157,8 @@
 
 
     } else {
+
+      box.classList.remove('warmup');
 
       box.classList.add('pause');
 
@@ -1220,6 +1287,8 @@
     document.getElementById('subPrompt').innerText = 'Session finished';
 
     document.getElementById('statusBox').classList.remove('pause');
+
+    document.getElementById('statusBox').classList.remove('warmup');
 
     document.getElementById('phaseTimer').innerText = '--';
 
