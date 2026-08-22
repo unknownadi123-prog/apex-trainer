@@ -36,7 +36,6 @@
       position: relative;
     }
 
-    /* Fullscreen Overlay Canvas for Finish FX */
     #fxCanvas {
       position: fixed;
       top: 0;
@@ -357,20 +356,18 @@
       margin-top: 5px;
     }
 
-    @media (max-width: 680px) {
-      .app-layout {
-        flex-direction: column;
-        align-items: center;
-      }
+    button.cummed-btn {
+      background: linear-gradient(135deg, #00ffaa, #00f0ff);
+      color: #000;
+      font-size: 1rem;
+      font-weight: 800;
+      box-shadow: 0 0 25px rgba(0, 255, 170, 0.6);
+      animation: pulseBtn 1s infinite alternate;
+    }
 
-      .stroke-panel {
-        width: 100%;
-        height: auto;
-      }
-
-      .stroke-canvas-container {
-        height: 220px;
-      }
+    @keyframes pulseBtn {
+      from { transform: scale(1); box-shadow: 0 0 15px rgba(0, 255, 170, 0.5); }
+      to { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 170, 0.9); }
     }
   </style>
 </head>
@@ -433,6 +430,7 @@
     <div class="control-panel">
       <button id="startBtn" class="action-btn" onclick="toggleSession()">Start Session</button>
       <button id="edgeBtn" class="action-btn edge-btn" onclick="logEdge()" style="display:none;">Edge Reached</button>
+      <button id="cummedBtn" class="action-btn cummed-btn" onclick="finishClimaxSession()" style="display:none;">CUMMED / FINISH SESSION</button>
     </div>
 
   </div>
@@ -464,7 +462,6 @@
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   let trainerVoice = null;
 
-  // Fullscreen FX Overlay Setup
   const fxCanvas = document.getElementById('fxCanvas');
   const fxCtx = fxCanvas.getContext('2d');
   let particles = [];
@@ -479,7 +476,6 @@
 
   function createSplashParticles() {
     particles = [];
-    // Burst particles from center/top
     for (let i = 0; i < 150; i++) {
       particles.push({
         x: fxCanvas.width / 2 + (Math.random() - 0.5) * 200,
@@ -493,7 +489,6 @@
       });
     }
 
-    // Top dripping streams
     for (let i = 0; i < 30; i++) {
       particles.push({
         x: Math.random() * fxCanvas.width,
@@ -803,8 +798,10 @@
 
       document.getElementById('edgeCount').innerText = '0';
       document.getElementById('modeSelect').disabled = true;
+      document.getElementById('startBtn').style.display = 'block';
       document.getElementById('startBtn').innerText = 'Stop Session';
       document.getElementById('edgeBtn').style.display = 'block';
+      document.getElementById('cummedBtn').style.display = 'none';
       document.getElementById('techniqueTag').style.display = 'inline-block';
 
       timerInterval = setInterval(() => {
@@ -828,7 +825,6 @@
     clearInterval(phaseInterval);
     currentPhase = 'release';
 
-    // Activate Fullscreen FX Animation
     fxActive = true;
     createSplashParticles();
 
@@ -844,6 +840,11 @@
     document.getElementById('techniqueTag').innerText = 'Status: Climax Approved';
     document.getElementById('phaseTimer').innerText = 'GO!';
 
+    // Swap Control Buttons to "CUMMED"
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('edgeBtn').style.display = 'none';
+    document.getElementById('cummedBtn').style.display = 'block';
+
     playTone(880, 'sine', 0.5);
 
     const finishVoiceLines = [
@@ -854,8 +855,12 @@
 
     const chosenVoice = finishVoiceLines[Math.floor(Math.random() * finishVoiceLines.length)];
     speak(chosenVoice);
+  }
 
-    document.getElementById('edgeBtn').style.display = 'none';
+  function finishClimaxSession() {
+    playTone(990, 'sine', 0.6);
+    speak(`Climax logged! Magnificent session completed with ${edges} edges.`);
+    endSession('climax');
   }
 
   function startNextPhase(forcedPhase = null) {
@@ -988,7 +993,7 @@
     startNextPhase('pause');
   }
 
-  function endSession() {
+  function endSession(reason = 'manual') {
     active = false;
     fxActive = false;
 
@@ -998,20 +1003,24 @@
     fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
 
     document.getElementById('modeSelect').disabled = false;
+    document.getElementById('startBtn').style.display = 'block';
     document.getElementById('startBtn').innerText = 'Start Session';
     document.getElementById('edgeBtn').style.display = 'none';
+    document.getElementById('cummedBtn').style.display = 'none';
     document.getElementById('techniqueTag').style.display = 'none';
 
-    document.getElementById('promptText').innerText = 'COMPLETE';
-    document.getElementById('subPrompt').innerText = 'Training session stopped.';
+    document.getElementById('promptText').innerText = reason === 'climax' ? 'VICTORY — COMPLETE' : 'COMPLETE';
+    document.getElementById('subPrompt').innerText = reason === 'climax' ? `Climax logged successfully. Total edges: ${edges}` : 'Training session stopped.';
     document.getElementById('statusBox').className = 'status-box';
     document.getElementById('phaseTimer').innerText = '--';
     document.getElementById('sessionProgressBar').style.width = '0%';
 
     updateIntensityMeter(10);
 
-    playTone(440, 'sine', 0.3);
-    speak(`Session terminated manually. You completed ${edges} edges.`);
+    if (reason === 'manual') {
+      playTone(440, 'sine', 0.3);
+      speak(`Session terminated manually. You completed ${edges} edges.`);
+    }
   }
 
   updateIntensityMeter(20);
