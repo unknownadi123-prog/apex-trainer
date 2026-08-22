@@ -446,7 +446,7 @@ Technique
 
 <div class="stat-card">
 <div class="stat-val" id="edgeCount">0</div>
-<div class="stat-lbl">Rounds Logged</div>
+<div class="stat-lbl">Edges</div>
 </div>
 
 <div class="stat-card">
@@ -2174,7 +2174,7 @@ document.getElementById(
 ).innerText=
 reason==='climax'
 ?
-`Session completed. Total rounds: ${edges}`
+`Session completed. Total edges: ${edges}`
 :
 'Training session stopped.';
 
@@ -2204,7 +2204,7 @@ playTone(
 );
 
 speak(
-`${randomRawLine('manualStop')} You logged ${edges} rounds.`
+`${randomRawLine('manualStop')} You logged ${edges} edges.`
 );
 
 }
