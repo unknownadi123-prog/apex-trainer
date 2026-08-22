@@ -558,6 +558,26 @@ synth.onvoiceschanged=setTrainerVoice;
 
 
 /* =========================================================
+   DYNAMIC FINISH COMMAND GENERATOR
+========================================================= */
+
+const compliments = [
+  "You handled that like an absolute legend.",
+  "Outstanding discipline and control throughout.",
+  "That was a masterclass performance.",
+  "Pure dedication, you built up incredible power.",
+  "An absolute champion effort from start to finish.",
+  "Your control is top tier, unbeatable session.",
+  "Incredible endurance, you earned every bit of this."
+];
+
+function getRandomFinishCue() {
+  const comp = compliments[Math.floor(Math.random() * compliments.length)];
+  return `Now you are allowed to shoot that cum out of the long harvest. ${comp}`;
+}
+
+
+/* =========================================================
    CONVERSATIONAL TRAINER VOICE
 ========================================================= */
 
@@ -1698,25 +1718,22 @@ box.className=
 
 updateIntensityMeter(100);
 
-const mode=
-document.getElementById(
-'modeSelect'
-).value;
+const finishMessage = getRandomFinishCue();
 
 document.getElementById(
 'promptText'
 ).innerText=
-'SESSION COMPLETE';
+'RELEASE ALLOWED';
 
 document.getElementById(
 'subPrompt'
 ).innerText=
-'Target time reached. Final phase engaged.';
+finishMessage;
 
 document.getElementById(
 'techniqueTag'
 ).innerText=
-'Status: Final Phase';
+'Status: Final Release';
 
 document.getElementById(
 'phaseTimer'
@@ -1736,28 +1753,7 @@ document.getElementById(
 
 playTone(880,'sine',.5);
 
-const lines=[
-
-"Target time reached. You made it. Finish the session strong.",
-
-"That's the target. You've got through the whole damn thing.",
-
-"Time's up. Final phase is active. Finish strong.",
-
-mode==='burst1'||
-mode==='burst2'
-?
-"Rapid session complete. Nice work. That's a wrap."
-:
-"Session complete. You made it to the finish."
-
-];
-
-speak(
-lines[
-Math.floor(Math.random()*lines.length)
-]
-);
+speak(finishMessage);
 
 }
 
