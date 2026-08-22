@@ -429,7 +429,7 @@
   let active = false;
   let seconds = 0;
   let edges = 0;
-  let totalSessionSeconds = 1800; // Default 30 mins
+  let totalSessionSeconds = 1800;
 
   let timerInterval = null;
   let phaseInterval = null;
@@ -645,7 +645,7 @@
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     if (trainerVoice) utterance.voice = trainerVoice;
-    utterance.rate = 1.0;
+    utterance.rate = 1.05;
     utterance.pitch = 0.8;
     synth.speak(utterance);
   }
@@ -656,24 +656,23 @@
     const secs = String(seconds % 60).padStart(2, '0');
     document.getElementById('mainTimer').innerText = `${hrs}:${mins}:${secs}`;
 
-    // Overall session progress bar
     const progress = Math.min(100, (seconds / totalSessionSeconds) * 100);
     document.getElementById('sessionProgressBar').style.width = `${progress}%`;
   }
 
   function setSessionDuration(mode) {
     if (mode === 'quick') {
-      totalSessionSeconds = Math.floor(Math.random() * 120) + 180; // 3 to 5 minutes
+      totalSessionSeconds = Math.floor(Math.random() * 120) + 180; 
     } else if (mode === 'warmup') {
-      totalSessionSeconds = 900; // 15 mins
+      totalSessionSeconds = 900; 
     } else if (mode === 'standard') {
-      totalSessionSeconds = 1500; // 25 mins
+      totalSessionSeconds = 1500; 
     } else if (mode === 'endurance') {
-      totalSessionSeconds = 2400; // 40 mins
+      totalSessionSeconds = 2400; 
     } else if (mode === 'ladder') {
-      totalSessionSeconds = 1200; // 20 mins
+      totalSessionSeconds = 1200; 
     } else if (mode === 'toy') {
-      totalSessionSeconds = Math.floor(Math.random() * 3600) + 7200; // 2 to 3 hours (120-180 mins)
+      totalSessionSeconds = Math.floor(Math.random() * 3600) + 7200; 
     }
   }
 
@@ -703,7 +702,7 @@
       }, 1000);
 
       playTone(660, 'sine', 0.2);
-      speak("Session started. Prepare yourself.");
+      speak("Session started. Keep it tight and don't cum early.");
       startNextPhase('action');
     } else {
       endSession();
@@ -719,13 +718,23 @@
 
     updateIntensityMeter(100);
 
-    document.getElementById('promptText').innerText = 'FULL RELEASE';
-    document.getElementById('subPrompt').innerText = 'Goal reached! Stroke freely and climax now.';
-    document.getElementById('techniqueTag').innerText = 'Status: Final Climax Allowed';
-    document.getElementById('phaseTimer').innerText = 'GO!';
+    const mode = document.getElementById('modeSelect').value;
+
+    document.getElementById('promptText').innerText = 'TIME TO CUM / SHOOT';
+    document.getElementById('subPrompt').innerText = 'Session complete! Stroke as hard as you want and blow your load now.';
+    document.getElementById('techniqueTag').innerText = 'Status: Climax Authorized';
+    document.getElementById('phaseTimer').innerText = 'SHOOT!';
 
     playTone(880, 'sine', 0.5);
-    speak("Target session time achieved. You are now authorized for full release. Climax now!");
+
+    const finishVoiceLines = [
+      "Alright time is up! Stroke fast and cum now! Blow your load!",
+      "You earned this finish. Go full speed and shoot your load!",
+      mode === 'toy' ? "Fill that sleeve up! Cum hard right now!" : "Session over. Stroke hard and shoot it all out!"
+    ];
+
+    const chosenVoice = finishVoiceLines[Math.floor(Math.random() * finishVoiceLines.length)];
+    speak(chosenVoice);
 
     document.getElementById('edgeBtn').style.display = 'none';
   }
@@ -770,21 +779,21 @@
         phaseTimeLeft = 15;
       } else if (mode === 'toy') {
         updateIntensityMeter(Math.min(80, 35 + ladderStep * 3));
-        phaseTimeLeft = Math.floor(Math.random() * 30 + 45); // Extended 45-75s strokes for toys
+        phaseTimeLeft = Math.floor(Math.random() * 30 + 45);
       }
 
       phaseTimeLeft = Math.max(5, phaseTimeLeft);
 
       const toyInstructions = [
-        { rhythm: 'Full-length steady glide', style: 'Sleeve Deep Stroke', vocal: 'Full depth gliding motion with sleeve.' },
-        { rhythm: 'Slow tip friction focus', style: 'Sleeve Cap Control', vocal: 'Target the tip area with slow rotation.' },
-        { rhythm: 'Twist on up-stroke', style: 'Twist & Pull Motion', vocal: 'Apply gentle rotation on every upward stroke.' }
+        { rhythm: 'Full-length steady glide', style: 'Sleeve Deep Stroke', vocal: 'Deep full strokes. Keep it smooth and hold off.' },
+        { rhythm: 'Slow tip friction focus', style: 'Sleeve Cap Control', vocal: 'Target the tip slowly. Don't slip over.' },
+        { rhythm: 'Twist on up-stroke', style: 'Twist & Pull Motion', vocal: 'Twist on the up stroke. Drive the intensity up.' }
       ];
 
       const standardInstructions = [
-        { rhythm: 'Slow steady pace', style: 'Full Range Edging', vocal: 'Maintain a slow steady rhythm.' },
-        { rhythm: 'Medium rhythm', style: 'Controlled Edging', vocal: 'Switch hand and maintain current rhythm.' },
-        { rhythm: 'Gradual speed build', style: 'Two-Handed Edging', vocal: 'Increase motion speed and focus on intensity.' }
+        { rhythm: 'Slow steady pace', style: 'Full Range Edging', vocal: 'Start stroking. Steady pace, stay in control.' },
+        { rhythm: 'Medium rhythm', style: 'Controlled Edging', vocal: 'Pick up the rhythm. Hold your focus.' },
+        { rhythm: 'Gradual speed build', style: 'Two-Handed Edging', vocal: 'Stroke faster now, build up near the edge.' }
       ];
 
       const chosen = (mode === 'toy') ? toyInstructions[Math.floor(Math.random() * toyInstructions.length)] : standardInstructions[Math.floor(Math.random() * standardInstructions.length)];
@@ -796,7 +805,7 @@
       activeHandSide = 'right';
 
       prompt.innerText = 'STROKE / BUILD';
-      sub.innerText = `${chosen.rhythm} — Aim for ${Math.round(targetIntensity)}% Intensity`;
+      sub.innerText = `${chosen.rhythm} — Target ${Math.round(targetIntensity)}% Intensity`;
       tag.innerText = `Focus: ${chosen.style}`;
 
       speak(chosen.vocal);
@@ -810,23 +819,22 @@
       if (mode === 'quick') {
         phaseTimeLeft = 5;
       } else if (mode === 'toy') {
-        phaseTimeLeft = Math.floor(Math.random() * 15) + 15; // Longer recovery holds for toys
+        phaseTimeLeft = Math.floor(Math.random() * 15) + 15;
       } else {
         phaseTimeLeft = Math.floor(Math.random() * 10) + 8;
       }
 
-      // Special periodic lube check prompt for Toy Mode every ~30 mins
       if (mode === 'toy' && seconds > 0 && Math.floor(seconds / 60) % 30 === 0) {
         prompt.innerText = 'LUBE & SUCTION CHECK';
         sub.innerText = 'Extended 30s pause: Re-apply lube or adjust sleeve suction.';
         tag.innerText = 'Focus: Toy Maintenance';
         phaseTimeLeft = 30;
-        speak('30 minute milestone. Reapply lubricant or adjust suction if needed.');
+        speak('Thirty minute mark. Lube up or vent suction, then get ready.');
       } else {
         prompt.innerText = 'HALT / HOLD';
-        sub.innerText = 'Hands off! Cool down to lower intensity.';
-        tag.innerText = 'Focus: Controlled breathing';
-        speak('Halt immediately and hold your edge.');
+        sub.innerText = 'Hands off! Cool down and hold your cum.';
+        tag.innerText = 'Focus: Deep breaths';
+        speak('Hands off completely! Stop right there and hold it back.');
       }
     }
 
@@ -849,7 +857,14 @@
     document.getElementById('edgeCount').innerText = edges;
 
     playTone(200, 'sawtooth', 0.4);
-    speak('Edge recorded! Stop all motion immediately.');
+
+    const edgeVoiceLines = [
+      "Edge logged! Stop moving right now, don't cum!",
+      "Hands away! Hold that peak right on the edge.",
+      "Good hold. Freeze right there and let it settle."
+    ];
+
+    speak(edgeVoiceLines[Math.floor(Math.random() * edgeVoiceLines.length)]);
 
     startNextPhase('pause');
   }
@@ -866,7 +881,7 @@
     document.getElementById('techniqueTag').style.display = 'none';
 
     document.getElementById('promptText').innerText = 'COMPLETE';
-    document.getElementById('subPrompt').innerText = 'Training session finished';
+    document.getElementById('subPrompt').innerText = 'Training session stopped.';
     document.getElementById('statusBox').className = 'status-box';
     document.getElementById('phaseTimer').innerText = '--';
     document.getElementById('sessionProgressBar').style.width = '0%';
@@ -874,7 +889,7 @@
     updateIntensityMeter(10);
 
     playTone(440, 'sine', 0.3);
-    speak(`Session finished. Total time: ${Math.floor(seconds / 60)} minutes with ${edges} edges recorded.`);
+    speak(`Session stopped manually. You logged ${edges} edges.`);
   }
 
   updateIntensityMeter(20);
