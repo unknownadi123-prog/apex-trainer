@@ -131,7 +131,7 @@
       background: #121220;
       border-radius: 3px;
       overflow: hidden;
-      margin: 15px 0 20px 0;
+      margin: 15px 0 10px 0;
     }
 
     .progress-bar-fill {
@@ -145,6 +145,40 @@
     .status-box.pause .progress-bar-fill {
       background: var(--stop);
       box-shadow: 0 0 10px var(--stop);
+    }
+
+    .intensity-container {
+      width: 100%;
+      margin-bottom: 15px;
+      text-align: left;
+    }
+
+    .intensity-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #6c6c80;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .intensity-bar-bg {
+      width: 100%;
+      height: 8px;
+      background: #06060c;
+      border: 1px solid #1a1a29;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .intensity-bar-fill {
+      height: 100%;
+      width: 50%;
+      background: linear-gradient(90deg, #00f0ff, #7000ff);
+      box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+      transition: width 0.3s ease, background 0.3s ease;
     }
 
     .status-box {
@@ -311,13 +345,16 @@
 
     <div class="selectors-row">
       <select id="modeSelect" class="mode-select">
-        <option value="standard">Mode: Standard</option>
-        <option value="endurance">Mode: Endurance</option>
-        <option value="chaos">Mode: Chaos</option>
+        <option value="warmup">Mode: Warm-Up</option>
+        <option value="standard" selected>Mode: Standard Balanced</option>
+        <option value="endurance">Mode: Endurance Hold</option>
+        <option value="ladder">Mode: Ladder Surge</option>
+        <option value="chaos">Mode: Chaos Randomizer</option>
+        <option value="extreme">Mode: Overload Edge</option>
       </select>
 
-      <select id="intensitySelect" class="mode-select">
-        <option value="1">Intensity: Low (x0.8)</option>
+      <select id="intensitySelect" class="mode-select" onchange="updateIntensityBar()">
+        <option value="0.8">Intensity: Low (x0.8)</option>
         <option value="1.3" selected>Intensity: Moderate (x1.3)</option>
         <option value="1.8">Intensity: High (x1.8)</option>
         <option value="2.5">Intensity: Extreme (x2.5)</option>
@@ -337,6 +374,16 @@
 
     <div class="progress-bar-container">
       <div class="progress-bar-fill" id="phaseProgressBar"></div>
+    </div>
+
+    <div class="intensity-container">
+      <div class="intensity-header">
+        <span>Arousal / Intensity Scale</span>
+        <span id="intensityLabel">52%</span>
+      </div>
+      <div class="intensity-bar-bg">
+        <div class="intensity-bar-fill" id="intensityBarFill"></div>
+      </div>
     </div>
 
     <div class="status-box" id="statusBox">
@@ -475,6 +522,27 @@
   let strokeRangeMax = 0.8;
   let handsCount = 1;
   let activeHandSide = 'right';
+
+
+  function updateIntensityBar() {
+    const val = parseFloat(document.getElementById('intensitySelect').value) || 1.3;
+    const maxVal = 2.5;
+    const percentage = Math.min(100, Math.round((val / maxVal) * 100));
+
+    const bar = document.getElementById('intensityBarFill');
+    const label = document.getElementById('intensityLabel');
+
+    label.innerText = `${percentage}%`;
+    bar.style.width = `${percentage}%`;
+
+    if (val >= 2.0) {
+      bar.style.background = 'linear-gradient(90deg, #ff0055, #ff5500)';
+    } else if (val >= 1.3) {
+      bar.style.background = 'linear-gradient(90deg, #00f0ff, #7000ff)';
+    } else {
+      bar.style.background = 'linear-gradient(90deg, #00f0ff, #00ffaa)';
+    }
+  }
 
 
   function drawHandGrip(x, y, isRightSide, color) {
@@ -737,8 +805,14 @@
       box.classList.remove('pause');
       playTone(520, 'sine', 0.15);
 
-      if (mode === 'endurance') {
-        phaseTimeLeft = Math.floor((Math.random() * 30 + 40) / (intensity * 0.5));
+      if (mode === 'warmup') {
+        phaseTimeLeft = Math.floor((Math.random() * 15 + 30) / (intensity * 0.7));
+      } else if (mode === 'endurance') {
+        phaseTimeLeft = Math.floor((Math.random() * 30 + 45) / (intensity * 0.5));
+      } else if (mode === 'ladder') {
+        phaseTimeLeft = Math.floor((Math.random() * 15 + 15) / intensity);
+      } else if (mode === 'extreme') {
+        phaseTimeLeft = Math.floor((Math.random() * 20 + 35) / (intensity * 0.8));
       } else if (mode === 'chaos') {
         phaseTimeLeft = Math.floor((Math.random() * 25 + 10) / intensity);
       } else {
@@ -802,7 +876,14 @@
 
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
 
-      strokeSpeed = chosen.baseSpeed * intensity;
+      if (mode === 'extreme') {
+        strokeSpeed = chosen.baseSpeed * intensity * 1.5;
+      } else if (mode === 'warmup') {
+        strokeSpeed = chosen.baseSpeed * intensity * 0.7;
+      } else {
+        strokeSpeed = chosen.baseSpeed * intensity;
+      }
+
       strokeRangeMin = chosen.min;
       strokeRangeMax = chosen.max;
       handsCount = chosen.hands;
@@ -818,9 +899,15 @@
       box.classList.add('pause');
       playTone(280, 'triangle', 0.3);
 
-      phaseTimeLeft = mode === 'chaos'
-        ? Math.floor(Math.random() * 10) + 5
-        : Math.floor(Math.random() * 15) + 10;
+      if (mode === 'extreme') {
+        phaseTimeLeft = Math.floor(Math.random() * 5) + 4;
+      } else if (mode === 'warmup') {
+        phaseTimeLeft = Math.floor(Math.random() * 10) + 15;
+      } else if (mode === 'chaos') {
+        phaseTimeLeft = Math.floor(Math.random() * 10) + 5;
+      } else {
+        phaseTimeLeft = Math.floor(Math.random() * 15) + 10;
+      }
 
       const pausePhrases = [
         'Halt immediately and hold your edge.',
@@ -894,6 +981,8 @@
     playTone(440, 'sine', 0.3);
     speak(`Session finished. Total training time: ${Math.floor(seconds / 60)} minutes with ${edges} total edges achieved.`);
   }
+
+  updateIntensityBar();
 
 </script>
 
