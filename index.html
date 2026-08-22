@@ -155,15 +155,13 @@
   let strokeRangeMin = 0.2;
   let strokeRangeMax = 0.8;
   
-  // State control for grip configuration
-  let handsCount = 1;      // 1 or 2 hands
-  let activeHandSide = 'right'; // 'right' or 'left' for single hand mode
+  let handsCount = 1;
+  let activeHandSide = 'right';
 
   function drawHandGrip(x, y, isRightSide, color) {
     strokeCtx.save();
     const flip = isRightSide ? 1 : -1;
     
-    // Main Palm Block
     strokeCtx.beginPath();
     strokeCtx.moveTo(x - (30 * flip), y - 12);
     strokeCtx.bezierCurveTo(x - (38 * flip), y - 6, x - (38 * flip), y + 16, x - (24 * flip), y + 18);
@@ -176,12 +174,10 @@
     strokeCtx.shadowColor = color;
     strokeCtx.fill();
 
-    // Thumb Grip
     strokeCtx.beginPath();
     strokeCtx.ellipse(x - (18 * flip), y - 8, 12, 8, (isRightSide ? -1 : 1) * Math.PI / 6, 0, Math.PI * 2);
     strokeCtx.fill();
 
-    // Finger Segments
     strokeCtx.shadowBlur = 0;
     strokeCtx.strokeStyle = '#040406';
     strokeCtx.lineWidth = 2;
@@ -196,7 +192,6 @@
   }
 
   function renderAnimations() {
-    // 1. Circular Timer Visualizer
     mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
     const centerX = mainCanvas.width / 2;
     const centerY = mainCanvas.height / 2;
@@ -221,7 +216,6 @@
       mainCtx.stroke();
     }
 
-    // 2. Motion Guide Visualizer Canvas
     strokeCtx.clearRect(0, 0, strokeCanvas.width, strokeCanvas.height);
     
     const w = strokeCanvas.width;
@@ -234,7 +228,7 @@
     const strokeColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     const fillColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
 
-    // Shaft Outline
+    // Shaft Geometry
     strokeCtx.beginPath();
     strokeCtx.moveTo(midX - 25, bottomY);
     strokeCtx.lineTo(midX - 25, topY + 48);
@@ -249,27 +243,38 @@
     strokeCtx.fill();
     strokeCtx.lineWidth = 2;
     strokeCtx.strokeStyle = strokeColor;
+    strokeCtx.lineCap = 'round';
+    strokeCtx.lineJoin = 'round';
     strokeCtx.stroke();
 
-    // Round Base Geometry
+    // Cleaned Base Circles (No Stray Line Artifacts)
     strokeCtx.beginPath();
-    strokeCtx.arc(midX - 22, bottomY + 22, 22, 0, Math.PI * 2);
-    strokeCtx.arc(midX + 22, bottomY + 22, 22, 0, Math.PI * 2);
+    strokeCtx.arc(midX - 18, bottomY + 18, 20, 0.25 * Math.PI, 1.25 * Math.PI, false);
     strokeCtx.strokeStyle = strokeColor;
     strokeCtx.lineWidth = 2;
     strokeCtx.stroke();
 
-    // Vascular Branches
+    strokeCtx.beginPath();
+    strokeCtx.arc(midX + 18, bottomY + 18, 20, 0.75 * Math.PI, 1.75 * Math.PI, false);
+    strokeCtx.strokeStyle = strokeColor;
+    strokeCtx.lineWidth = 2;
+    strokeCtx.stroke();
+
+    // Vascular Branches (Isolated Paths)
     strokeCtx.beginPath();
     strokeCtx.moveTo(midX - 8, bottomY - 10);
     strokeCtx.bezierCurveTo(midX - 20, bottomY - 60, midX - 4, topY + 110, midX - 18, topY + 60);
+    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.35)' : 'rgba(255, 0, 85, 0.35)';
+    strokeCtx.lineWidth = 1.8;
+    strokeCtx.stroke();
+
+    strokeCtx.beginPath();
     strokeCtx.moveTo(midX + 8, bottomY - 20);
     strokeCtx.bezierCurveTo(midX + 22, bottomY - 70, midX + 6, topY + 100, midX + 20, topY + 55);
     strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.35)' : 'rgba(255, 0, 85, 0.35)';
     strokeCtx.lineWidth = 1.8;
     strokeCtx.stroke();
 
-    // Calculate Motion Position
     if (active && currentPhase === 'action') {
       strokePos += strokeSpeed * strokeDirection;
       if (strokePos >= strokeRangeMax) {
@@ -288,14 +293,10 @@
     const currentY = topY + strokePos * totalLen;
     const handColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.88)' : 'rgba(255, 0, 85, 0.88)';
 
-    // Dynamic Multi-Hand Visualizer Logic
     if (handsCount === 2) {
-      // Primary Lower Hand
       drawHandGrip(midX, currentY + 12, true, handColor);
-      // Secondary Upper Hand
       drawHandGrip(midX, currentY - 18, false, handColor);
     } else {
-      // Single Hand (Left or Right)
       drawHandGrip(midX, currentY, activeHandSide === 'right', handColor);
     }
 
