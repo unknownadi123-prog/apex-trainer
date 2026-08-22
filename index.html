@@ -519,7 +519,7 @@ let ladderStep=0;
 
 
 /* =========================================================
-   AUDIO
+   AUDIO & VOICE CONFIGURATION
 ========================================================= */
 
 const synth=window.speechSynthesis;
@@ -535,15 +535,18 @@ if(!synth)return;
 
 const voices=synth.getVoices();
 
+/* Priority order to pick a deep, masculine system voice */
 trainerVoice=
 voices.find(v =>
 v.lang.includes('en') &&
 (
-v.name.includes('Male') ||
 v.name.includes('David') ||
-v.name.includes('Daniel')
+v.name.includes('Daniel') ||
+v.name.includes('Male') ||
+v.name.includes('George') ||
+v.name.includes('Alex')
 )
-) || voices[0];
+) || voices.find(v => v.lang.includes('en')) || voices[0];
 
 }
 
@@ -559,80 +562,80 @@ synth.onvoiceschanged=setTrainerVoice;
 
 
 /* =========================================================
-   NATURAL HUMAN VOICE & DIALOGUE ENGINE
+   DOMINANT & MASCULINE DIALOGUE ENGINE
 ========================================================= */
 
 const rawVoice={
 
 start:[
-"Alright, let's get started. Take a breath and get comfortable.",
-"Hey, ready? Let's kick this session off together.",
-"Alright, we're going now. Focus up and just stick with me.",
-"Here we go. Just relax and follow my pace."
+"Alright, pay attention. I'm taking full control now. Stay focused.",
+"You belong to my tempo today. Let's see how much control you really have.",
+"Here we go. Don't move faster than I allow. Follow my commands.",
+"Look at me. Clear your mind, take a breath, and get ready."
 ],
 
 action:[
-"Keep that rhythm going, you're doing great.",
-"Nice steady movement. Stay right here.",
-"Looking good. Keep this pace for a bit.",
-"There you go. Smooth and steady.",
-"Just stay with it. Breathe through it.",
-"Keep it up, you're handling this smoothly.",
-"Maintain this tempo, you're doing awesome.",
-"Nice and steady. Keep that mind locked in."
+"Keep that pace steady. Do not rush unless I say so.",
+"Stay right there. I want a smooth, disciplined rhythm.",
+"Controlled movement. Show me you can follow orders.",
+"Maintain that speed. Keep your mind locked in on my voice.",
+"Don't lose your discipline now. Stay steady.",
+"Good. Keep moving exactly at this tempo.",
+"Keep stroking. Stay controlled and stay focused.",
+"Hold that rhythm. I am in full control of this pace."
 ],
 
 midActionCheck:[
-"Still feeling good? Keep holding that steady rhythm.",
-"You're doing awesome. Stay focused right here.",
-"How are you holding up? Keep that nice pace going.",
-"Looking really solid. Stick with it.",
-"Nice and controlled. Just keep breathing through it.",
-"You're in total control right now, keep it up."
+"Still keeping your composure? Good. Don't slip up now.",
+"Stay disciplined. I want total control over every movement.",
+"You are doing what you are told. Keep holding that steady pace.",
+"Focus on my command. Breathe through it and stay locked in.",
+"Do not rush ahead. Stay right on my line.",
+"Good control. Keep that pressure steady under my lead."
 ],
 
 highIntensity:[
-"Alright, pick it up a little bit now. Feel that build.",
-"Pushing the pace now. Stay sharp, you got this.",
-"Bring up that energy. Don't lose your focus.",
-"Getting close to the edge of your limit now. Hold it together.",
-"Feel that heat building up. Stay controlled.",
-"Driving hard now. Stay right on the line.",
-"This is where it gets intense. Stick with me."
+"Pick up the speed now. Drive it harder, but stay under control.",
+"Push the intensity. Stay right on the edge, don't you dare ruin it.",
+"Drive it faster now. Feel that heat build up under my command.",
+"Getting close to the edge? Good. Hold it together and obey.",
+"Heavy pressure now. Stay sharp and handle this intensity.",
+"Push hard right now. Do not back down until I order it.",
+"Feel that massive surge. Hold your ground and stay locked on me."
 ],
 
 pause:[
-"Hands off completely. Deep breath in, deep breath out.",
-"Alright, freeze right there. Let everything cool down.",
-"Take a quick break. Just relax for a second.",
-"Pause right here. Let that intensity drop.",
-"Good job, now rest up and take a deep breath.",
-"Hold up, hands off. Take a moment to recover.",
-"Easy now. Let your body relax for a moment."
+"Hands off right now. Freeze and breathe.",
+"Halt. Completely hands off. Drop your posture and recover.",
+"Stop immediately. Do not touch. Let that pressure settle.",
+"Hands off. Take a deep breath and yield control.",
+"Freeze where you are. Breathe out and calm down.",
+"Hands away. I control when you continue. Hold still.",
+"Stop right there. Back off completely and recover."
 ],
 
 edge:[
-"Got it, you edged. Hands completely off and breathe.",
-"Nice catch. Take a breather and let that cool down.",
-"Recorded that edge. Stand by and let yourself recover.",
-"Good save. Hands off, take a deep breath.",
-"Logged it. Just relax and let the pressure drop.",
-"You got close there. Back off completely and recover."
+"You got close or edged. Hands completely off right now.",
+"Good catch. Drop your hands, breathe, and recover under my watch.",
+"Logged that edge. Stand down and let that intense pressure drop.",
+"Close call. Back off immediately and take a deep breath.",
+"Logged. You know the drill, hands away and recover.",
+"You touched the edge. Back off, freeze, and get your discipline back."
 ],
 
 finish:[
-"That is time. You made it all the way through.",
-"Session done. Man, that was an incredible run.",
-"And that's a wrap! You handled that whole run like a pro.",
-"Time's up. Outstanding control today.",
-"Finished! You put in serious work today."
+"Time is up. You obeyed every single command. Excellent work.",
+"Session complete. You demonstrated supreme discipline today.",
+"And that is the end. You stayed in control and followed my voice perfectly.",
+"Time's up. Outstanding performance under my guidance.",
+"Finished. You proved your endurance and control today."
 ],
 
 manualStop:[
-"Alright, stopping here. Great effort today.",
-"Wrapping up early? No problem, good session.",
-"Stopping session. You did some solid work.",
-"Alright, let's call it there. Great job."
+"Stopping now. You obeyed well today.",
+"Terminating early? Fine. You put in solid work.",
+"Stopping session. You maintained strong discipline.",
+"Calling it here. Good job staying under control."
 ]
 
 };
@@ -659,9 +662,9 @@ new SpeechSynthesisUtterance(text);
 if(trainerVoice)
 utterance.voice=trainerVoice;
 
-/* Slightly adjusted pitch/rate for a natural human cadence */
-utterance.rate=0.98;
-utterance.pitch=0.92;
+/* Low pitch (0.65) and measured rate (0.92) for a deep, dominating, authoritative presence */
+utterance.rate=0.92;
+utterance.pitch=0.65;
 utterance.volume=1;
 
 synth.speak(utterance);
@@ -671,11 +674,11 @@ synth.speak(utterance);
 
 /* Dynamic Finish Lines */
 const finishCompliments = [
-  "You handled that session like an absolute legend.",
-  "Outstanding discipline and control from start to finish.",
-  "That was a masterclass in staying in control.",
-  "Incredible focus, you built up huge intensity.",
-  "Your endurance is top tier, awesome effort."
+  "You handled this session with absolute mastery and discipline.",
+  "Outstanding control throughout. You earned this release.",
+  "That was a dominant performance from start to finish.",
+  "Incredible endurance under my command.",
+  "Top tier discipline. You obeyed every prompt perfectly."
 ];
 
 function getRandomFinishCue() {
@@ -1962,9 +1965,8 @@ tag.innerText=
 
 speak(textLine);
 
-/* Schedule mid-phase conversational check-in if the interval is long enough */
 if(phaseTimeLeft >= 18) {
-  const midDelay = Math.floor(phaseTimeLeft * 500); // speak around halfway through
+  const midDelay = Math.floor(phaseTimeLeft * 500);
   midPhaseCheckInTimeout = setTimeout(() => {
     if(active && currentPhase === 'action') {
       const midLine = randomRawLine('midActionCheck');
