@@ -51,14 +51,14 @@ body {
   flex-direction:row;
   gap:20px;
   width:100%;
-  max-width:1100px;
+  max-width:1380px;
   align-items:stretch;
   justify-content:center;
   z-index:1;
   margin:auto;
 }
 
-@media(max-width:960px) {
+@media(max-width:1024px) {
   .app-layout {
     flex-direction:column;
     align-items:center;
@@ -66,7 +66,7 @@ body {
 
   .stroke-panel, .video-panel {
     width:100%!important;
-    max-width:420px;
+    max-width:550px;
   }
 }
 
@@ -84,7 +84,7 @@ body {
 }
 
 .stroke-panel {
-  width:220px;
+  width:200px;
   background:var(--card);
   border:1px solid #1a1a29;
   border-radius:24px;
@@ -96,9 +96,10 @@ body {
   box-shadow:0 0 30px rgba(0,0,0,.5);
 }
 
-/* VIDEO PANEL STYLES */
+/* EXPANDED VIDEO PANEL STYLES */
 .video-panel {
-  width:340px;
+  flex:1.4;
+  min-width:320px;
   background:var(--card);
   border:1px solid #1a1a29;
   border-radius:24px;
@@ -161,6 +162,7 @@ body {
   overflow:hidden;
   background:#000;
   border:1px solid #161626;
+  flex-grow:1;
 }
 
 .video-container iframe {
@@ -469,7 +471,7 @@ button.cummed-btn {
 
 <div class="app-layout">
 
-<!-- VIDEO PLAYER PANEL -->
+<!-- LARGER VIDEO PLAYER PANEL -->
 <div class="video-panel">
   <div class="panel-title">Video Feed</div>
   
