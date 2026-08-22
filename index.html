@@ -51,22 +51,22 @@ body {
   flex-direction:row;
   gap:20px;
   width:100%;
-  max-width:1380px;
+  max-width:820px;
   align-items:stretch;
   justify-content:center;
   z-index:1;
   margin:auto;
 }
 
-@media(max-width:1024px) {
+@media(max-width:768px) {
   .app-layout {
     flex-direction:column;
     align-items:center;
   }
 
-  .stroke-panel, .video-panel {
+  .stroke-panel {
     width:100%!important;
-    max-width:550px;
+    max-width:320px;
   }
 }
 
@@ -84,7 +84,7 @@ body {
 }
 
 .stroke-panel {
-  width:200px;
+  width:220px;
   background:var(--card);
   border:1px solid #1a1a29;
   border-radius:24px;
@@ -94,84 +94,6 @@ body {
   align-items:center;
   justify-content:space-between;
   box-shadow:0 0 30px rgba(0,0,0,.5);
-}
-
-/* EXPANDED VIDEO PANEL STYLES */
-.video-panel {
-  flex:1.4;
-  min-width:320px;
-  background:var(--card);
-  border:1px solid #1a1a29;
-  border-radius:24px;
-  padding:20px;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  box-shadow:0 0 30px rgba(0,0,0,.5);
-}
-
-.panel-title {
-  font-size:.8rem;
-  letter-spacing:2px;
-  text-transform:uppercase;
-  color:var(--primary);
-  margin-bottom:4px;
-  font-weight:700;
-  text-align:center;
-}
-
-.video-input-group {
-  display:flex;
-  gap:8px;
-}
-
-.video-input {
-  flex:1;
-  background:#06060c;
-  border:1px solid #22223a;
-  color:#fff;
-  padding:10px;
-  border-radius:8px;
-  font-size:.8rem;
-  outline:none;
-}
-
-.video-input:focus {
-  border-color:var(--primary);
-}
-
-.video-load-btn {
-  background:var(--primary);
-  color:#000;
-  border:none;
-  padding:10px 14px;
-  border-radius:8px;
-  font-weight:700;
-  font-size:.75rem;
-  text-transform:uppercase;
-  cursor:pointer;
-  letter-spacing:1px;
-}
-
-.video-container {
-  position:relative;
-  width:100%;
-  padding-bottom:56.25%; /* 16:9 Aspect Ratio */
-  height:0;
-  border-radius:12px;
-  overflow:hidden;
-  background:#000;
-  border:1px solid #161626;
-  flex-grow:1;
-}
-
-.video-container iframe {
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  border:none;
 }
 
 .stroke-title {
@@ -471,115 +393,8 @@ button.cummed-btn {
 
 <div class="app-layout">
 
-<!-- LARGER VIDEO PLAYER PANEL -->
-<!-- VIDEO PLAYER PANEL -->
-<div class="video-panel">
-  <div class="panel-title">Video Feed</div>
-  
-  <select id="siteSelect" class="video-input" style="margin-bottom:8px; background:#0a0a12; color:var(--primary); border:1px solid #22223a; padding:10px; border-radius:8px; font-size:.8rem;">
-    <option value="direct">Direct MP4/Video URL</option>
-    <option value="pornhub">PornHub</option>
-    <option value="xvideos">XVideos</option>
-    <option value="xhamster">xHamster</option>
-    <option value="xnxx">XNXX</option>
-    <option value="redtube">RedTube</option>
-    <option value="tube8">Tube8</option>
-    <option value="youporn">YouPorn</option>
-    <option value="chaturbate">Chaturbate (Live)</option>
-    <option value="stripchat">StripChat (Live)</option>
-    <option value="bongacams">BongaCams (Live)</option>
-    <option value="livejasmin">LiveJasmin (Live)</option>
-    <option value="cam4">Cam4 (Live)</option>
-    <option value="boyfriendtv">BoyfriendTV</option>
-    <option value="gaymaletube">GayMaleTube</option>
-    <option value="icegay">IceGay</option>
-    <option value="thegay">TheGay</option>
-    <option value="pridehub">PrideHub</option>
-    <option value="anygay">AnyGay</option>
-    <option value="homo">Homo</option>
-    <option value="gayck">GayCK</option>
-    <option value="gayporno">GayPorno</option>
-    <option value="yeswegays">YesWeGays</option>
-    <option value="mansurfer">ManSurfer</option>
-    <option value="beeg">Beeg</option>
-    <option value="spankbang">SpankBang</option>
-    <option value="tnaflix">TNAFlix</option>
-    <option value="pornhat">Pornhat</option>
-    <option value="pornone">Pornone</option>
-    <option value="porntrex">PornTrex</option>
-    <option value="eporner">EPorner</option>
-    <option value="daftsex">DaftSex</option>
-    <option value="xmovies">XMovies</option>
-    <option value="sunporno">SunPorno</option>
-    <option value="gayforit">GayForIt</option>
-    <option value="gay0day">Gay0Day</option>
-    <option value="gaycock4u">GayCock4U</option>
-    <option value="onlygayvideo">OnlyGayVideo</option>
-    <option value="needgayporn">NeedGayPorn</option>
-    <option value="goldgay">GoldGay</option>
-    <option value="hotgaylist">HotGayList</option>
-    <option value="gaymenring">GayMenRing</option>
-    <option value="gaybubble">GayBubble</option>
-    <option value="gaydig">GayDig</option>
-    <option value="gotgayporn">GotGayPorn</option>
-    <option value="xgaytube">XGayTube</option>
-    <option value="worldsex">WorldSex</option>
-    <option value="cumlouder">CumLouder</option>
-    <option value="porn300">Porn300</option>
-    <option value="okxxx">OK.XXX</option>
-    <option value="sexvid">SexVid</option>
-    <option value="tube8">Tube8</option>
-    <option value="ixxx">IXXX</option>
-    <option value="tubegalore">TubeGalore</option>
-    <option value="zbporn">ZbPorn</option>
-    <option value="pornosos">PornSOS</option>
-    <option value="bigporn">BigPorn</option>
-    <option value="megapornfreehd">MegaPornFreeHD</option>
-    <option value="helloporn">HelloPorn</option>
-    <option value="megatube">MegaTube</option>
-    <option value="4tube">4Tube</option>
-    <option value="xxxbule">XXXBule</option>
-    <option value="me-gay">Me-Gay</option>
-    <option value="good-gay">Good-Gay</option>
-    <option value="rockettube">RocketTube</option>
-    <option value="gaysuperman">GaySuperman</option>
-    <option value="manporn">ManPorn</option>
-    <option value="maturetube">MatureTube</option>
-  </select>
-  
-  <div class="video-input-group">
-    <input type="text" id="videoUrlInput" class="video-input" placeholder="Paste video URL here...">
-    <button onclick="loadAdultVideo()" class="video-load-btn">Load</button>
-  </div>
+<div class="container">
 
-  <div class="video-container" id="videoContainer">
-    <iframe id="videoPlayer" src="" allow="autoplay; fullscreen" allowfullscreen style="display:none;"></iframe>
-    <video id="directVideoPlayer" controls style="display:none; width:100%; height:100%; position:absolute; top:0; left:0; background:#000;"></video>
-    <div id="videoFallback" style="display:flex; align-items:center; justify-content:center; width:100%; height:100%; background:#06060c; color:#8a8a9e; font-size:.8rem; text-align:center; padding:20px;">
-      Enter a video URL and click Load<br>or paste a direct MP4 link
-    </div>
-  </div>
-</div>
-  <!-- RECOMMENDATIONS -->
-  <div class="recommendations">
-    <div class="recommendations-title">Quick Recommendations</div>
-    <button class="rec-btn" onclick="loadRec('pornhub','ph5f7ab9b0a3d6e')">
-      <span class="rec-site">PH</span>Popular Right Now
-    </button>
-    <button class="rec-btn" onclick="loadRec('pornhub_gay','ph5f7ab9b0a3d6e')">
-      <span class="rec-site">PH Gay</span>Top Gay Featured
-    </button>
-    <button class="rec-btn" onclick="loadRec('xhamster','xh4FfQK')">
-      <span class="rec-site">XH</span>Trending
-    </button>
-    <button class="rec-btn" onclick="loadRec('xhamster_gay','xh4FfQK')">
-      <span class="rec-site">XH Gay</span>Gay Top Rated
-    </button>
-    <button class="rec-btn" onclick="loadRec('xnxx','1234567')">
-      <span class="rec-site">XNXX</span>Most Viewed
-    </button>
-    <button class="rec-btn" onclick="loadRec('boyfriendtv','123456')">
-      <span class="rec-site">BFTV</span>Featured
 <h1>Apex Edge Trainer</h1>
 
 <select id="modeSelect" class="mode-select">
@@ -684,400 +499,6 @@ Motion Guide
 <script>
 
 /* =========================================================
-   YOUTUBE LOADER FUNCTION
-========================================================= */
-
-/* =========================================================
-   ADULT SITE VIDEO LOADER FUNCTION
-========================================================= */
-
-function loadAdultVideo() {
-  const input = document.getElementById('videoUrlInput').value.trim();
-  const site = document.getElementById('siteSelect').value;
-  const iframe = document.getElementById('videoPlayer');
-  const directVideo = document.getElementById('directVideoPlayer');
-  const fallback = document.getElementById('videoFallback');
-  
-  if (!input) return;
-  
-  // Hide all first
-  iframe.style.display = 'none';
-  directVideo.style.display = 'none';
-  fallback.style.display = 'none';
-  
-  // If it's a direct MP4/file URL
-  if (site === 'direct' || input.endsWith('.mp4') || input.endsWith('.m3u8') || input.includes('.mp4?')) {
-    directVideo.src = input;
-    directVideo.style.display = 'block';
-    directVideo.play().catch(e => console.log('Autoplay blocked:', e));
-    return;
-  }
-  
-  let embedUrl = '';
-  
-  // Parse different site formats
-  switch(site) {
-    case 'pornhub':
-      // Extract video ID from various PornHub URL formats
-      let phId = '';
-      if (input.includes('viewkey=')) {
-        phId = input.split('viewkey=')[1].split('&')[0];
-      } else if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        phId = parts[0];
-      }
-      if (phId) embedUrl = `https://www.pornhub.com/embed/${phId}`;
-      break;
-      
-    case 'xvideos':
-      let xvId = '';
-      if (input.includes('/video')) {
-        const match = input.match(/\/video(\d+)/);
-        if (match) xvId = match[1];
-      } else if (input.includes('video=')) {
-        xvId = input.split('video=')[1].split('&')[0];
-      }
-      if (xvId) embedUrl = `https://www.xvideos.com/embedframe/${xvId}`;
-      break;
-      
-    case 'xhamster':
-      let xhId = '';
-      if (input.includes('/videos/')) {
-        const parts = input.split('/videos/')[1].split('/');
-        xhId = parts[0];
-      } else if (input.includes('xhamster.com/videos/')) {
-        const match = input.match(/videos\/([a-zA-Z0-9-]+)/);
-        if (match) xhId = match[1];
-      }
-      if (xhId) embedUrl = `https://xhamster.com/embed/${xhId}`;
-      break;
-      
-    case 'xnxx':
-      let xnId = '';
-      if (input.includes('/video-')) {
-        const match = input.match(/\/video-([a-zA-Z0-9]+)/);
-        if (match) xnId = match[1];
-      } else if (input.includes('video=')) {
-        xnId = input.split('video=')[1].split('&')[0];
-      }
-      if (xnId) embedUrl = `https://www.xnxx.com/embedframe/${xnId}`;
-      break;
-      
-    case 'redtube':
-      let rtId = '';
-      if (input.includes('/')) {
-        const parts = input.split('/');
-        rtId = parts[parts.length - 1] || parts[parts.length - 2];
-      }
-      if (rtId && !rtId.includes('.')) embedUrl = `https://embed.redtube.com/?id=${rtId}`;
-      break;
-      
-    case 'tube8':
-      let t8Id = '';
-      if (input.includes('/')) {
-        const parts = input.split('/');
-        t8Id = parts[parts.length - 1] || parts[parts.length - 2];
-      }
-      if (t8Id) embedUrl = `https://www.tube8.com/embed/${t8Id}/`;
-      break;
-      
-    case 'youporn':
-      let ypId = '';
-      if (input.includes('/watch/')) {
-        const parts = input.split('/watch/')[1].split('/');
-        ypId = parts[0];
-      }
-      if (ypId) embedUrl = `https://www.youporn.com/embed/${ypId}/`;
-      break;
-      
-    case 'spankbang':
-      let sbId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        sbId = parts[0];
-      }
-      if (sbId) embedUrl = `https://spankbang.com/${sbId}/embed/`;
-      break;
-      
-    case 'chaturbate':
-      // Chaturbate uses room names, not video IDs
-      let cbRoom = '';
-      if (input.includes('chaturbate.com/')) {
-        const parts = input.split('chaturbate.com/')[1].split('/');
-        cbRoom = parts[0];
-      } else {
-        cbRoom = input.replace('@', '').trim();
-      }
-      if (cbRoom) embedUrl = `https://chaturbate.com/in/?tour=dU9X&campaign=8NwEB&room=${cbRoom}&embed_video_only=1&disable_sound=0`;
-      break;
-      
-    case 'stripchat':
-      let scRoom = '';
-      if (input.includes('stripchat.com/')) {
-        const parts = input.split('stripchat.com/')[1].split('/');
-        scRoom = parts[0];
-      } else {
-        scRoom = input.replace('@', '').trim();
-      }
-      if (scRoom) embedUrl = `https://stripchat.com/${scRoom}/embed/live`;
-      break;
-      
-    case 'bongacams':
-      let bcRoom = '';
-      if (input.includes('bongacams.com/')) {
-        const parts = input.split('bongacams.com/')[1].split('/');
-        bcRoom = parts[0];
-      } else {
-        bcRoom = input.replace('@', '').trim();
-      }
-      if (bcRoom) embedUrl = `https://bongacams.com/embed/${bcRoom}`;
-      break;
-      
-    case 'livejasmin':
-      let ljRoom = '';
-      if (input.includes('livejasmin.com/')) {
-        const parts = input.split('livejasmin.com/')[1].split('/');
-        ljRoom = parts[0];
-      } else {
-        ljRoom = input.replace('@', '').trim();
-      }
-      if (ljRoom) embedUrl = `https://www.livejasmin.com/en/chat-html5/${ljRoom}?category=gay&language=en`;
-      break;
-      
-    case 'cam4':
-      let c4Room = '';
-      if (input.includes('cam4.com/')) {
-        const parts = input.split('cam4.com/')[1].split('/');
-        c4Room = parts[0];
-      } else {
-        c4Room = input.replace('@', '').trim();
-      }
-      if (c4Room) embedUrl = `https://www.cam4.com/${c4Room}?showPreview=1&hideChat=0`;
-      break;
-      
-    case 'boyfriendtv':
-      let bftvId = '';
-      if (input.includes('/videos/')) {
-        const match = input.match(/\/videos\/(\d+)/);
-        if (match) bftvId = match[1];
-      }
-      if (bftvId) embedUrl = `https://www.boyfriendtv.com/embed/${bftvId}/`;
-      break;
-      
-    case 'gaymaletube':
-      let gmtId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        gmtId = parts[0];
-      }
-      if (gmtId) embedUrl = `https://www.gaymaletube.com/embed/${gmtId}/`;
-      break;
-      
-    case 'icegay':
-      let igId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        igId = parts[0];
-      } else if (input.includes('?v=')) {
-        igId = input.split('?v=')[1].split('&')[0];
-      }
-      if (igId) embedUrl = `https://www.icegay.tv/embed/${igId}/`;
-      break;
-      
-    case 'thegay':
-      let tgId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        tgId = parts[0];
-      }
-      if (tgId) embedUrl = `https://thegay.com/embed/${tgId}/`;
-      break;
-      
-    case 'pridehub':
-      let phubId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        phubId = parts[0];
-      }
-      if (phubId) embedUrl = `https://pridehub.com/embed/${phubId}`;
-      break;
-      
-    case 'beeg':
-      let beegId = '';
-      if (input.includes('/')) {
-        const parts = input.split('/');
-        beegId = parts[parts.length - 1] || parts[parts.length - 2];
-      }
-      if (beegId && beegId.includes('-')) embedUrl = `https://beeg.com/embed/${beegId}`;
-      break;
-      
-    case 'tnaflix':
-      let tnId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        tnId = parts[0];
-      }
-      if (tnId) embedUrl = `https://www.tnaflix.com/emb/${tnId}`;
-      break;
-      
-    case 'eporner':
-      let epId = '';
-      if (input.includes('/video/')) {
-        const match = input.match(/\/video-([a-zA-Z0-9]+)/);
-        if (match) epId = match[1];
-      }
-      if (epId) embedUrl = `https://www.eporner.com/embed/${epId}`;
-      break;
-      
-    case 'pornhat':
-      let phatId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        phatId = parts[0];
-      }
-      if (phatId) embedUrl = `https://www.pornhat.com/embed/${phatId}`;
-      break;
-      
-    case 'pornone':
-      let poId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        poId = parts[0];
-      }
-      if (poId) embedUrl = `https://pornone.com/embed/${poId}`;
-      break;
-      
-    case 'porntrex':
-      let ptId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        ptId = parts[0];
-      }
-      if (ptId) embedUrl = `https://www.porntrex.com/embed/${ptId}`;
-      break;
-      
-    case 'sunporno':
-      let spId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        spId = parts[0];
-      }
-      if (spId) embedUrl = `https://www.sunporno.com/embed/${spId}`;
-      break;
-      
-    case 'gayforit':
-      let gfiId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        gfiId = parts[0];
-      }
-      if (gfiId) embedUrl = `https://www.gayforit.com/embed/${gfiId}`;
-      break;
-      
-    case 'rockettube':
-      let rtubeId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        rtubeId = parts[0];
-      }
-      if (rtubeId) embedUrl = `https://www.rockettube.com/embed/${rtubeId}`;
-      break;
-      
-    case 'gaysuperman':
-      let gsmId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        gsmId = parts[0];
-      }
-      if (gsmId) embedUrl = `https://www.gaysuperman.com/embed/${gsmId}`;
-      break;
-      
-    case 'manporn':
-      let mpId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        mpId = parts[0];
-      }
-      if (mpId) embedUrl = `https://manporn.xxx/embed/${mpId}`;
-      break;
-      
-    case 'maturetube':
-      let mtId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        mtId = parts[0];
-      }
-      if (mtId) embedUrl = `https://www.maturetube.com/embed/${mtId}`;
-      break;
-      
-    case '4tube':
-      let ftId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        ftId = parts[0];
-      }
-      if (ftId) embedUrl = `https://www.4tube.com/embed/${ftId}`;
-      break;
-      
-    case 'cumlouder':
-      let clId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        clId = parts[0];
-      }
-      if (clId) embedUrl = `https://www.cumlouder.com/embed/${clId}`;
-      break;
-      
-    case 'worldsex':
-      let wsId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        wsId = parts[0];
-      }
-      if (wsId) embedUrl = `https://www.worldsex.com/embed/${wsId}`;
-      break;
-      
-    case 'ixxx':
-      let ixxxId = '';
-      if (input.includes('/video/')) {
-        const parts = input.split('/video/')[1].split('/');
-        ixxxId = parts[0];
-      }
-      if (ixxxId) embedUrl = `https://www.ixxx.com/embed/${ixxxId}`;
-      break;
-      
-    case 'tubegalore':
-      // TubeGalore aggregates, try to extract underlying video or use as-is
-      fallback.innerHTML = 'TubeGalore links cannot be embedded directly.<br>Please use the direct video URL from the source site.';
-      fallback.style.display = 'flex';
-      return;
-      
-    default:
-      // Try generic embed pattern or show fallback
-      if (input.includes('embed')) {
-        embedUrl = input;
-      } else {
-        fallback.innerHTML = `Cannot auto-embed from this site.<br>Try using "Direct MP4" option with the video file URL,<br>or open the video in a new tab.`;
-        fallback.style.display = 'flex';
-        return;
-      }
-  }
-  
-  if (embedUrl) {
-    iframe.src = embedUrl;
-    iframe.style.display = 'block';
-  } else {
-    fallback.innerHTML = 'Could not parse video ID from URL.<br>Try using "Direct MP4" option with the video file URL.';
-    fallback.style.display = 'flex';
-  }
-}
-
-// Allow Enter key to load video
-document.getElementById('videoUrlInput').addEventListener('keypress', function(e) {
-  if (e.key === 'Enter') loadAdultVideo();
-});
-
-/* =========================================================
    CORE STATE
 ========================================================= */
 
@@ -1114,6 +535,7 @@ if(!synth)return;
 
 const voices=synth.getVoices();
 
+/* Priority order to pick a deep, masculine system voice */
 trainerVoice=
 voices.find(v =>
 v.lang.includes('en') &&
@@ -1240,6 +662,7 @@ new SpeechSynthesisUtterance(text);
 if(trainerVoice)
 utterance.voice=trainerVoice;
 
+/* Low pitch (0.65) and measured rate (0.92) for a deep, dominating, authoritative presence */
 utterance.rate=0.92;
 utterance.pitch=0.65;
 utterance.volume=1;
@@ -1247,28 +670,7 @@ utterance.volume=1;
 synth.speak(utterance);
 
 }
-/* Additional styles for adult video player */
-#videoContainer {
-  background: #000;
-}
 
-#directVideoPlayer {
-  object-fit: contain;
-}
-
-#siteSelect {
-  cursor: pointer;
-  outline: none;
-}
-
-#siteSelect:focus {
-  border-color: var(--primary);
-}
-
-#videoFallback a {
-  color: var(--primary);
-  text-decoration: underline;
-}
 
 /* Dynamic Finish Lines */
 const finishCompliments = [
