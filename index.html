@@ -509,6 +509,7 @@ let totalSessionSeconds=1500;
 
 let timerInterval=null;
 let phaseInterval=null;
+let midPhaseCheckInTimeout=null;
 
 let phaseTimeLeft=0;
 let currentPhase='idle';
@@ -558,91 +559,80 @@ synth.onvoiceschanged=setTrainerVoice;
 
 
 /* =========================================================
-   DYNAMIC FINISH COMMAND GENERATOR
-========================================================= */
-
-const compliments = [
-  "You handled that like an absolute legend.",
-  "Outstanding discipline and control throughout.",
-  "That was a masterclass performance.",
-  "Pure dedication, you built up incredible power.",
-  "An absolute champion effort from start to finish.",
-  "Your control is top tier, unbeatable session.",
-  "Incredible endurance, you earned every bit of this."
-];
-
-function getRandomFinishCue() {
-  const comp = compliments[Math.floor(Math.random() * compliments.length)];
-  return `Now you are allowed to shoot that cum out of the long harvest. ${comp}`;
-}
-
-
-/* =========================================================
-   CONVERSATIONAL TRAINER VOICE
+   NATURAL HUMAN VOICE & DIALOGUE ENGINE
 ========================================================= */
 
 const rawVoice={
 
 start:[
-"Alright, you're in. Let's get this damn session moving.",
-"Okay, we're live. No messing around now. Stay with the pace.",
-"Let's go. Keep your head in the game and follow the cues.",
-"You're on the clock. Stay focused and let's get moving."
+"Alright, let's get started. Take a breath and get comfortable.",
+"Hey, ready? Let's kick this session off together.",
+"Alright, we're going now. Focus up and just stick with me.",
+"Here we go. Just relax and follow my pace."
 ],
 
 action:[
-"Come on, keep that pace. Don't get sloppy.",
-"That's it. Stay steady and keep pushing.",
-"Pick it up. You've got more in you.",
-"Good rhythm. Don't lose it now.",
-"Keep going. Breathe, stay controlled, and don't rush.",
-"Alright, push the pace a little. You've got this.",
-"That's better. Stay locked in and keep moving.",
-"Come on. Keep working. Don't quit on me now."
+"Keep that rhythm going, you're doing great.",
+"Nice steady movement. Stay right here.",
+"Looking good. Keep this pace for a bit.",
+"There you go. Smooth and steady.",
+"Just stay with it. Breathe through it.",
+"Keep it up, you're handling this smoothly.",
+"Maintain this tempo, you're doing awesome.",
+"Nice and steady. Keep that mind locked in."
+],
+
+midActionCheck:[
+"Still feeling good? Keep holding that steady rhythm.",
+"You're doing awesome. Stay focused right here.",
+"How are you holding up? Keep that nice pace going.",
+"Looking really solid. Stick with it.",
+"Nice and controlled. Just keep breathing through it.",
+"You're in total control right now, keep it up."
 ],
 
 highIntensity:[
-"Alright, here we go. High intensity. Stay sharp.",
-"Push hard now. Don't lose control.",
-"Come on, keep driving. This is the tough part.",
-"You're getting close to the limit. Stay controlled.",
-"That's it. Keep the pressure on and stay focused.",
-"No slacking now. Hold that pace.",
-"Come on. This is where you earn the damn result."
+"Alright, pick it up a little bit now. Feel that build.",
+"Pushing the pace now. Stay sharp, you got this.",
+"Bring up that energy. Don't lose your focus.",
+"Getting close to the edge of your limit now. Hold it together.",
+"Feel that heat building up. Stay controlled.",
+"Driving hard now. Stay right on the line.",
+"This is where it gets intense. Stick with me."
 ],
 
 pause:[
-"Stop. Hands off and breathe.",
-"Alright, freeze there. Take a breath.",
-"Easy. Back off for a second and recover.",
-"Hold it. Don't rush the next round.",
-"Good. Take the damn break and reset.",
-"Relax for a moment. The next round is coming.",
-"Stop right there. Breathe and get your control back."
+"Hands off completely. Deep breath in, deep breath out.",
+"Alright, freeze right there. Let everything cool down.",
+"Take a quick break. Just relax for a second.",
+"Pause right here. Let that intensity drop.",
+"Good job, now rest up and take a deep breath.",
+"Hold up, hands off. Take a moment to recover.",
+"Easy now. Let your body relax for a moment."
 ],
 
 edge:[
-"Edge recorded. Freeze there and recover.",
-"Nice catch. That's another edge logged.",
-"Good control. Stop and reset before the next push.",
-"Recorded. Don't get carried away. Take your break.",
-"You edged again. Breathe and get ready.",
-"Logged. Stay calm and wait for the next cue."
+"Got it, you edged. Hands completely off and breathe.",
+"Nice catch. Take a breather and let that cool down.",
+"Recorded that edge. Stand by and let yourself recover.",
+"Good save. Hands off, take a deep breath.",
+"Logged it. Just relax and let the pressure drop.",
+"You got close there. Back off completely and recover."
 ],
 
 finish:[
-"That's it. You made it through the session.",
-"Session complete. Nice work.",
-"You hit the target. That's a wrap.",
-"Done. You pushed through the whole damn session.",
-"That's the finish. Good job staying with it."
+"That is time. You made it all the way through.",
+"Session done. Man, that was an incredible run.",
+"And that's a wrap! You handled that whole run like a pro.",
+"Time's up. Outstanding control today.",
+"Finished! You put in serious work today."
 ],
 
 manualStop:[
-"Session stopped. You put in the work.",
-"Alright, stopping here. Not bad.",
-"Session terminated. You got your work in.",
-"We're done for now. Good effort."
+"Alright, stopping here. Great effort today.",
+"Wrapping up early? No problem, good session.",
+"Stopping session. You did some solid work.",
+"Alright, let's call it there. Great job."
 ]
 
 };
@@ -669,12 +659,28 @@ new SpeechSynthesisUtterance(text);
 if(trainerVoice)
 utterance.voice=trainerVoice;
 
-utterance.rate=1.05;
-utterance.pitch=.85;
+/* Slightly adjusted pitch/rate for a natural human cadence */
+utterance.rate=0.98;
+utterance.pitch=0.92;
 utterance.volume=1;
 
 synth.speak(utterance);
 
+}
+
+
+/* Dynamic Finish Lines */
+const finishCompliments = [
+  "You handled that session like an absolute legend.",
+  "Outstanding discipline and control from start to finish.",
+  "That was a masterclass in staying in control.",
+  "Incredible focus, you built up huge intensity.",
+  "Your endurance is top tier, awesome effort."
+];
+
+function getRandomFinishCue() {
+  const comp = finishCompliments[Math.floor(Math.random() * finishCompliments.length)];
+  return `Now you are allowed to shoot that cum out of the long harvest. ${comp}`;
 }
 
 
@@ -758,9 +764,6 @@ splatters=[];
 const cx=fxCanvas.width/2;
 const cy=fxCanvas.height/2;
 
-
-/* central burst */
-
 for(let i=0;i<120;i++){
 
 const angle=
@@ -791,9 +794,6 @@ splatOnBoundary:true
 });
 
 }
-
-
-/* background droplets */
 
 for(let i=0;i<50;i++){
 
@@ -887,8 +887,6 @@ fxCanvas.height
 
 if(fxActive){
 
-/* splatter marks */
-
 for(const s of splatters){
 
 fxCtx.save();
@@ -919,9 +917,6 @@ fxCtx.restore();
 
 }
 
-
-/* flying particles */
-
 for(const p of drops){
 
 const velocity=
@@ -950,9 +945,6 @@ p.vx*=p.viscosity;
 
 p.vy=
 p.vy*p.viscosity+.45;
-
-
-/* screen collision */
 
 if(
 p.x<=p.radius ||
@@ -995,9 +987,6 @@ p.radius=0;
 }
 
 }
-
-
-/* falling droplets */
 
 for(const d of drips){
 
@@ -1331,9 +1320,6 @@ mainCtx.stroke();
 
 }
 
-
-/* motion guide */
-
 strokeCtx.clearRect(
 0,
 0,
@@ -1367,9 +1353,6 @@ currentPhase==='action'
 
 const shaftHalfWidth=25;
 const lowerWidth=40;
-
-
-/* guide shape */
 
 strokeCtx.beginPath();
 
@@ -1460,9 +1443,6 @@ strokeCtx.fill();
 strokeCtx.strokeStyle=strokeColor;
 strokeCtx.lineWidth=2;
 strokeCtx.stroke();
-
-
-/* motion */
 
 if(
 active &&
@@ -1675,12 +1655,10 @@ triggerReleasePhase();
 
 },1000);
 
-
 playTone(660,'sine',.2);
 
-speak(
-randomRawLine('start')
-);
+const startGreeting = randomRawLine('start');
+speak(startGreeting);
 
 startNextPhase('action');
 
@@ -1701,6 +1679,8 @@ endSession();
 function triggerReleasePhase(){
 
 clearInterval(phaseInterval);
+
+if(midPhaseCheckInTimeout) clearTimeout(midPhaseCheckInTimeout);
 
 currentPhase='release';
 
@@ -1767,7 +1747,7 @@ function finishClimaxSession(){
 playTone(990,'sine',.6);
 
 speak(
-`${randomRawLine('finish')} You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
+`${randomRawLine('finish')} You edged ${edges} ${edges === 1 ? 'time' : 'times'} this session.`
 );
 
 endSession('climax');
@@ -1776,7 +1756,7 @@ endSession('climax');
 
 
 /* =========================================================
-   PHASE ENGINE
+   PHASE ENGINE WITH CONTINUOUS CONVERSATIONAL CHECKS
 ========================================================= */
 
 function startNextPhase(forcedPhase=null){
@@ -1785,6 +1765,7 @@ if(currentPhase==='release')
 return;
 
 clearInterval(phaseInterval);
+if(midPhaseCheckInTimeout) clearTimeout(midPhaseCheckInTimeout);
 
 if(forcedPhase){
 
@@ -1836,7 +1817,6 @@ playTone(520,'sine',.15);
 
 ladderStep++;
 
-
 if(mode==='burst1'){
 
 updateIntensityMeter(
@@ -1846,7 +1826,7 @@ Math.min(
 )
 );
 
-phaseTimeLeft=12;
+phaseTimeLeft=14;
 
 }
 
@@ -1859,7 +1839,7 @@ Math.min(
 )
 );
 
-phaseTimeLeft=15;
+phaseTimeLeft=18;
 
 }
 
@@ -1872,7 +1852,7 @@ Math.min(
 )
 );
 
-phaseTimeLeft=20;
+phaseTimeLeft=22;
 
 }
 
@@ -1900,7 +1880,7 @@ Math.min(
 
 phaseTimeLeft=
 Math.floor(
-Math.random()*15+20
+Math.random()*15+22
 );
 
 }
@@ -1925,7 +1905,7 @@ const stepVal=
 
 updateIntensityMeter(stepVal);
 
-phaseTimeLeft=15;
+phaseTimeLeft=18;
 
 }
 
@@ -1945,13 +1925,11 @@ Math.random()*30+45
 
 }
 
-
 phaseTimeLeft=
 Math.max(
-3,
+5,
 phaseTimeLeft
 );
-
 
 strokeSpeed=
 mode==='burst1'||mode==='burst2'
@@ -1966,32 +1944,34 @@ strokeRangeMax=.85;
 handsCount=1;
 activeHandSide='right';
 
-
 prompt.innerText=
 'BUILD / PUSH';
 
+let textLine = "";
+if(targetIntensity>=70){
+  textLine = randomRawLine('highIntensity');
+} else {
+  textLine = randomRawLine('action');
+}
+
 sub.innerText=
-`${randomRawLine('action')} Target ${Math.round(targetIntensity)}% intensity.`;
+`${textLine} (Target: ${Math.round(targetIntensity)}%)`;
 
 tag.innerText=
 'Focus: Controlled Pace';
 
+speak(textLine);
 
-/* conversational voice */
-
-if(targetIntensity>=70){
-
-speak(
-randomRawLine('highIntensity')
-);
-
-}
-else{
-
-speak(
-randomRawLine('action')
-);
-
+/* Schedule mid-phase conversational check-in if the interval is long enough */
+if(phaseTimeLeft >= 18) {
+  const midDelay = Math.floor(phaseTimeLeft * 500); // speak around halfway through
+  midPhaseCheckInTimeout = setTimeout(() => {
+    if(active && currentPhase === 'action') {
+      const midLine = randomRawLine('midActionCheck');
+      sub.innerText = midLine;
+      speak(midLine);
+    }
+  }, midDelay);
 }
 
 }
@@ -2012,15 +1992,14 @@ targetIntensity*.2
 )
 );
 
-
 if(mode==='burst1')
-phaseTimeLeft=3;
-
-else if(mode==='burst2')
 phaseTimeLeft=4;
 
-else if(mode==='quick')
+else if(mode==='burst2')
 phaseTimeLeft=5;
+
+else if(mode==='quick')
+phaseTimeLeft=6;
 
 else if(mode==='toy')
 phaseTimeLeft=
@@ -2031,22 +2010,21 @@ Math.random()*15
 else
 phaseTimeLeft=
 Math.floor(
-Math.random()*10
+Math.random()*8
 )+8;
-
 
 prompt.innerText=
 'HALT / RESET';
 
+const pauseLine = randomRawLine('pause');
+
 sub.innerText=
-'Back off, breathe, and get ready for the next round.';
+pauseLine;
 
 tag.innerText=
 'Focus: Recovery';
 
-speak(
-randomRawLine('pause')
-);
+speak(pauseLine);
 
 }
 
@@ -2079,7 +2057,7 @@ startNextPhase();
 
 
 /* =========================================================
-   LOG ROUND
+   LOG EDGE / CLOSE CALL
 ========================================================= */
 
 function logEdge(){
@@ -2103,9 +2081,10 @@ playTone(
 .4
 );
 
-speak(
-randomRawLine('edge')
-);
+const edgeLine = randomRawLine('edge');
+document.getElementById('subPrompt').innerText = edgeLine;
+
+speak(edgeLine);
 
 startNextPhase('pause');
 
@@ -2124,6 +2103,7 @@ fxActive=false;
 
 clearInterval(timerInterval);
 clearInterval(phaseInterval);
+if(midPhaseCheckInTimeout) clearTimeout(midPhaseCheckInTimeout);
 
 fxCtx.clearRect(
 0,
@@ -2170,7 +2150,7 @@ document.getElementById(
 ).innerText=
 reason==='climax'
 ?
-`Session completed. You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
+`Session completed! You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
 :
 'Training session stopped.';
 
@@ -2200,7 +2180,7 @@ playTone(
 );
 
 speak(
-`${randomRawLine('manualStop')} You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
+`${randomRawLine('manualStop')} You edged ${edges} ${edges === 1 ? 'time' : 'times'} this session.`
 );
 
 }
