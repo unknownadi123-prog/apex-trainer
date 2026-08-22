@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Edge Trainer - Ultimate Edition</title>
+  <title>Apex Edge Trainer</title>
 
   <style>
     :root {
@@ -12,8 +12,6 @@
       --primary: #00f0ff;
       --accent: #7000ff;
       --stop: #ff0055;
-      --warning: #ffaa00;
-      --warmup: #00ff88;
       --text: #e0e6ed;
       --glow: rgba(0, 240, 255, 0.15);
     }
@@ -41,7 +39,7 @@
       flex-direction: row;
       gap: 20px;
       width: 100%;
-      max-width: 860px;
+      max-width: 820px;
       align-items: stretch;
       justify-content: center;
     }
@@ -60,7 +58,7 @@
     }
 
     .stroke-panel {
-      width: 240px;
+      width: 220px;
       background: var(--card);
       border: 1px solid #1a1a29;
       border-radius: 24px;
@@ -120,7 +118,7 @@
     .timer-overlay {
       position: relative;
       z-index: 2;
-      font-size: 2.2rem;
+      font-size: 2.5rem;
       font-weight: 700;
       color: #fff;
       text-shadow: 0 0 15px var(--primary);
@@ -149,16 +147,11 @@
       box-shadow: 0 0 10px var(--stop);
     }
 
-    .status-box.warmup .progress-bar-fill {
-      background: var(--warmup);
-      box-shadow: 0 0 10px var(--warmup);
-    }
-
     .status-box {
       background: #06060c;
       border: 2px solid var(--primary);
       border-radius: 16px;
-      padding: 18px;
+      padding: 20px;
       margin: 10px 0;
       transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       box-shadow: 0 0 25px rgba(0, 240, 255, 0.1);
@@ -167,11 +160,6 @@
     .status-box.pause {
       border-color: var(--stop);
       box-shadow: 0 0 35px rgba(255, 0, 85, 0.35);
-    }
-
-    .status-box.warmup {
-      border-color: var(--warmup);
-      box-shadow: 0 0 35px rgba(0, 255, 136, 0.25);
     }
 
     .prompt-text {
@@ -184,10 +172,6 @@
 
     .status-box.pause .prompt-text {
       color: var(--stop);
-    }
-
-    .status-box.warmup .prompt-text {
-      color: var(--warmup);
     }
 
     .sub-prompt {
@@ -217,12 +201,6 @@
       background: rgba(255, 0, 85, 0.1);
     }
 
-    .status-box.warmup .technique-tag {
-      border-color: var(--warmup);
-      color: var(--warmup);
-      background: rgba(0, 255, 136, 0.1);
-    }
-
     .control-panel {
       display: flex;
       flex-direction: column;
@@ -246,87 +224,30 @@
 
     .stats-row {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
       margin: 15px 0 5px 0;
     }
 
     .stat-card {
       background: #06060c;
-      padding: 10px;
+      padding: 12px;
       border-radius: 10px;
       border: 1px solid #161626;
     }
 
     .stat-val {
-      font-size: 1.2rem;
+      font-size: 1.4rem;
       font-weight: 700;
       color: var(--primary);
     }
 
     .stat-lbl {
-      font-size: 0.65rem;
+      font-size: 0.7rem;
       color: #6c6c80;
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-top: 2px;
-    }
-
-    .intensity-bar-container {
-      width: 100%;
-      margin: 10px 0;
-      text-align: left;
-    }
-
-    .intensity-header {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.75rem;
-      color: #8a8a9e;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 4px;
-      font-weight: 600;
-    }
-
-    .intensity-meter {
-      display: flex;
-      gap: 4px;
-      height: 10px;
-      background: #06060c;
-      padding: 2px;
-      border-radius: 6px;
-      border: 1px solid #1a1a29;
-    }
-
-    .intensity-segment {
-      flex: 1;
-      background: #121220;
-      border-radius: 2px;
-      transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .intensity-segment.active-low { background: var(--primary); box-shadow: 0 0 5px var(--primary); }
-    .intensity-segment.active-mid { background: var(--warning); box-shadow: 0 0 5px var(--warning); }
-    .intensity-segment.active-high { background: var(--stop); box-shadow: 0 0 5px var(--stop); }
-
-    .metro-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #06060c;
-      border: 1px solid #22223a;
-      padding: 8px 12px;
-      border-radius: 8px;
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      color: #8a8a9e;
-      font-weight: 600;
-    }
-
-    .metro-toggle input {
-      accent-color: var(--primary);
-      cursor: pointer;
     }
 
     button {
@@ -366,10 +287,6 @@
       .stroke-canvas-container {
         height: 220px;
       }
-
-      .stats-row {
-        grid-template-columns: 1fr 1fr;
-      }
     }
   </style>
 </head>
@@ -384,10 +301,8 @@
 
     <select id="modeSelect" class="mode-select">
       <option value="standard">Mode: Standard Balanced</option>
-      <option value="endurance">Mode: Endurance Sustained</option>
-      <option value="chaos">Mode: Chaos Overdrive</option>
-      <option value="pyramid">Mode: Pyramid Intensity Escalation</option>
-      <option value="reaction">Mode: Dynamic Reaction Test</option>
+      <option value="endurance">Mode: Endurance</option>
+      <option value="chaos">Mode: Chaos</option>
     </select>
 
     <div class="visualizer-wrapper">
@@ -403,25 +318,6 @@
 
     <div class="progress-bar-container">
       <div class="progress-bar-fill" id="phaseProgressBar"></div>
-    </div>
-
-    <div class="intensity-bar-container">
-      <div class="intensity-header">
-        <span>Target Intensity Zone</span>
-        <span id="intensityVal">Level 0/10</span>
-      </div>
-      <div class="intensity-meter" id="intensityMeter">
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-        <div class="intensity-segment"></div>
-      </div>
     </div>
 
     <div class="status-box" id="statusBox">
@@ -454,19 +350,9 @@
         <div class="stat-lbl">Next Cue</div>
       </div>
 
-      <div class="stat-card">
-        <div class="stat-val" id="bpmVal">--</div>
-        <div class="stat-lbl">Cadence (BPM)</div>
-      </div>
-
     </div>
 
     <div class="control-panel">
-
-      <div class="metro-toggle">
-        <label for="metronomeSwitch">Rhythmic Metronome Audio</label>
-        <input type="checkbox" id="metronomeSwitch" checked>
-      </div>
 
       <button id="startBtn"
               onclick="toggleSession()">
@@ -488,13 +374,13 @@
   <div class="stroke-panel">
 
     <div class="stroke-title">
-      Cadence Motion
+      Anatomy Motion
     </div>
 
     <div class="stroke-canvas-container">
 
       <canvas id="strokeCanvas"
-              width="180"
+              width="160"
               height="300">
       </canvas>
 
@@ -513,15 +399,11 @@
 
   let timerInterval = null;
   let phaseInterval = null;
-  let metronomeInterval = null;
 
   let phaseTimeLeft = 0;
   let totalPhaseDuration = 1;
 
-  let currentPhase = 'idle'; // 'warmup', 'action', 'pause'
-  let pyramidStep = 1;
-  let currentBpm = 60;
-  let currentIntensity = 0;
+  let currentPhase = 'idle';
 
   const synth = window.speechSynthesis;
 
@@ -587,57 +469,111 @@
 
   let strokeRangeMax = 0.8;
 
+  let handsCount = 1;
 
-  function updateIntensityMeter(level) {
-
-    currentIntensity = level;
-
-    document.getElementById('intensityVal').innerText = `Level ${level}/10`;
-
-    const segments = document.querySelectorAll('.intensity-segment');
-
-    segments.forEach((seg, index) => {
-
-      seg.className = 'intensity-segment';
-
-      if (index < level) {
-
-        if (level <= 3) seg.classList.add('active-low');
-
-        else if (level <= 7) seg.classList.add('active-mid');
-
-        else seg.classList.add('active-high');
-
-      }
-
-    });
-
-  }
+  let activeHandSide = 'right';
 
 
-  function setMetronome(bpm) {
+  function drawHandGrip(
+    x,
+    y,
+    isRightSide,
+    color
+  ) {
 
-    currentBpm = bpm;
+    strokeCtx.save();
 
-    document.getElementById('bpmVal').innerText = active && (currentPhase === 'action' || currentPhase === 'warmup') ? bpm : '--';
+    const flip =
+      isRightSide ? 1 : -1;
 
-    if (metronomeInterval) clearInterval(metronomeInterval);
 
-    if (!active || currentPhase === 'pause' || bpm <= 0) return;
+    strokeCtx.beginPath();
 
-    const intervalMs = (60 / bpm) * 1000;
+    strokeCtx.moveTo(
+      x - (30 * flip),
+      y - 12
+    );
 
-    metronomeInterval = setInterval(() => {
+    strokeCtx.bezierCurveTo(
+      x - (38 * flip),
+      y - 6,
+      x - (38 * flip),
+      y + 16,
+      x - (24 * flip),
+      y + 18
+    );
 
-      const isAudioEnabled = document.getElementById('metronomeSwitch').checked;
+    strokeCtx.lineTo(
+      x + (24 * flip),
+      y + 18
+    );
 
-      if (isAudioEnabled && active) {
+    strokeCtx.bezierCurveTo(
+      x + (34 * flip),
+      y + 16,
+      x + (34 * flip),
+      y - 8,
+      x + (24 * flip),
+      y - 12
+    );
 
-        playTone(880, 'sine', 0.05);
+    strokeCtx.closePath();
 
-      }
+    strokeCtx.fillStyle = color;
 
-    }, intervalMs);
+    strokeCtx.shadowBlur = 12;
+    strokeCtx.shadowColor = color;
+
+    strokeCtx.fill();
+
+
+    strokeCtx.beginPath();
+
+    strokeCtx.ellipse(
+      x - (18 * flip),
+      y - 8,
+      12,
+      8,
+      (isRightSide ? -1 : 1) *
+      Math.PI / 6,
+      0,
+      Math.PI * 2
+    );
+
+    strokeCtx.fill();
+
+
+    strokeCtx.shadowBlur = 0;
+
+    strokeCtx.strokeStyle = '#040406';
+
+    strokeCtx.lineWidth = 2;
+
+
+    for (
+      let i = -4;
+      i <= 8;
+      i += 6
+    ) {
+
+      strokeCtx.beginPath();
+
+      strokeCtx.moveTo(
+        x - (8 * flip),
+        y + i
+      );
+
+      strokeCtx.lineTo(
+        x + (26 * flip),
+        y + i
+      );
+
+      strokeCtx.stroke();
+
+    }
+
+
+    strokeCtx.restore();
 
   }
 
@@ -663,7 +599,7 @@
 
       pulseAngle +=
         currentPhase === 'action'
-          ? (0.02 + (currentIntensity * 0.008))
+          ? 0.05
           : 0.02;
 
 
@@ -672,7 +608,7 @@
         Math.sin(pulseAngle) *
         (
           currentPhase === 'action'
-            ? (3 + currentIntensity)
+            ? 7
             : 2
         );
 
@@ -687,19 +623,19 @@
         Math.PI * 2
       );
 
-      if (currentPhase === 'warmup') {
-        mainCtx.strokeStyle = '#00ff88';
-      } else if (currentPhase === 'action') {
-        mainCtx.strokeStyle = currentIntensity > 7 ? '#ff0055' : '#00f0ff';
-      } else {
-        mainCtx.strokeStyle = '#ff0055';
-      }
+      mainCtx.strokeStyle =
+        currentPhase === 'action'
+          ? '#00f0ff'
+          : '#ff0055';
 
       mainCtx.lineWidth = 4;
 
       mainCtx.shadowBlur = 15;
 
-      mainCtx.shadowColor = mainCtx.strokeStyle;
+      mainCtx.shadowColor =
+        currentPhase === 'action'
+          ? '#00f0ff'
+          : '#ff0055';
 
       mainCtx.stroke();
 
@@ -740,120 +676,377 @@
 
     const midX = w / 2;
 
-    const topY = 40;
+    const topY = 30;
 
-    const bottomY = h - 40;
+    const bottomY = h - 65;
 
-    const totalLen = bottomY - topY;
-
-
-    let strokeColor = '#00f0ff';
-    if (currentPhase === 'warmup') strokeColor = '#00ff88';
-    else if (currentPhase === 'pause') strokeColor = '#ff0055';
+    const totalLen =
+      bottomY - topY;
 
 
-    // Draw geometric linear motion track
+    const strokeColor =
+      currentPhase === 'action'
+        ? '#00f0ff'
+        : '#ff0055';
 
-    strokeCtx.beginPath();
-
-    strokeCtx.moveTo(midX, topY);
-
-    strokeCtx.lineTo(midX, bottomY);
-
-    strokeCtx.strokeStyle = '#1a1a29';
-
-    strokeCtx.lineWidth = 6;
-
-    strokeCtx.lineCap = 'round';
-
-    strokeCtx.stroke();
+    const fillColor =
+      currentPhase === 'action'
+        ? 'rgba(0, 240, 255, 0.08)'
+        : 'rgba(255, 0, 85, 0.08)';
 
 
-    // Draw active zone boundaries
+    const shaftHalfWidth = 25;
 
-    const minY = topY + strokeRangeMin * totalLen;
-
-    const maxY = topY + strokeRangeMax * totalLen;
+    const lowerWidth = 40;
 
 
     strokeCtx.beginPath();
 
-    strokeCtx.moveTo(midX - 15, minY);
 
-    strokeCtx.lineTo(midX + 15, minY);
+    // Upper rounded contour
 
-    strokeCtx.moveTo(midX - 15, maxY);
+    strokeCtx.moveTo(
+      midX - 25,
+      topY + 48
+    );
 
-    strokeCtx.lineTo(midX + 15, maxY);
+    strokeCtx.lineTo(
+      midX - 32,
+      topY + 42
+    );
 
-    strokeCtx.strokeStyle = currentPhase === 'warmup' ? 'rgba(0, 255, 136, 0.3)' : 'rgba(0, 240, 255, 0.3)';
+    strokeCtx.bezierCurveTo(
+      midX - 32,
+      topY + 12,
+      midX - 18,
+      topY,
+      midX,
+      topY
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX + 18,
+      topY,
+      midX + 32,
+      topY + 12,
+      midX + 32,
+      topY + 42
+    );
+
+    strokeCtx.lineTo(
+      midX + 25,
+      topY + 48
+    );
+
+
+    // Main shaft
+
+    strokeCtx.lineTo(
+      midX + shaftHalfWidth,
+      bottomY - 7
+    );
+
+
+    // Lower rounded region
+
+    strokeCtx.bezierCurveTo(
+      midX + lowerWidth,
+      bottomY + 8,
+      midX + lowerWidth,
+      bottomY + 30,
+      midX + 24,
+      bottomY + 40
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX + 16,
+      bottomY + 44,
+      midX + 7,
+      bottomY + 45,
+      midX,
+      bottomY + 43
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX - 7,
+      bottomY + 45,
+      midX - 16,
+      bottomY + 44,
+      midX - 24,
+      bottomY + 40
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX - lowerWidth,
+      bottomY + 30,
+      midX - lowerWidth,
+      bottomY + 8,
+      midX - shaftHalfWidth,
+      bottomY - 7
+    );
+
+
+    strokeCtx.lineTo(
+      midX - 25,
+      topY + 48
+    );
+
+    strokeCtx.closePath();
+
+
+    strokeCtx.fillStyle = fillColor;
+
+    strokeCtx.fill();
 
     strokeCtx.lineWidth = 2;
 
+    strokeCtx.strokeStyle = strokeColor;
+
+    strokeCtx.lineCap = 'round';
+
+    strokeCtx.lineJoin = 'round';
+
     strokeCtx.stroke();
 
 
-    // Calculate slider position
+    // Central anatomical contour
 
-    if (active && (currentPhase === 'action' || currentPhase === 'warmup')) {
+    strokeCtx.beginPath();
 
-      strokePos += strokeSpeed * strokeDirection;
+    strokeCtx.moveTo(
+      midX,
+      bottomY + 5
+    );
 
-      if (strokePos >= strokeRangeMax) {
+    strokeCtx.bezierCurveTo(
+      midX - 2,
+      bottomY + 18,
+      midX - 2,
+      bottomY + 34,
+      midX,
+      bottomY + 43
+    );
 
-        strokePos = strokeRangeMax;
+    strokeCtx.strokeStyle =
+      currentPhase === 'action'
+        ? 'rgba(0,240,255,0.42)'
+        : 'rgba(255,0,85,0.42)';
+
+    strokeCtx.lineWidth = 1.5;
+
+    strokeCtx.stroke();
+
+
+    // Subtle vascular / contour lines
+
+    const veinColor =
+      currentPhase === 'action'
+        ? 'rgba(0,240,255,0.35)'
+        : 'rgba(255,0,85,0.35)';
+
+
+    // Left primary contour
+
+    strokeCtx.beginPath();
+
+    strokeCtx.moveTo(
+      midX - 8,
+      bottomY - 12
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX - 18,
+      bottomY - 40,
+      midX - 7,
+      bottomY - 65,
+      midX - 15,
+      bottomY - 100
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX - 21,
+      bottomY - 125,
+      midX - 10,
+      topY + 120,
+      midX - 18,
+      topY + 62
+    );
+
+    strokeCtx.strokeStyle = veinColor;
+
+    strokeCtx.lineWidth = 1.7;
+
+    strokeCtx.stroke();
+
+
+    // Right primary contour
+
+    strokeCtx.beginPath();
+
+    strokeCtx.moveTo(
+      midX + 9,
+      bottomY - 14
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX + 19,
+      bottomY - 45,
+      midX + 8,
+      bottomY - 75,
+      midX + 16,
+      bottomY - 108
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX + 22,
+      bottomY - 130,
+      midX + 10,
+      topY + 115,
+      midX + 19,
+      topY + 58
+    );
+
+    strokeCtx.strokeStyle = veinColor;
+
+    strokeCtx.lineWidth = 1.7;
+
+    strokeCtx.stroke();
+
+
+    // Small branching anatomical lines
+
+    strokeCtx.beginPath();
+
+    strokeCtx.moveTo(
+      midX - 14,
+      bottomY - 62
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX - 25,
+      bottomY - 74,
+      midX - 26,
+      bottomY - 90,
+      midX - 18,
+      bottomY - 103
+    );
+
+
+    strokeCtx.moveTo(
+      midX + 14,
+      bottomY - 70
+    );
+
+    strokeCtx.bezierCurveTo(
+      midX + 26,
+      bottomY - 82,
+      midX + 27,
+      bottomY - 98,
+      midX + 18,
+      bottomY - 112
+    );
+
+    strokeCtx.strokeStyle =
+      currentPhase === 'action'
+        ? 'rgba(0,240,255,0.25)'
+        : 'rgba(255,0,85,0.25)';
+
+    strokeCtx.lineWidth = 1.2;
+
+    strokeCtx.stroke();
+
+
+    // Motion Logic
+
+    if (
+      active &&
+      currentPhase === 'action'
+    ) {
+
+      strokePos +=
+        strokeSpeed *
+        strokeDirection;
+
+
+      if (
+        strokePos >=
+        strokeRangeMax
+      ) {
+
+        strokePos =
+          strokeRangeMax;
 
         strokeDirection = -1;
 
-      } else if (strokePos <= strokeRangeMin) {
+      } else if (
+        strokePos <=
+        strokeRangeMin
+      ) {
 
-        strokePos = strokeRangeMin;
+        strokePos =
+          strokeRangeMin;
 
         strokeDirection = 1;
 
       }
 
-    } else if (active && currentPhase === 'pause') {
+    } else if (
+      active &&
+      currentPhase === 'pause'
+    ) {
 
-      strokePos += (0.5 - strokePos) * 0.1;
+      strokePos +=
+        (0.85 - strokePos) * 0.1;
 
     } else {
 
-      strokePos = 0.5;
+      strokePos = 0.85;
 
     }
 
 
-    const currentY = topY + strokePos * totalLen;
+    const currentY =
+      topY +
+      strokePos * totalLen;
 
 
-    // Draw animated target slider indicator
-
-    strokeCtx.beginPath();
-
-    strokeCtx.arc(midX, currentY, 12, 0, Math.PI * 2);
-
-    strokeCtx.fillStyle = strokeColor;
-
-    strokeCtx.shadowBlur = 12;
-
-    strokeCtx.shadowColor = strokeColor;
-
-    strokeCtx.fill();
+    const handColor =
+      currentPhase === 'action'
+        ? 'rgba(0,240,255,0.88)'
+        : 'rgba(255,0,85,0.88)';
 
 
-    strokeCtx.beginPath();
+    if (handsCount === 2) {
 
-    strokeCtx.arc(midX, currentY, 5, 0, Math.PI * 2);
+      drawHandGrip(
+        midX,
+        currentY + 12,
+        true,
+        handColor
+      );
 
-    strokeCtx.fillStyle = '#fff';
+      drawHandGrip(
+        midX,
+        currentY - 18,
+        false,
+        handColor
+      );
 
-    strokeCtx.fill();
+    } else {
 
-    strokeCtx.shadowBlur = 0;
+      drawHandGrip(
+        midX,
+        currentY,
+        activeHandSide === 'right',
+        handColor
+      );
+
+    }
 
 
-    requestAnimationFrame(renderAnimations);
+    requestAnimationFrame(
+      renderAnimations
+    );
 
   }
 
@@ -867,16 +1060,18 @@
     duration = 0.15
   ) {
 
-    if (audioCtx.state === 'suspended') {
-
+    if (
+      audioCtx.state === 'suspended'
+    ) {
       audioCtx.resume();
-
     }
 
 
-    const osc = audioCtx.createOscillator();
+    const osc =
+      audioCtx.createOscillator();
 
-    const gain = audioCtx.createGain();
+    const gain =
+      audioCtx.createGain();
 
 
     osc.type = type;
@@ -884,19 +1079,30 @@
     osc.frequency.value = freq;
 
 
-    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.setValueAtTime(
+      0.1,
+      audioCtx.currentTime
+    );
 
-    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    gain.gain.exponentialRampToValueAtTime(
+      0.01,
+      audioCtx.currentTime + duration
+    );
 
 
     osc.connect(gain);
 
-    gain.connect(audioCtx.destination);
+    gain.connect(
+      audioCtx.destination
+    );
 
 
     osc.start();
 
-    osc.stop(audioCtx.currentTime + duration);
+    osc.stop(
+      audioCtx.currentTime +
+      duration
+    );
 
   }
 
@@ -908,13 +1114,13 @@
     synth.cancel();
 
 
-    const utterance = new SpeechSynthesisUtterance(text);
+    const utterance =
+      new SpeechSynthesisUtterance(text);
 
 
     if (trainerVoice) {
-
-      utterance.voice = trainerVoice;
-
+      utterance.voice =
+        trainerVoice;
     }
 
 
@@ -930,14 +1136,30 @@
 
   function updateDisplay() {
 
-    const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const hrs =
+      String(
+        Math.floor(seconds / 3600)
+      ).padStart(2, '0');
 
-    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
 
-    const secs = String(seconds % 60).padStart(2, '0');
+    const mins =
+      String(
+        Math.floor(
+          (seconds % 3600) / 60
+        )
+      ).padStart(2, '0');
 
 
-    document.getElementById('mainTimer').innerText = `${hrs}:${mins}:${secs}`;
+    const secs =
+      String(
+        seconds % 60
+      ).padStart(2, '0');
+
+
+    document.getElementById(
+      'mainTimer'
+    ).innerText =
+      `${hrs}:${mins}:${secs}`;
 
   }
 
@@ -952,36 +1174,60 @@
 
       edges = 0;
 
-      pyramidStep = 1;
+
+      document.getElementById(
+        'edgeCount'
+      ).innerText = '0';
 
 
-      document.getElementById('edgeCount').innerText = '0';
-
-      document.getElementById('modeSelect').disabled = true;
-
-      document.getElementById('startBtn').innerText = 'Stop Session';
-
-      document.getElementById('edgeBtn').style.display = 'block';
-
-      document.getElementById('techniqueTag').style.display = 'inline-block';
+      document.getElementById(
+        'modeSelect'
+      ).disabled = true;
 
 
-      timerInterval = setInterval(() => {
-
-        seconds++;
-
-        updateDisplay();
-
-      }, 1000);
+      document.getElementById(
+        'startBtn'
+      ).innerText =
+        'Stop Session';
 
 
-      playTone(660, 'sine', 0.2);
+      document.getElementById(
+        'edgeBtn'
+      ).style.display =
+        'block';
 
 
-      speak("Initiating warm up phase. Focus on breathing and gentle rhythm.");
+      document.getElementById(
+        'techniqueTag'
+      ).style.display =
+        'inline-block';
 
 
-      startNextPhase('warmup');
+      timerInterval =
+        setInterval(
+          () => {
+            seconds++;
+            updateDisplay();
+          },
+          1000
+        );
+
+
+      playTone(
+        660,
+        'sine',
+        0.2
+      );
+
+
+      speak(
+        "Session started. Follow the visual rhythm and maintain steady control."
+      );
+
+
+      startNextPhase(
+        'action'
+      );
 
     } else {
 
@@ -992,246 +1238,335 @@
   }
 
 
-  function startNextPhase(forcedPhase = null) {
+  function startNextPhase(
+    forcedPhase = null
+  ) {
 
-    clearInterval(phaseInterval);
+    clearInterval(
+      phaseInterval
+    );
 
 
     if (forcedPhase) {
 
-      currentPhase = forcedPhase;
+      currentPhase =
+        forcedPhase;
 
     } else {
 
-      if (currentPhase === 'warmup') {
-
-        currentPhase = 'action';
-
-        speak("Warm up complete. Main training sequence starting now.");
-
-      } else {
-
-        currentPhase = currentPhase === 'action' ? 'pause' : 'action';
-
-      }
+      currentPhase =
+        currentPhase === 'action'
+          ? 'pause'
+          : 'action';
 
     }
 
 
-    const mode = document.getElementById('modeSelect').value;
-
-    const box = document.getElementById('statusBox');
-
-    const prompt = document.getElementById('promptText');
-
-    const sub = document.getElementById('subPrompt');
-
-    const tag = document.getElementById('techniqueTag');
+    const mode =
+      document.getElementById(
+        'modeSelect'
+      ).value;
 
 
-    if (currentPhase === 'warmup') {
-
-      box.classList.remove('pause');
-
-      box.classList.add('warmup');
-
-      playTone(440, 'sine', 0.2);
+    const box =
+      document.getElementById(
+        'statusBox'
+      );
 
 
-      phaseTimeLeft = 60; // 60s warm up
-
-      updateIntensityMeter(2);
-
-      setMetronome(45);
-
-
-      strokeSpeed = 0.015;
-
-      strokeRangeMin = 0.1;
-
-      strokeRangeMax = 0.9;
+    const prompt =
+      document.getElementById(
+        'promptText'
+      );
 
 
-      prompt.innerText = 'WARM-UP PHASE';
-
-      sub.innerText = 'Low Cadence Conditioning';
-
-      tag.innerText = 'Focus: Gentle Motion';
-
-
-    } else if (currentPhase === 'action') {
-
-      box.classList.remove('pause');
-
-      box.classList.remove('warmup');
-
-      playTone(520, 'sine', 0.15);
+    const sub =
+      document.getElementById(
+        'subPrompt'
+      );
 
 
-      let intensity = 5;
+    const tag =
+      document.getElementById(
+        'techniqueTag'
+      );
 
-      let bpm = 60;
+
+    if (
+      currentPhase === 'action'
+    ) {
+
+      box.classList.remove(
+        'pause'
+      );
 
 
-      if (mode === 'endurance') {
+      playTone(
+        520,
+        'sine',
+        0.15
+      );
 
-        phaseTimeLeft = Math.floor(Math.random() * 30) + 40;
 
-        intensity = Math.floor(Math.random() * 3) + 4;
+      if (
+        mode === 'endurance'
+      ) {
 
-        bpm = 50;
+        phaseTimeLeft =
+          Math.floor(
+            Math.random() * 30
+          ) + 40;
 
-      } else if (mode === 'chaos') {
+      } else if (
+        mode === 'chaos'
+      ) {
 
-        phaseTimeLeft = Math.floor(Math.random() * 20) + 10;
-
-        intensity = Math.floor(Math.random() * 6) + 5;
-
-        bpm = Math.floor(Math.random() * 60) + 60;
-
-      } else if (mode === 'pyramid') {
-
-        phaseTimeLeft = 20 + (pyramidStep * 5);
-
-        intensity = Math.min(10, pyramidStep * 2);
-
-        bpm = 40 + (pyramidStep * 10);
-
-        pyramidStep = pyramidStep >= 5 ? 1 : pyramidStep + 1;
-
-      } else if (mode === 'reaction') {
-
-        phaseTimeLeft = Math.floor(Math.random() * 12) + 8;
-
-        intensity = Math.floor(Math.random() * 8) + 3;
-
-        bpm = Math.floor(Math.random() * 80) + 50;
+        phaseTimeLeft =
+          Math.floor(
+            Math.random() * 25
+          ) + 10;
 
       } else {
 
-        phaseTimeLeft = Math.floor(Math.random() * 20) + 25;
-
-        intensity = Math.floor(Math.random() * 4) + 3;
-
-        bpm = 60;
+        phaseTimeLeft =
+          Math.floor(
+            Math.random() * 20
+          ) + 25;
 
       }
-
-
-      updateIntensityMeter(intensity);
-
-      setMetronome(bpm);
 
 
       const instructions = [
 
-        { rhythm: 'Sustained Rhythm', style: 'Full Range Target', speed: 0.02 + (intensity * 0.003), min: 0.0, max: 0.9, vocal: 'Maintain full range motion.' },
+        {
+          rhythm: 'Slow steady pace',
+          style: 'Full Range',
+          vocal: 'Maintain a slow steady rhythm.',
+          speed: 0.02,
+          min: 0.0,
+          max: 0.85,
+          hands: 1,
+          side: 'right'
+        },
 
-        { rhythm: 'High Cadence Pulse', style: 'Upper Zone Concentration', speed: 0.04 + (intensity * 0.004), min: 0.0, max: 0.4, vocal: 'Focus on upper range cadence.' },
+        {
+          rhythm: 'Medium rhythm',
+          style: 'Controlled Motion',
+          vocal: 'Switch direction and maintain the rhythm.',
+          speed: 0.035,
+          min: 0.1,
+          max: 0.7,
+          hands: 1,
+          side: 'left'
+        },
 
-        { rhythm: 'Isometric Tension Drive', style: 'Lower Zone Holding', speed: 0.02, min: 0.5, max: 0.9, vocal: 'Drive tension in lower zone.' },
+        {
+          rhythm: 'Gradual speed build',
+          style: 'Two-Handed Motion',
+          vocal: 'Gradually increase the motion speed.',
+          speed: 0.05,
+          min: 0.1,
+          max: 0.85,
+          hands: 2,
+          side: 'right'
+        },
 
-        { rhythm: 'Controlled Sprint', style: 'Mid Range Variable', speed: 0.05 + (intensity * 0.003), min: 0.2, max: 0.7, vocal: 'Accelerate mid range cadence.' }
+        {
+          rhythm: 'Light pressure',
+          style: 'Reduced Range',
+          vocal: 'Ease the motion and reduce the range.',
+          speed: 0.025,
+          min: 0.4,
+          max: 0.85,
+          hands: 1,
+          side: 'right'
+        },
+
+        {
+          rhythm: 'Controlled cadence',
+          style: 'Short Range',
+          vocal: 'Use a short controlled range of motion.',
+          speed: 0.03,
+          min: 0.0,
+          max: 0.3,
+          hands: 2,
+          side: 'right'
+        }
 
       ];
 
 
-      const chosen = instructions[Math.floor(Math.random() * instructions.length)];
+      const chosen =
+        instructions[
+          Math.floor(
+            Math.random() *
+            instructions.length
+          )
+        ];
 
 
-      strokeSpeed = chosen.speed;
+      strokeSpeed =
+        chosen.speed;
 
-      strokeRangeMin = chosen.min;
+      strokeRangeMin =
+        chosen.min;
 
-      strokeRangeMax = chosen.max;
+      strokeRangeMax =
+        chosen.max;
+
+      handsCount =
+        chosen.hands;
+
+      activeHandSide =
+        chosen.side;
 
 
-      prompt.innerText = 'ACTION PHASE';
-
-      sub.innerText = chosen.rhythm;
-
-      tag.innerText = `Focus: ${chosen.style}`;
+      prompt.innerText =
+        'ACTION';
 
 
-      speak(chosen.vocal);
+      sub.innerText =
+        chosen.rhythm;
+
+
+      tag.innerText =
+        `Focus: ${chosen.style}`;
+
+
+      speak(
+        chosen.vocal
+      );
 
 
     } else {
 
-      box.classList.remove('warmup');
-
-      box.classList.add('pause');
-
-      playTone(280, 'triangle', 0.3);
+      box.classList.add(
+        'pause'
+      );
 
 
-      updateIntensityMeter(0);
+      playTone(
+        280,
+        'triangle',
+        0.3
+      );
 
-      setMetronome(0);
 
-
-      phaseTimeLeft = mode === 'chaos' ? Math.floor(Math.random() * 10) + 5 : Math.floor(Math.random() * 15) + 10;
+      phaseTimeLeft =
+        mode === 'chaos'
+          ? Math.floor(
+              Math.random() * 10
+            ) + 5
+          : Math.floor(
+              Math.random() * 15
+            ) + 10;
 
 
       const pausePhrases = [
 
-        'Halt movement immediately and reset tension.',
+        'Pause now and take a controlled breath.',
 
-        'Hold static posture and equalize breathing.',
+        'Hold the position and relax.',
 
-        'Pause cadence and prepare for next threshold.'
+        'Stop the movement and reset your rhythm.'
 
       ];
 
 
-      const chosenPause = pausePhrases[Math.floor(Math.random() * pausePhrases.length)];
+      const chosenPause =
+        pausePhrases[
+          Math.floor(
+            Math.random() *
+            pausePhrases.length
+          )
+        ];
 
 
-      prompt.innerText = 'HALT / ISOMETRIC HOLD';
-
-      sub.innerText = 'Static recovery and focus.';
-
-      tag.innerText = 'Focus: Breath Regulation';
+      prompt.innerText =
+        'HALT / HOLD';
 
 
-      speak(chosenPause);
+      sub.innerText =
+        'Pause and reset.';
+
+
+      tag.innerText =
+        'Focus: Controlled breathing';
+
+
+      speak(
+        chosenPause
+      );
 
     }
 
 
-    totalPhaseDuration = phaseTimeLeft;
+    totalPhaseDuration =
+      phaseTimeLeft;
+
 
     updateProgressBar();
 
 
-    document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
+    document.getElementById(
+      'phaseTimer'
+    ).innerText =
+      `${phaseTimeLeft}s`;
 
 
-    phaseInterval = setInterval(() => {
+    phaseInterval =
+      setInterval(
+        () => {
 
-      phaseTimeLeft--;
-
-      document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
-
-      updateProgressBar();
+          phaseTimeLeft--;
 
 
-      if (phaseTimeLeft <= 0) {
+          document.getElementById(
+            'phaseTimer'
+          ).innerText =
+            `${phaseTimeLeft}s`;
 
-        startNextPhase();
 
-      }
+          updateProgressBar();
 
-    }, 1000);
+
+          if (
+            phaseTimeLeft <= 0
+          ) {
+
+            startNextPhase();
+
+          }
+
+        },
+        1000
+      );
 
   }
 
 
   function updateProgressBar() {
 
-    const percentage = ((totalPhaseDuration - phaseTimeLeft) / totalPhaseDuration) * 100;
+    const percentage =
+      (
+        (
+          totalPhaseDuration -
+          phaseTimeLeft
+        ) /
+        totalPhaseDuration
+      ) * 100;
 
-    document.getElementById('phaseProgressBar').style.width = `${Math.min(100, Math.max(0, percentage))}%`;
+
+    document.getElementById(
+      'phaseProgressBar'
+    ).style.width =
+      `${Math.min(
+        100,
+        Math.max(
+          0,
+          percentage
+        )
+      )}%`;
 
   }
 
@@ -1243,16 +1578,28 @@
 
     edges++;
 
-    document.getElementById('edgeCount').innerText = edges;
+
+    document.getElementById(
+      'edgeCount'
+    ).innerText =
+      edges;
 
 
-    playTone(200, 'sawtooth', 0.4);
+    playTone(
+      200,
+      'sawtooth',
+      0.4
+    );
 
 
-    speak('Threshold reached. Hold static pause.');
+    speak(
+      'Cycle registered. Hold the pause and reset.'
+    );
 
 
-    startNextPhase('pause');
+    startNextPhase(
+      'pause'
+    );
 
   }
 
@@ -1262,43 +1609,79 @@
     active = false;
 
 
-    clearInterval(timerInterval);
+    clearInterval(
+      timerInterval
+    );
 
-    clearInterval(phaseInterval);
-
-    if (metronomeInterval) clearInterval(metronomeInterval);
-
-
-    updateIntensityMeter(0);
-
-    setMetronome(0);
+    clearInterval(
+      phaseInterval
+    );
 
 
-    document.getElementById('modeSelect').disabled = false;
-
-    document.getElementById('startBtn').innerText = 'Start Session';
-
-    document.getElementById('edgeBtn').style.display = 'none';
-
-    document.getElementById('techniqueTag').style.display = 'none';
-
-    document.getElementById('promptText').innerText = 'COMPLETE';
-
-    document.getElementById('subPrompt').innerText = 'Session finished';
-
-    document.getElementById('statusBox').classList.remove('pause');
-
-    document.getElementById('statusBox').classList.remove('warmup');
-
-    document.getElementById('phaseTimer').innerText = '--';
-
-    document.getElementById('phaseProgressBar').style.width = '0%';
+    document.getElementById(
+      'modeSelect'
+    ).disabled = false;
 
 
-    playTone(440, 'sine', 0.3);
+    document.getElementById(
+      'startBtn'
+    ).innerText =
+      'Start Session';
 
 
-    speak(`Session finished. Total time ${Math.floor(seconds / 60)} minutes with ${edges} threshold cycles logged.`);
+    document.getElementById(
+      'edgeBtn'
+    ).style.display =
+      'none';
+
+
+    document.getElementById(
+      'techniqueTag'
+    ).style.display =
+      'none';
+
+
+    document.getElementById(
+      'promptText'
+    ).innerText =
+      'COMPLETE';
+
+
+    document.getElementById(
+      'subPrompt'
+    ).innerText =
+      'Session finished';
+
+
+    document.getElementById(
+      'statusBox'
+    ).classList.remove(
+      'pause'
+    );
+
+
+    document.getElementById(
+      'phaseTimer'
+    ).innerText =
+      '--';
+
+
+    document.getElementById(
+      'phaseProgressBar'
+    ).style.width =
+      '0%';
+
+
+    playTone(
+      440,
+      'sine',
+      0.3
+    );
+
+
+    speak(
+      `Session finished. You completed ${Math.floor(seconds / 60)} minutes and ${edges} cycles.`
+    );
 
   }
 
