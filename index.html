@@ -46,7 +46,7 @@
     .status-box.pause .technique-tag { border-color: var(--stop); color: var(--stop); background: rgba(255, 0, 85, 0.1); }
 
     .control-panel { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-    .mode-select { background: #06060c; color: var(--primary); border: 1px solid #22223a; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; outline: none; }
+    .mode-select { background: #06060c; color: var(--primary); border: 1px solid #22223a; padding: 12px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; outline: none; }
     
     .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0 5px 0; }
     .stat-card { background: #06060c; padding: 12px; border-radius: 10px; border: 1px solid #161626; }
@@ -76,10 +76,6 @@
       <option value="chaos">Mode: Chaos (Randomized Burst)</option>
     </select>
 
-    <select id="voiceSelect" class="mode-select" style="margin-top: 6px;">
-      <option value="default">Voice: Loading Voices...</option>
-    </select>
-
     <div class="visualizer-wrapper">
       <canvas id="pulseCanvas" class="main-canvas" width="200" height="200"></canvas>
       <div class="timer-overlay" id="mainTimer">00:00:00</div>
@@ -91,7 +87,7 @@
     
     <div class="status-box" id="statusBox">
       <div class="prompt-text" id="promptText">READY</div>
-      <div class="sub-prompt" id="subPrompt">Select options and press Start</div>
+      <div class="sub-prompt" id="subPrompt">Select mode and start training</div>
       <div class="technique-tag" id="techniqueTag" style="display:none;">Technique</div>
     </div>
 
@@ -132,7 +128,22 @@
 
   const synth = window.speechSynthesis;
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  let availableVoices = [];
+  let trainerVoice = null;
+
+  // Single dynamic voice select logic
+  function setTrainerVoice() {
+    if (!synth) return;
+    const voices = synth.getVoices();
+    // Prioritize deeper English voices
+    trainerVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('Daniel') || v.name.includes('Google UK English Male'))) || voices[0];
+  }
+
+  if (synth) {
+    setTrainerVoice();
+    if (synth.onvoiceschanged !== undefined) {
+      synth.onvoiceschanged = setTrainerVoice;
+    }
+  }
 
   const mainCanvas = document.getElementById('pulseCanvas');
   const mainCtx = mainCanvas.getContext('2d');
@@ -231,28 +242,6 @@
   }
   renderAnimations();
 
-  function loadVoices() {
-    if (!synth) return;
-    availableVoices = synth.getVoices();
-    const select = document.getElementById('voiceSelect');
-    select.innerHTML = '';
-
-    availableVoices.forEach((voice, index) => {
-      const option = document.createElement('option');
-      option.value = index;
-      option.textContent = `${voice.name} (${voice.lang})`;
-      if (voice.default) option.selected = true;
-      select.appendChild(option);
-    });
-  }
-
-  if (synth) {
-    loadVoices();
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged = loadVoices;
-    }
-  }
-
   function playTone(freq = 440, type = 'sine', duration = 0.15) {
     if (audioCtx.state === 'suspended') audioCtx.resume();
     const osc = audioCtx.createOscillator();
@@ -271,14 +260,10 @@
     if (!synth) return;
     synth.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    const selectedVoiceIndex = document.getElementById('voiceSelect').value;
-    
-    if (availableVoices[selectedVoiceIndex]) {
-      utterance.voice = availableVoices[selectedVoiceIndex];
-    }
+    if (trainerVoice) utterance.voice = trainerVoice;
     
     utterance.rate = 1.0;
-    utterance.pitch = 0.85; // Lower pitch for a firmer tone
+    utterance.pitch = 0.8;
     synth.speak(utterance);
   }
 
@@ -296,14 +281,13 @@
       edges = 0;
       document.getElementById('edgeCount').innerText = '0';
       document.getElementById('modeSelect').disabled = true;
-      document.getElementById('voiceSelect').disabled = true;
       document.getElementById('startBtn').innerText = 'Stop Session';
       document.getElementById('edgeBtn').style.display = 'block';
       document.getElementById('techniqueTag').style.display = 'inline-block';
       
       timerInterval = setInterval(() => { seconds++; updateDisplay(); }, 1000);
       playTone(660, 'sine', 0.2);
-      speak("Session active. Listen to my commands and hold complete discipline.");
+      speak("Alright, pay attention. We're training for real stamina today. Keep up with my rhythm and do not bust early.");
       startNextPhase('action');
     } else {
       endSession();
@@ -338,11 +322,11 @@
       }
 
       const instructions = [
-        { rhythm: "Slow steady pace", style: "Full length strokes", vocal: "Action now. Slow, controlled, full length strokes. Match the rhythm.", speed: 0.02, min: 0.0, max: 0.9 },
-        { rhythm: "Medium rhythm", style: "Tip focus only", vocal: "Pick up the pace. Focus strictly on the tip. Stay focused.", speed: 0.04, min: 0.0, max: 0.35 },
-        { rhythm: "Light pressure", style: "Base to mid shaft", vocal: "Action. Light pressure on the base to mid shaft. Maintain steady control.", speed: 0.025, min: 0.4, max: 0.9 },
-        { rhythm: "Gradual speed build", style: "Two-handed grip", vocal: "Build speed now. Two hands. Drive the pace steadily.", speed: 0.05, min: 0.1, max: 0.85 },
-        { rhythm: "Controlled cadence", style: "Twist motion at head", vocal: "Action. Controlled cadence with a twisting motion at the head. Do not break form.", speed: 0.03, min: 0.0, max: 0.25 }
+        { rhythm: "Slow steady pace", style: "Full length strokes", vocal: "Alright, work it slow and smooth. Full strokes, base to tip. Stay locked in.", speed: 0.02, min: 0.0, max: 0.9 },
+        { rhythm: "Medium rhythm", style: "Tip focus only", vocal: "Now focus strictly on the head. Keep the pace steady, don't rush it.", speed: 0.04, min: 0.0, max: 0.35 },
+        { rhythm: "Light pressure", style: "Base to mid shaft", vocal: "Ease up on the grip. Stroke the shaft gently and stay in total control.", speed: 0.025, min: 0.4, max: 0.9 },
+        { rhythm: "Gradual speed build", style: "Two-handed grip", vocal: "Pick up the speed now! Two hands, match my pace and push through it.", speed: 0.05, min: 0.1, max: 0.85 },
+        { rhythm: "Controlled cadence", style: "Twist motion at head", vocal: "Back to action. Give it a tight twist right at the tip. Control it.", speed: 0.03, min: 0.0, max: 0.25 }
       ];
       
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
@@ -361,10 +345,17 @@
       
       phaseTimeLeft = mode === 'chaos' ? Math.floor(Math.random() * 10) + 5 : Math.floor(Math.random() * 15) + 10;
       
+      const pausePhrases = [
+        "Freeze right there! Hands off completely, let the arousal drop.",
+        "Halt! Drop your hands right now. Take a deep breath and clear your mind.",
+        "Stop stroking! Hands off instantly, don't you dare touch it till I say."
+      ];
+      const chosenPause = pausePhrases[Math.floor(Math.random() * pausePhrases.length)];
+
       prompt.innerText = "HALT / HOLD";
       sub.innerText = "Hands off completely.";
       tag.innerText = "Focus: Regulate breathing";
-      speak("Halt completely! Hands off right now. Take a deep breath and stay completely still.");
+      speak(chosenPause);
     }
 
     totalPhaseDuration = phaseTimeLeft;
@@ -393,7 +384,7 @@
     edges++;
     document.getElementById('edgeCount').innerText = edges;
     playTone(200, 'sawtooth', 0.4);
-    speak("Edge registered! Stop immediately. Hands completely off.");
+    speak("Edge registered! Good control stopping right on the brink. Hold that pause.");
     startNextPhase('pause');
   }
 
@@ -403,7 +394,6 @@
     clearInterval(phaseInterval);
     
     document.getElementById('modeSelect').disabled = false;
-    document.getElementById('voiceSelect').disabled = false;
     document.getElementById('startBtn').innerText = 'Start Session';
     document.getElementById('edgeBtn').style.display = 'none';
     document.getElementById('techniqueTag').style.display = 'none';
@@ -414,7 +404,7 @@
     document.getElementById('phaseProgressBar').style.width = '0%';
 
     playTone(440, 'sine', 0.3);
-    speak(`Session terminated. You completed ${Math.floor(seconds / 60)} minutes with ${edges} edges recorded.`);
+    speak(`Session finished. You lasted ${Math.floor(seconds / 60)} minutes and controlled ${edges} edges. Solid work.`);
   }
 </script>
 </body>
