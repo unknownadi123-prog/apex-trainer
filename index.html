@@ -22,14 +22,12 @@
     
     .container { flex: 1; min-width: 320px; background: var(--card); border: 1px solid #1a1a29; border-radius: 24px; padding: 28px; box-shadow: 0 0 50px var(--glow); text-align: center; position: relative; z-index: 1; }
     
-    /* Side Stroke Visualizer Box */
     .stroke-panel { width: 220px; background: var(--card); border: 1px solid #1a1a29; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
     .stroke-title { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; font-weight: 700; }
     .stroke-canvas-container { position: relative; width: 100%; height: 320px; display: flex; justify-content: center; }
 
     h1 { color: var(--primary); font-size: 1.3rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6); }
     
-    /* Visualizer Canvas Styling */
     .visualizer-wrapper { position: relative; width: 200px; height: 200px; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
     canvas.main-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
     .timer-overlay { position: relative; z-index: 2; font-size: 2.5rem; font-weight: 700; color: #fff; text-shadow: 0 0 15px var(--primary); font-variant-numeric: tabular-nums; }
@@ -82,7 +80,6 @@
       <option value="default">Voice: Loading Voices...</option>
     </select>
 
-    <!-- Main Circular Pulse Canvas -->
     <div class="visualizer-wrapper">
       <canvas id="pulseCanvas" class="main-canvas" width="200" height="200"></canvas>
       <div class="timer-overlay" id="mainTimer">00:00:00</div>
@@ -115,7 +112,6 @@
     </div>
   </div>
 
-  <!-- Side Motion Visualizer -->
   <div class="stroke-panel">
     <div class="stroke-title">Stroke Motion</div>
     <div class="stroke-canvas-container">
@@ -138,22 +134,19 @@
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   let availableVoices = [];
 
-  // Main Canvas Setup
   const mainCanvas = document.getElementById('pulseCanvas');
   const mainCtx = mainCanvas.getContext('2d');
   let pulseAngle = 0;
 
-  // Stroke Motion Canvas Setup
   const strokeCanvas = document.getElementById('strokeCanvas');
   const strokeCtx = strokeCanvas.getContext('2d');
   let strokePos = 0;
   let strokeDirection = 1;
   let strokeSpeed = 0.03;
-  let strokeRangeMin = 0.2; // 0.0 (top) to 1.0 (bottom)
+  let strokeRangeMin = 0.2;
   let strokeRangeMax = 0.8;
 
   function renderAnimations() {
-    // 1. Render Circular Pulse Canvas
     mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
     const centerX = mainCanvas.width / 2;
     const centerY = mainCanvas.height / 2;
@@ -178,7 +171,6 @@
       mainCtx.stroke();
     }
 
-    // 2. Render Side Stroke Visualizer Canvas
     strokeCtx.clearRect(0, 0, strokeCanvas.width, strokeCanvas.height);
     
     const w = strokeCanvas.width;
@@ -188,7 +180,6 @@
     const bottomY = h - 40;
     const shaftHeight = bottomY - topY;
 
-    // Draw central guide shaft
     strokeCtx.beginPath();
     strokeCtx.moveTo(shaftX, topY);
     strokeCtx.lineTo(shaftX, bottomY);
@@ -198,7 +189,6 @@
     strokeCtx.shadowBlur = 0;
     strokeCtx.stroke();
 
-    // Draw glans / tip outline
     strokeCtx.beginPath();
     strokeCtx.arc(shaftX, topY, 14, Math.PI, 0, false);
     strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(255, 0, 85, 0.2)';
@@ -207,7 +197,6 @@
     strokeCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     strokeCtx.stroke();
 
-    // Animate stroke grip ring
     if (active && currentPhase === 'action') {
       strokePos += strokeSpeed * strokeDirection;
       if (strokePos >= strokeRangeMax) {
@@ -218,7 +207,6 @@
         strokeDirection = 1;
       }
     } else if (active && currentPhase === 'pause') {
-      // Hold at bottom during pause phase
       strokePos += (0.9 - strokePos) * 0.1;
     } else {
       strokePos = 0.9;
@@ -226,7 +214,6 @@
 
     const ringY = topY + strokePos * shaftHeight;
 
-    // Draw active grip ring
     strokeCtx.beginPath();
     strokeCtx.arc(shaftX, ringY, 18, 0, Math.PI * 2);
     strokeCtx.fillStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
@@ -234,7 +221,6 @@
     strokeCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     strokeCtx.fill();
 
-    // Inner ring detail
     strokeCtx.beginPath();
     strokeCtx.arc(shaftX, ringY, 10, 0, Math.PI * 2);
     strokeCtx.fillStyle = '#0a0a12';
@@ -291,8 +277,8 @@
       utterance.voice = availableVoices[selectedVoiceIndex];
     }
     
-    utterance.rate = 0.95;
-    utterance.pitch = 1.0;
+    utterance.rate = 1.0;
+    utterance.pitch = 0.85; // Lower pitch for a firmer tone
     synth.speak(utterance);
   }
 
@@ -317,7 +303,7 @@
       
       timerInterval = setInterval(() => { seconds++; updateDisplay(); }, 1000);
       playTone(660, 'sine', 0.2);
-      speak("Session started. Maintain control.");
+      speak("Session active. Listen to my commands and hold complete discipline.");
       startNextPhase('action');
     } else {
       endSession();
@@ -352,11 +338,11 @@
       }
 
       const instructions = [
-        { rhythm: "Slow steady pace", style: "Full length strokes", speed: 0.02, min: 0.0, max: 0.9 },
-        { rhythm: "Medium rhythm", style: "Tip focus only", speed: 0.04, min: 0.0, max: 0.35 },
-        { rhythm: "Light pressure", style: "Base to mid shaft", speed: 0.025, min: 0.4, max: 0.9 },
-        { rhythm: "Gradual speed build", style: "Two-handed grip", speed: 0.05, min: 0.1, max: 0.85 },
-        { rhythm: "Controlled cadence", style: "Twist motion at head", speed: 0.03, min: 0.0, max: 0.25 }
+        { rhythm: "Slow steady pace", style: "Full length strokes", vocal: "Action now. Slow, controlled, full length strokes. Match the rhythm.", speed: 0.02, min: 0.0, max: 0.9 },
+        { rhythm: "Medium rhythm", style: "Tip focus only", vocal: "Pick up the pace. Focus strictly on the tip. Stay focused.", speed: 0.04, min: 0.0, max: 0.35 },
+        { rhythm: "Light pressure", style: "Base to mid shaft", vocal: "Action. Light pressure on the base to mid shaft. Maintain steady control.", speed: 0.025, min: 0.4, max: 0.9 },
+        { rhythm: "Gradual speed build", style: "Two-handed grip", vocal: "Build speed now. Two hands. Drive the pace steadily.", speed: 0.05, min: 0.1, max: 0.85 },
+        { rhythm: "Controlled cadence", style: "Twist motion at head", vocal: "Action. Controlled cadence with a twisting motion at the head. Do not break form.", speed: 0.03, min: 0.0, max: 0.25 }
       ];
       
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
@@ -368,7 +354,7 @@
       prompt.innerText = "ACTION";
       sub.innerText = chosen.rhythm;
       tag.innerText = `Focus: ${chosen.style}`;
-      speak(`Action. ${chosen.rhythm}. ${chosen.style}.`);
+      speak(chosen.vocal);
     } else {
       box.classList.add('pause');
       playTone(280, 'triangle', 0.3);
@@ -378,7 +364,7 @@
       prompt.innerText = "HALT / HOLD";
       sub.innerText = "Hands off completely.";
       tag.innerText = "Focus: Regulate breathing";
-      speak("Halt. Hands off completely.");
+      speak("Halt completely! Hands off right now. Take a deep breath and stay completely still.");
     }
 
     totalPhaseDuration = phaseTimeLeft;
@@ -407,7 +393,7 @@
     edges++;
     document.getElementById('edgeCount').innerText = edges;
     playTone(200, 'sawtooth', 0.4);
-    speak("Edge registered. Full pause.");
+    speak("Edge registered! Stop immediately. Hands completely off.");
     startNextPhase('pause');
   }
 
@@ -428,7 +414,7 @@
     document.getElementById('phaseProgressBar').style.width = '0%';
 
     playTone(440, 'sine', 0.3);
-    speak(`Session ended. Total time ${Math.floor(seconds / 60)} minutes with ${edges} edges reached.`);
+    speak(`Session terminated. You completed ${Math.floor(seconds / 60)} minutes with ${edges} edges recorded.`);
   }
 </script>
 </body>
