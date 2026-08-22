@@ -474,19 +474,47 @@ button.cummed-btn {
 <!-- LARGER VIDEO PLAYER PANEL -->
 <div class="video-panel">
   <div class="panel-title">Video Feed</div>
-  
+
+  <div class="site-selector-group">
+    <select id="siteSelect" class="site-selector">
+      <option value="pornhub">Pornhub</option>
+      <option value="pornhub_gay">Pornhub Gay</option>
+      <option value="xhamster">XHamster</option>
+      <option value="xhamster_gay">XHamster Gay</option>
+      <option value="xnxx">XNXX</option>
+      <option value="boyfriendtv">BoyfriendTV</option>
+    </select>
+  </div>
+
   <div class="video-input-group">
-    <input type="text" id="ytUrlInput" class="video-input" placeholder="Paste YouTube URL or Video ID...">
-    <button onclick="loadYouTubeVideo()" class="video-load-btn">Load</button>
+    <input type="text" id="vidUrlInput" class="video-input" placeholder="Paste video URL or video ID...">
+    <button onclick="loadVideo()" class="video-load-btn">Load</button>
   </div>
 
   <div class="video-container">
-    <iframe id="ytPlayer" src="https://www.youtube.com/embed/" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+    <iframe id="vidPlayer" src="about:blank" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
   </div>
-</div>
 
-<div class="container">
-
+  <!-- RECOMMENDATIONS -->
+  <div class="recommendations">
+    <div class="recommendations-title">Quick Recommendations</div>
+    <button class="rec-btn" onclick="loadRec('pornhub','ph5f7ab9b0a3d6e')">
+      <span class="rec-site">PH</span>Popular Right Now
+    </button>
+    <button class="rec-btn" onclick="loadRec('pornhub_gay','ph5f7ab9b0a3d6e')">
+      <span class="rec-site">PH Gay</span>Top Gay Featured
+    </button>
+    <button class="rec-btn" onclick="loadRec('xhamster','xh4FfQK')">
+      <span class="rec-site">XH</span>Trending
+    </button>
+    <button class="rec-btn" onclick="loadRec('xhamster_gay','xh4FfQK')">
+      <span class="rec-site">XH Gay</span>Gay Top Rated
+    </button>
+    <button class="rec-btn" onclick="loadRec('xnxx','1234567')">
+      <span class="rec-site">XNXX</span>Most Viewed
+    </button>
+    <button class="rec-btn" onclick="loadRec('boyfriendtv','123456')">
+      <span class="rec-site">BFTV</span>Featured
 <h1>Apex Edge Trainer</h1>
 
 <select id="modeSelect" class="mode-select">
