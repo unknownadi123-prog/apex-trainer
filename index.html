@@ -12,7 +12,7 @@
       --primary: #00f0ff;
       --accent: #7000ff;
       --stop: #ff0055;
-      --cum: #00ffaa;
+      --cum: #ffffff;
       --text: #e0e6ed;
       --glow: rgba(0, 240, 255, 0.15);
     }
@@ -225,13 +225,13 @@
 
     .status-box.release {
       border-color: var(--cum);
-      box-shadow: 0 0 45px rgba(0, 255, 170, 0.6);
+      box-shadow: 0 0 45px rgba(255, 255, 255, 0.8);
       animation: pulseGlow 1s infinite alternate;
     }
 
     @keyframes pulseGlow {
-      from { box-shadow: 0 0 20px rgba(0, 255, 170, 0.4); }
-      to { box-shadow: 0 0 50px rgba(0, 255, 170, 0.9); }
+      from { box-shadow: 0 0 20px rgba(255, 255, 255, 0.4); }
+      to { box-shadow: 0 0 50px rgba(255, 255, 255, 0.9); }
     }
 
     .prompt-text {
@@ -280,7 +280,7 @@
     .status-box.release .technique-tag {
       border-color: var(--cum);
       color: var(--cum);
-      background: rgba(0, 255, 170, 0.1);
+      background: rgba(255, 255, 255, 0.15);
     }
 
     .control-panel {
@@ -357,17 +357,17 @@
     }
 
     button.cummed-btn {
-      background: linear-gradient(135deg, #00ffaa, #00f0ff);
+      background: linear-gradient(135deg, #ffffff, #dcdcdc);
       color: #000;
       font-size: 1rem;
       font-weight: 800;
-      box-shadow: 0 0 25px rgba(0, 255, 170, 0.6);
+      box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
       animation: pulseBtn 1s infinite alternate;
     }
 
     @keyframes pulseBtn {
-      from { transform: scale(1); box-shadow: 0 0 15px rgba(0, 255, 170, 0.5); }
-      to { transform: scale(1.02); box-shadow: 0 0 30px rgba(0, 255, 170, 0.9); }
+      from { transform: scale(1); box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); }
+      to { transform: scale(1.02); box-shadow: 0 0 30px rgba(255, 255, 255, 0.95); }
     }
   </style>
 </head>
@@ -430,7 +430,7 @@
     <div class="control-panel">
       <button id="startBtn" class="action-btn" onclick="toggleSession()">Start Session</button>
       <button id="edgeBtn" class="action-btn edge-btn" onclick="logEdge()" style="display:none;">Edge Reached</button>
-      <button id="cummedBtn" class="action-btn cummed-btn" onclick="finishClimaxSession()" style="display:none;">CUMMED / FINISH SESSION</button>
+      <button id="cummedBtn" class="action-btn cummed-btn" onclick="finishClimaxSession()" style="display:none;">FINISH SESSION</button>
     </div>
 
   </div>
@@ -476,29 +476,36 @@
 
   function createSplashParticles() {
     particles = [];
-    for (let i = 0; i < 150; i++) {
+
+    // Screen splash explosion (center burst)
+    for (let i = 0; i < 220; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 24 + 4;
       particles.push({
-        x: fxCanvas.width / 2 + (Math.random() - 0.5) * 200,
-        y: fxCanvas.height / 2 + (Math.random() - 0.5) * 200,
-        vx: (Math.random() - 0.5) * 18,
-        vy: (Math.random() - 0.8) * 22,
-        radius: Math.random() * 8 + 4,
+        x: fxCanvas.width / 2,
+        y: fxCanvas.height / 2,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed - 4,
+        radius: Math.random() * 10 + 4,
         alpha: 1,
-        color: Math.random() > 0.3 ? '#00ffaa' : '#00f0ff',
-        gravity: 0.4
+        color: '#ffffff',
+        gravity: 0.35,
+        isStream: false
       });
     }
 
-    for (let i = 0; i < 30; i++) {
+    // Slow dripping liquid streaks from upper screen edge
+    for (let i = 0; i < 50; i++) {
       particles.push({
         x: Math.random() * fxCanvas.width,
-        y: -10,
+        y: Math.random() * (fxCanvas.height * 0.25),
         vx: 0,
-        vy: Math.random() * 5 + 3,
-        radius: Math.random() * 6 + 3,
-        length: Math.random() * 40 + 20,
-        alpha: 0.9,
-        color: '#00ffaa',
+        vy: Math.random() * 2.5 + 1,
+        radius: Math.random() * 7 + 3,
+        length: Math.random() * 35 + 15,
+        alpha: 0.95,
+        color: '#ffffff',
+        gravity: 0.04,
         isStream: true
       });
     }
@@ -512,6 +519,7 @@
         let p = particles[i];
 
         if (p.isStream) {
+          // Render dripping liquid stream
           fxCtx.beginPath();
           fxCtx.fillStyle = p.color;
           fxCtx.globalAlpha = p.alpha;
@@ -520,23 +528,27 @@
           fxCtx.fill();
 
           p.y += p.vy;
+          p.vy += p.gravity;
+
           if (p.y > fxCanvas.height + 50) {
-            p.y = -20;
+            p.y = -10;
             p.x = Math.random() * fxCanvas.width;
+            p.vy = Math.random() * 2.5 + 1;
           }
         } else {
+          // Render radial splash particles
           fxCtx.beginPath();
           fxCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           fxCtx.fillStyle = p.color;
           fxCtx.globalAlpha = p.alpha;
-          fxCtx.shadowBlur = 10;
-          fxCtx.shadowColor = p.color;
+          fxCtx.shadowBlur = 12;
+          fxCtx.shadowColor = '#ffffff';
           fxCtx.fill();
 
           p.x += p.vx;
           p.y += p.vy;
           p.vy += p.gravity;
-          p.alpha -= 0.005;
+          p.alpha -= 0.004;
 
           if (p.alpha <= 0) {
             p.alpha = 0;
@@ -599,10 +611,10 @@
       bar.style.background = 'linear-gradient(90deg, #00f0ff, #7000ff)';
     } else if (targetIntensity >= 20) {
       desc = "Low Controlled";
-      bar.style.background = 'linear-gradient(90deg, #00f0ff, #00ffaa)';
+      bar.style.background = 'linear-gradient(90deg, #00f0ff, #ffffff)';
     } else {
       desc = "Cooling Down";
-      bar.style.background = '#00ffaa';
+      bar.style.background = '#ffffff';
     }
 
     label.innerText = `${Math.round(targetIntensity)}% (${desc})`;
@@ -655,10 +667,10 @@
 
       mainCtx.beginPath();
       mainCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      mainCtx.strokeStyle = currentPhase === 'release' ? '#00ffaa' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
+      mainCtx.strokeStyle = currentPhase === 'release' ? '#ffffff' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
       mainCtx.lineWidth = 4;
       mainCtx.shadowBlur = 15;
-      mainCtx.shadowColor = currentPhase === 'release' ? '#00ffaa' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
+      mainCtx.shadowColor = currentPhase === 'release' ? '#ffffff' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
       mainCtx.stroke();
     } else {
       mainCtx.beginPath();
@@ -678,8 +690,8 @@
     const bottomY = h - 65;
     const totalLen = bottomY - topY;
 
-    const strokeColor = currentPhase === 'release' ? '#00ffaa' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
-    const fillColor = currentPhase === 'release' ? 'rgba(0, 255, 170, 0.12)' : (currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)');
+    const strokeColor = currentPhase === 'release' ? '#ffffff' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
+    const fillColor = currentPhase === 'release' ? 'rgba(255, 255, 255, 0.2)' : (currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)');
 
     const shaftHalfWidth = 25;
     const lowerWidth = 40;
@@ -719,7 +731,7 @@
     }
 
     const currentY = topY + strokePos * totalLen;
-    const handColor = currentPhase === 'release' ? 'rgba(0,255,170,0.95)' : (currentPhase === 'action' ? 'rgba(0,240,255,0.88)' : 'rgba(255,0,85,0.88)');
+    const handColor = currentPhase === 'release' ? 'rgba(255,255,255,0.95)' : (currentPhase === 'action' ? 'rgba(0,240,255,0.88)' : 'rgba(255,0,85,0.88)');
 
     if (handsCount === 2) {
       drawHandGrip(midX, currentY + 12, true, handColor);
@@ -835,12 +847,11 @@
 
     const mode = document.getElementById('modeSelect').value;
 
-    document.getElementById('promptText').innerText = 'CLIMAX AUTHORIZED — SHOOT NOW';
-    document.getElementById('subPrompt').innerText = 'Target time reached! Full speed ahead. Finish hard right now.';
-    document.getElementById('techniqueTag').innerText = 'Status: Climax Approved';
+    document.getElementById('promptText').innerText = 'SESSION COMPLETE — SPLASH RELEASE';
+    document.getElementById('subPrompt').innerText = 'Target time reached! Maximum intensity complete. Finish phase engaged.';
+    document.getElementById('techniqueTag').innerText = 'Status: Final Phase';
     document.getElementById('phaseTimer').innerText = 'GO!';
 
-    // Swap Control Buttons to "CUMMED"
     document.getElementById('startBtn').style.display = 'none';
     document.getElementById('edgeBtn').style.display = 'none';
     document.getElementById('cummedBtn').style.display = 'block';
@@ -848,9 +859,9 @@
     playTone(880, 'sine', 0.5);
 
     const finishVoiceLines = [
-      "Target time reached! Maximum speed, stroke fast and shoot now!",
-      "You made it to the end. Take full control, stroke hard, and finish!",
-      mode === 'toy' ? "Time is up! Drive that sleeve fast and climax right now!" : "Session complete. Unleash full speed and shoot!"
+      "Target time reached! Maximum pace achieved, complete your set now!",
+      "You made it to the end. Full intensity visual authorized!",
+      mode === 'toy' ? "Time is up! Complete the marathon phase right now!" : "Session complete. Maximum speed burst enabled!"
     ];
 
     const chosenVoice = finishVoiceLines[Math.floor(Math.random() * finishVoiceLines.length)];
@@ -859,7 +870,7 @@
 
   function finishClimaxSession() {
     playTone(990, 'sine', 0.6);
-    speak(`Climax logged! Magnificent session completed with ${edges} edges.`);
+    speak(`Session fully completed with ${edges} edges logged.`);
     endSession('climax');
   }
 
@@ -1010,7 +1021,7 @@
     document.getElementById('techniqueTag').style.display = 'none';
 
     document.getElementById('promptText').innerText = reason === 'climax' ? 'VICTORY — COMPLETE' : 'COMPLETE';
-    document.getElementById('subPrompt').innerText = reason === 'climax' ? `Climax logged successfully. Total edges: ${edges}` : 'Training session stopped.';
+    document.getElementById('subPrompt').innerText = reason === 'climax' ? `Session logged successfully. Total edges: ${edges}` : 'Training session stopped.';
     document.getElementById('statusBox').className = 'status-box';
     document.getElementById('phaseTimer').innerText = '--';
     document.getElementById('sessionProgressBar').style.width = '0%';
