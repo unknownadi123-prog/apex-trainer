@@ -60,7 +60,7 @@
     @media (max-width: 680px) {
       .app-layout { flex-direction: column; align-items: center; }
       .stroke-panel { width: 100%; height: auto; }
-      .stroke-canvas-container { height: 180px; }
+      .stroke-canvas-container { height: 220px; }
     }
   </style>
 </head>
@@ -130,11 +130,9 @@
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   let trainerVoice = null;
 
-  // Single dynamic voice select logic
   function setTrainerVoice() {
     if (!synth) return;
     const voices = synth.getVoices();
-    // Prioritize deeper English voices
     trainerVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('Daniel') || v.name.includes('Google UK English Male'))) || voices[0];
   }
 
@@ -158,6 +156,7 @@
   let strokeRangeMax = 0.8;
 
   function renderAnimations() {
+    // 1. Render Circular Timer Visualizer
     mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
     const centerX = mainCanvas.width / 2;
     const centerY = mainCanvas.height / 2;
@@ -182,32 +181,32 @@
       mainCtx.stroke();
     }
 
+    // 2. Render Anatomical Guide Visualizer Canvas
     strokeCtx.clearRect(0, 0, strokeCanvas.width, strokeCanvas.height);
     
     const w = strokeCanvas.width;
     const h = strokeCanvas.height;
-    const shaftX = w / 2;
-    const topY = 40;
-    const bottomY = h - 40;
-    const shaftHeight = bottomY - topY;
+    const midX = w / 2;
+    const topY = 45;
+    const bottomY = h - 45;
+    const totalLen = bottomY - topY;
 
+    // Draw Silhouette Outline Guide
     strokeCtx.beginPath();
-    strokeCtx.moveTo(shaftX, topY);
-    strokeCtx.lineTo(shaftX, bottomY);
-    strokeCtx.lineWidth = 14;
-    strokeCtx.lineCap = 'round';
-    strokeCtx.strokeStyle = '#121220';
-    strokeCtx.shadowBlur = 0;
-    strokeCtx.stroke();
+    strokeCtx.moveTo(midX - 12, bottomY);
+    strokeCtx.lineTo(midX - 12, topY + 25);
+    strokeCtx.bezierCurveTo(midX - 18, topY + 15, midX - 18, topY, midX, topY);
+    strokeCtx.bezierCurveTo(midX + 18, topY, midX + 18, topY + 15, midX + 12, topY + 25);
+    strokeCtx.lineTo(midX + 12, bottomY);
+    strokeCtx.closePath();
 
-    strokeCtx.beginPath();
-    strokeCtx.arc(shaftX, topY, 14, Math.PI, 0, false);
-    strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(255, 0, 85, 0.2)';
+    strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
     strokeCtx.fill();
     strokeCtx.lineWidth = 2;
     strokeCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     strokeCtx.stroke();
 
+    // Calculate Motion Position
     if (active && currentPhase === 'action') {
       strokePos += strokeSpeed * strokeDirection;
       if (strokePos >= strokeRangeMax) {
@@ -223,20 +222,26 @@
       strokePos = 0.9;
     }
 
-    const ringY = topY + strokePos * shaftHeight;
+    const currentY = topY + strokePos * totalLen;
 
+    // Draw Grip Motion Indicator
     strokeCtx.beginPath();
-    strokeCtx.arc(shaftX, ringY, 18, 0, Math.PI * 2);
-    strokeCtx.fillStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
-    strokeCtx.shadowBlur = 20;
+    strokeCtx.roundRect(midX - 24, currentY - 14, 48, 28, 12);
+    strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.85)' : 'rgba(255, 0, 85, 0.85)';
+    strokeCtx.shadowBlur = 15;
     strokeCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     strokeCtx.fill();
 
-    strokeCtx.beginPath();
-    strokeCtx.arc(shaftX, ringY, 10, 0, Math.PI * 2);
-    strokeCtx.fillStyle = '#0a0a12';
+    // Finger Grip Details
     strokeCtx.shadowBlur = 0;
-    strokeCtx.fill();
+    strokeCtx.strokeStyle = '#040406';
+    strokeCtx.lineWidth = 2;
+    for (let i = -8; i <= 8; i += 8) {
+      strokeCtx.beginPath();
+      strokeCtx.moveTo(midX - 18, currentY + i);
+      strokeCtx.lineTo(midX + 18, currentY + i);
+      strokeCtx.stroke();
+    }
 
     requestAnimationFrame(renderAnimations);
   }
