@@ -32,7 +32,8 @@
       align-items: center;
       justify-content: center;
       padding: 20px;
-      overflow: hidden;
+      overflow-x: hidden;
+      overflow-y: auto;
       position: relative;
     }
 
@@ -55,6 +56,18 @@
       align-items: stretch;
       justify-content: center;
       z-index: 1;
+      margin: auto;
+    }
+
+    @media (max-width: 768px) {
+      .app-layout {
+        flex-direction: column;
+        align-items: center;
+      }
+      .stroke-panel {
+        width: 100% !important;
+        max-width: 320px;
+      }
     }
 
     .container {
@@ -486,7 +499,6 @@
     const centerX = fxCanvas.width / 2;
     const centerY = fxCanvas.height / 2;
 
-    // High Viscosity Explosive Liquid Blobs (Center Burst)
     for (let i = 0; i < 90; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 18 + 5;
@@ -503,7 +515,6 @@
       });
     }
 
-    // Heavy Dripping Viscous Liquid Streams (Top Screen Wall Drop)
     for (let i = 0; i < 35; i++) {
       drips.push({
         x: Math.random() * fxCanvas.width,
@@ -523,7 +534,6 @@
     ctx.rotate(stretchAngle);
     ctx.scale(1, scaleY);
 
-    // Thick Liquid Base Glow & Shadow
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
     ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
@@ -531,14 +541,12 @@
     ctx.shadowBlur = 15;
     ctx.fill();
 
-    // 3D Glossy Liquid Inner Highlight
     ctx.beginPath();
     ctx.ellipse(-radius * 0.3, -radius * 0.3, radius * 0.35, radius * 0.2, Math.PI / 4, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.shadowBlur = 0;
     ctx.fill();
 
-    // Deep Fluid Edge Rim
     ctx.beginPath();
     ctx.arc(0, 0, radius, 0, Math.PI * 2);
     ctx.strokeStyle = 'rgba(220, 225, 240, 0.8)';
@@ -552,7 +560,6 @@
     fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
 
     if (fxActive) {
-      // 1. Render Static Wall Splatters (Accumulated Slime Stains)
       for (let i = 0; i < splatters.length; i++) {
         const s = splatters[i];
         fxCtx.save();
@@ -563,7 +570,6 @@
         fxCtx.shadowBlur = 8;
         fxCtx.fill();
 
-        // Highlight
         fxCtx.beginPath();
         fxCtx.ellipse(s.x - s.rx * 0.2, s.y - s.ry * 0.2, s.rx * 0.3, s.ry * 0.25, s.angle, 0, Math.PI * 2);
         fxCtx.fillStyle = 'rgba(255, 255, 255, 0.9)';
@@ -571,7 +577,6 @@
         fxCtx.restore();
       }
 
-      // 2. Render Thick Liquid Burst Drops
       for (let i = 0; i < drops.length; i++) {
         let p = drops[i];
 
@@ -581,13 +586,11 @@
 
         drawViscousBlob(fxCtx, p.x, p.y, p.radius, stretchAngle, scaleY, p.opacity);
 
-        // Physics Update: Heavy Viscous Friction + Gravity
         p.x += p.vx;
         p.y += p.vy;
         p.vx *= p.viscosity;
-        p.vy = p.vy * p.viscosity + 0.45; // Fluid gravity pull
+        p.vy = p.vy * p.viscosity + 0.45;
 
-        // Screen Boundary Liquid Splat Impact
         if (p.splatOnBoundary && (p.x <= p.radius || p.x >= fxCanvas.width - p.radius || p.y >= fxCanvas.height - p.radius)) {
           splatters.push({
             x: Math.max(p.radius, Math.min(fxCanvas.width - p.radius, p.x)),
@@ -597,16 +600,14 @@
             angle: Math.random() * Math.PI,
             opacity: p.opacity
           });
-          p.radius = 0; // Destroy drop on splash
+          p.radius = 0;
         }
       }
 
-      // 3. Render Slow Dripping Viscous Streams
       for (let i = 0; i < drips.length; i++) {
         let d = drips[i];
 
         fxCtx.save();
-        // Main Droplet Head
         fxCtx.beginPath();
         fxCtx.arc(d.x, d.y, d.radius, 0, Math.PI * 2);
         fxCtx.fillStyle = 'rgba(255, 255, 255, 0.92)';
@@ -614,14 +615,12 @@
         fxCtx.shadowBlur = 10;
         fxCtx.fill();
 
-        // Thick Slime Tail
         fxCtx.beginPath();
         fxCtx.moveTo(d.x - d.radius * 0.8, d.y - 4);
         fxCtx.quadraticCurveTo(d.x, d.y - d.length, d.x + d.radius * 0.8, d.y - 4);
         fxCtx.fillStyle = 'rgba(255, 255, 255, 0.75)';
         fxCtx.fill();
 
-        // Shiny Liquid Highlight
         fxCtx.beginPath();
         fxCtx.arc(d.x - d.radius * 0.3, d.y - d.radius * 0.3, d.radius * 0.3, 0, Math.PI * 2);
         fxCtx.fillStyle = 'rgba(255, 255, 255, 0.98)';
@@ -629,7 +628,6 @@
 
         fxCtx.restore();
 
-        // Slow Heavy Acceleration
         d.y += d.vy;
         d.vy += 0.03;
         d.length = Math.min(120, d.length + d.vy * 0.8);
