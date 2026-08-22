@@ -383,6 +383,8 @@
     <h1>Apex Edge Trainer</h1>
 
     <select id="modeSelect" class="mode-select">
+      <option value="burst1">Mode: Ultra Burst (1 min)</option>
+      <option value="burst2">Mode: Sprint Edge (2 mins)</option>
       <option value="quick">Mode: Quick Edge (3-5 mins)</option>
       <option value="warmup">Mode: Warm-Up (15 mins)</option>
       <option value="standard" selected>Mode: Standard Balanced (25 mins)</option>
@@ -477,7 +479,7 @@
   function createSplashParticles() {
     particles = [];
 
-    // Screen splash explosion (center burst)
+    // Screen splash explosion
     for (let i = 0; i < 220; i++) {
       const angle = Math.random() * Math.PI * 2;
       const speed = Math.random() * 24 + 4;
@@ -494,7 +496,7 @@
       });
     }
 
-    // Slow dripping liquid streaks from upper screen edge
+    // Slow dripping liquid streaks
     for (let i = 0; i < 50; i++) {
       particles.push({
         x: Math.random() * fxCanvas.width,
@@ -519,7 +521,6 @@
         let p = particles[i];
 
         if (p.isStream) {
-          // Render dripping liquid stream
           fxCtx.beginPath();
           fxCtx.fillStyle = p.color;
           fxCtx.globalAlpha = p.alpha;
@@ -536,7 +537,6 @@
             p.vy = Math.random() * 2.5 + 1;
           }
         } else {
-          // Render radial splash particles
           fxCtx.beginPath();
           fxCtx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
           fxCtx.fillStyle = p.color;
@@ -782,7 +782,11 @@
   }
 
   function setSessionDuration(mode) {
-    if (mode === 'quick') {
+    if (mode === 'burst1') {
+      totalSessionSeconds = 60;
+    } else if (mode === 'burst2') {
+      totalSessionSeconds = 120;
+    } else if (mode === 'quick') {
       totalSessionSeconds = Math.floor(Math.random() * 120) + 180; 
     } else if (mode === 'warmup') {
       totalSessionSeconds = 900; 
@@ -826,7 +830,7 @@
       }, 1000);
 
       playTone(660, 'sine', 0.2);
-      speak("Session started. Lock in, follow the pace, and hold off until the end.");
+      speak("Session started. Fasten up, follow the pace, and push hard!");
       startNextPhase('action');
     } else {
       endSession();
@@ -861,7 +865,7 @@
     const finishVoiceLines = [
       "Target time reached! Maximum pace achieved, complete your set now!",
       "You made it to the end. Full intensity visual authorized!",
-      mode === 'toy' ? "Time is up! Complete the marathon phase right now!" : "Session complete. Maximum speed burst enabled!"
+      mode === 'burst1' || mode === 'burst2' ? "Rapid burst sprint complete! Finish right now!" : "Session complete. Maximum speed burst enabled!"
     ];
 
     const chosenVoice = finishVoiceLines[Math.floor(Math.random() * finishVoiceLines.length)];
@@ -896,7 +900,13 @@
       playTone(520, 'sine', 0.15);
       ladderStep++;
 
-      if (mode === 'quick') {
+      if (mode === 'burst1') {
+        updateIntensityMeter(Math.min(95, 70 + ladderStep * 10));
+        phaseTimeLeft = 12;
+      } else if (mode === 'burst2') {
+        updateIntensityMeter(Math.min(95, 60 + ladderStep * 10));
+        phaseTimeLeft = 15;
+      } else if (mode === 'quick') {
         updateIntensityMeter(Math.min(95, 50 + ladderStep * 15));
         phaseTimeLeft = 20;
       } else if (mode === 'warmup') {
@@ -917,12 +927,11 @@
         phaseTimeLeft = Math.floor(Math.random() * 30 + 45);
       }
 
-      phaseTimeLeft = Math.max(5, phaseTimeLeft);
+      phaseTimeLeft = Math.max(3, phaseTimeLeft);
 
-      const toyInstructions = [
-        { rhythm: 'Full-length steady glide', style: 'Sleeve Deep Stroke', vocal: 'Deep smooth glides. Keep control and build up slowly.' },
-        { rhythm: 'Slow tip friction focus', style: 'Sleeve Cap Control', vocal: 'Focus on the tip. Watch your threshold.' },
-        { rhythm: 'Twist on up-stroke', style: 'Twist & Pull Motion', vocal: 'Add a twist on every stroke. Push the intensity higher.' }
+      const burstInstructions = [
+        { rhythm: 'Maximum rapid pace', style: 'High Speed Surge', vocal: 'Maximum speed! Build the heat fast!' },
+        { rhythm: 'Aggressive tight stroke', style: 'Rapid Edge Surge', vocal: 'Push hard right now! Drive straight to the limit!' }
       ];
 
       const standardInstructions = [
@@ -931,9 +940,9 @@
         { rhythm: 'Gradual speed build', style: 'Two-Handed Edging', vocal: 'Increase speed now. Drive it right up toward the edge.' }
       ];
 
-      const chosen = (mode === 'toy') ? toyInstructions[Math.floor(Math.random() * toyInstructions.length)] : standardInstructions[Math.floor(Math.random() * standardInstructions.length)];
+      const chosen = (mode === 'burst1' || mode === 'burst2') ? burstInstructions[Math.floor(Math.random() * burstInstructions.length)] : standardInstructions[Math.floor(Math.random() * standardInstructions.length)];
 
-      strokeSpeed = mode === 'quick' ? 0.06 : 0.035;
+      strokeSpeed = (mode === 'burst1' || mode === 'burst2') ? 0.08 : (mode === 'quick' ? 0.06 : 0.035);
       strokeRangeMin = 0.1;
       strokeRangeMax = 0.85;
       handsCount = 1;
@@ -951,7 +960,11 @@
 
       updateIntensityMeter(Math.max(5, targetIntensity * 0.2));
 
-      if (mode === 'quick') {
+      if (mode === 'burst1') {
+        phaseTimeLeft = 3;
+      } else if (mode === 'burst2') {
+        phaseTimeLeft = 4;
+      } else if (mode === 'quick') {
         phaseTimeLeft = 5;
       } else if (mode === 'toy') {
         phaseTimeLeft = Math.floor(Math.random() * 15) + 15;
@@ -959,18 +972,10 @@
         phaseTimeLeft = Math.floor(Math.random() * 10) + 8;
       }
 
-      if (mode === 'toy' && seconds > 0 && Math.floor(seconds / 60) % 30 === 0) {
-        prompt.innerText = 'LUBE & SUCTION CHECK';
-        sub.innerText = 'Extended 30s pause: Re-apply lube or adjust sleeve suction.';
-        tag.innerText = 'Focus: Maintenance Pause';
-        phaseTimeLeft = 30;
-        speak('30 minute check. Re-apply lubricant or release suction before we resume.');
-      } else {
-        prompt.innerText = 'HALT / HOLD';
-        sub.innerText = 'Hands off! Cool down and let the arousal drop.';
-        tag.innerText = 'Focus: Deep Breaths';
-        speak('Hands completely off! Freeze right there and let it cool down.');
-      }
+      prompt.innerText = 'HALT / HOLD';
+      sub.innerText = 'Hands off! Quick breather before the next surge.';
+      tag.innerText = 'Focus: Rapid Reset';
+      speak('Hands off! Quick hold right there.');
     }
 
     document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
