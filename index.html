@@ -702,7 +702,7 @@
       }, 1000);
 
       playTone(660, 'sine', 0.2);
-      speak("Session started. Keep it tight and don't cum early.");
+      speak("Session started. Lock in, follow the pace, and hold off until the end.");
       startNextPhase('action');
     } else {
       endSession();
@@ -720,17 +720,17 @@
 
     const mode = document.getElementById('modeSelect').value;
 
-    document.getElementById('promptText').innerText = 'TIME TO CUM / SHOOT';
-    document.getElementById('subPrompt').innerText = 'Session complete! Stroke as hard as you want and blow your load now.';
-    document.getElementById('techniqueTag').innerText = 'Status: Climax Authorized';
-    document.getElementById('phaseTimer').innerText = 'SHOOT!';
+    document.getElementById('promptText').innerText = 'CLIMAX AUTHORIZED — SHOOT NOW';
+    document.getElementById('subPrompt').innerText = 'Target time reached! Full speed ahead. Finish hard right now.';
+    document.getElementById('techniqueTag').innerText = 'Status: Climax Approved';
+    document.getElementById('phaseTimer').innerText = 'GO!';
 
     playTone(880, 'sine', 0.5);
 
     const finishVoiceLines = [
-      "Alright time is up! Stroke fast and cum now! Blow your load!",
-      "You earned this finish. Go full speed and shoot your load!",
-      mode === 'toy' ? "Fill that sleeve up! Cum hard right now!" : "Session over. Stroke hard and shoot it all out!"
+      "Target time reached! Maximum speed, stroke fast and shoot now!",
+      "You made it to the end. Take full control, stroke hard, and finish!",
+      mode === 'toy' ? "Time is up! Drive that sleeve fast and climax right now!" : "Session complete. Unleash full speed and shoot!"
     ];
 
     const chosenVoice = finishVoiceLines[Math.floor(Math.random() * finishVoiceLines.length)];
@@ -785,15 +785,15 @@
       phaseTimeLeft = Math.max(5, phaseTimeLeft);
 
       const toyInstructions = [
-        { rhythm: 'Full-length steady glide', style: 'Sleeve Deep Stroke', vocal: 'Deep full strokes. Keep it smooth and hold off.' },
-        { rhythm: 'Slow tip friction focus', style: 'Sleeve Cap Control', vocal: 'Target the tip slowly. Don't slip over.' },
-        { rhythm: 'Twist on up-stroke', style: 'Twist & Pull Motion', vocal: 'Twist on the up stroke. Drive the intensity up.' }
+        { rhythm: 'Full-length steady glide', style: 'Sleeve Deep Stroke', vocal: 'Deep smooth glides. Keep control and build up slowly.' },
+        { rhythm: 'Slow tip friction focus', style: 'Sleeve Cap Control', vocal: 'Focus on the tip. Watch your threshold.' },
+        { rhythm: 'Twist on up-stroke', style: 'Twist & Pull Motion', vocal: 'Add a twist on every stroke. Push the intensity higher.' }
       ];
 
       const standardInstructions = [
-        { rhythm: 'Slow steady pace', style: 'Full Range Edging', vocal: 'Start stroking. Steady pace, stay in control.' },
-        { rhythm: 'Medium rhythm', style: 'Controlled Edging', vocal: 'Pick up the rhythm. Hold your focus.' },
-        { rhythm: 'Gradual speed build', style: 'Two-Handed Edging', vocal: 'Stroke faster now, build up near the edge.' }
+        { rhythm: 'Slow steady pace', style: 'Full Range Edging', vocal: 'Start stroking. Keep a steady pace and stay relaxed.' },
+        { rhythm: 'Medium rhythm', style: 'Controlled Edging', vocal: 'Pick up the tempo. Stay focused and hold the rhythm.' },
+        { rhythm: 'Gradual speed build', style: 'Two-Handed Edging', vocal: 'Increase speed now. Drive it right up toward the edge.' }
       ];
 
       const chosen = (mode === 'toy') ? toyInstructions[Math.floor(Math.random() * toyInstructions.length)] : standardInstructions[Math.floor(Math.random() * standardInstructions.length)];
@@ -827,14 +827,14 @@
       if (mode === 'toy' && seconds > 0 && Math.floor(seconds / 60) % 30 === 0) {
         prompt.innerText = 'LUBE & SUCTION CHECK';
         sub.innerText = 'Extended 30s pause: Re-apply lube or adjust sleeve suction.';
-        tag.innerText = 'Focus: Toy Maintenance';
+        tag.innerText = 'Focus: Maintenance Pause';
         phaseTimeLeft = 30;
-        speak('Thirty minute mark. Lube up or vent suction, then get ready.');
+        speak('30 minute check. Re-apply lubricant or release suction before we resume.');
       } else {
         prompt.innerText = 'HALT / HOLD';
-        sub.innerText = 'Hands off! Cool down and hold your cum.';
-        tag.innerText = 'Focus: Deep breaths';
-        speak('Hands off completely! Stop right there and hold it back.');
+        sub.innerText = 'Hands off! Cool down and let the arousal drop.';
+        tag.innerText = 'Focus: Deep Breaths';
+        speak('Hands completely off! Freeze right there and let it cool down.');
       }
     }
 
@@ -859,9 +859,9 @@
     playTone(200, 'sawtooth', 0.4);
 
     const edgeVoiceLines = [
-      "Edge logged! Stop moving right now, don't cum!",
-      "Hands away! Hold that peak right on the edge.",
-      "Good hold. Freeze right there and let it settle."
+      "Edge recorded! Hands off immediately, do not cross the limit!",
+      "Freeze! Hold right at the brink and breathe.",
+      "Solid hold. Hands off now and settle down."
     ];
 
     speak(edgeVoiceLines[Math.floor(Math.random() * edgeVoiceLines.length)]);
@@ -889,7 +889,7 @@
     updateIntensityMeter(10);
 
     playTone(440, 'sine', 0.3);
-    speak(`Session stopped manually. You logged ${edges} edges.`);
+    speak(`Session terminated manually. You completed ${edges} edges.`);
   }
 
   updateIntensityMeter(20);
