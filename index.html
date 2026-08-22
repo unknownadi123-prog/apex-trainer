@@ -1,2717 +1,2222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Apex Edge Trainer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apex Edge Trainer</title>
 
-  <style>
-    :root {
-      --bg: #040406;
-      --card: #0a0a12;
-      --primary: #00f0ff;
-      --accent: #7000ff;
-      --stop: #ff0055;
-      --cum: #ffffff;
-      --text: #e0e6ed;
-      --glow: rgba(0, 240, 255, 0.15);
-    }
+<style>
+:root {
+  --bg:#040406;
+  --card:#0a0a12;
+  --primary:#00f0ff;
+  --accent:#7000ff;
+  --stop:#ff0055;
+  --cum:#ffffff;
+  --text:#e0e6ed;
+  --glow:rgba(0,240,255,.15);
+}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-    }
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:'Segoe UI',Roboto,system-ui,sans-serif;
+}
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-      overflow-x: hidden;
-      overflow-y: auto;
-      position: relative;
-    }
+body {
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  overflow-x:hidden;
+  overflow-y:auto;
+  position:relative;
+}
 
-    /* FULL SCREEN FX */
-    #fxCanvas {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
-      z-index: 9999;
-    }
+#fxCanvas {
+  position:fixed;
+  inset:0;
+  width:100vw;
+  height:100vh;
+  pointer-events:none;
+  z-index:99;
+}
 
-    .app-layout {
-      display: flex;
-      flex-direction: row;
-      gap: 20px;
-      width: 100%;
-      max-width: 820px;
-      align-items: stretch;
-      justify-content: center;
-      z-index: 1;
-      margin: auto;
-    }
+.app-layout {
+  display:flex;
+  flex-direction:row;
+  gap:20px;
+  width:100%;
+  max-width:820px;
+  align-items:stretch;
+  justify-content:center;
+  z-index:1;
+  margin:auto;
+}
 
-    @media (max-width: 768px) {
-      .app-layout {
-        flex-direction: column;
-        align-items: center;
-      }
+@media(max-width:768px) {
+  .app-layout {
+    flex-direction:column;
+    align-items:center;
+  }
 
-      .stroke-panel {
-        width: 100% !important;
-        max-width: 320px;
-      }
-    }
+  .stroke-panel {
+    width:100%!important;
+    max-width:320px;
+  }
+}
 
-    .container {
-      flex: 1;
-      min-width: 320px;
-      background: var(--card);
-      border: 1px solid #1a1a29;
-      border-radius: 24px;
-      padding: 28px;
-      box-shadow: 0 0 50px var(--glow);
-      text-align: center;
-      position: relative;
-      z-index: 1;
-    }
+.container {
+  flex:1;
+  min-width:320px;
+  background:var(--card);
+  border:1px solid #1a1a29;
+  border-radius:24px;
+  padding:28px;
+  box-shadow:0 0 50px var(--glow);
+  text-align:center;
+  position:relative;
+  z-index:1;
+}
 
-    .stroke-panel {
-      width: 220px;
-      background: var(--card);
-      border: 1px solid #1a1a29;
-      border-radius: 24px;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
-    }
+.stroke-panel {
+  width:220px;
+  background:var(--card);
+  border:1px solid #1a1a29;
+  border-radius:24px;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:space-between;
+  box-shadow:0 0 30px rgba(0,0,0,.5);
+}
 
-    .stroke-title {
-      font-size: 0.8rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--primary);
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
+.stroke-title {
+  font-size:.8rem;
+  letter-spacing:2px;
+  text-transform:uppercase;
+  color:var(--primary);
+  margin-bottom:10px;
+  font-weight:700;
+}
 
-    .stroke-canvas-container {
-      position: relative;
-      width: 100%;
-      height: 320px;
-      display: flex;
-      justify-content: center;
-    }
+.stroke-canvas-container {
+  position:relative;
+  width:100%;
+  height:320px;
+  display:flex;
+  justify-content:center;
+}
 
-    h1 {
-      color: var(--primary);
-      font-size: 1.3rem;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      margin-bottom: 15px;
-      text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
-    }
+h1 {
+  color:var(--primary);
+  font-size:1.3rem;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  margin-bottom:15px;
+  text-shadow:0 0 12px rgba(0,240,255,.6);
+}
 
-    .visualizer-wrapper {
-      position: relative;
-      width: 200px;
-      height: 200px;
-      margin: 10px auto;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+.visualizer-wrapper {
+  position:relative;
+  width:200px;
+  height:200px;
+  margin:10px auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 
-    canvas.main-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 1;
-    }
+canvas.main-canvas {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:1;
+}
 
-    .timer-overlay {
-      position: relative;
-      z-index: 2;
-      font-size: 2.2rem;
-      font-weight: 700;
-      color: #fff;
-      text-shadow: 0 0 15px var(--primary);
-      font-variant-numeric: tabular-nums;
-    }
+.timer-overlay {
+  position:relative;
+  z-index:2;
+  font-size:2.2rem;
+  font-weight:700;
+  color:#fff;
+  text-shadow:0 0 15px var(--primary);
+  font-variant-numeric:tabular-nums;
+}
 
-    .progress-bar-container {
-      width: 100%;
-      height: 6px;
-      background: #121220;
-      border-radius: 3px;
-      overflow: hidden;
-      margin: 15px 0 10px 0;
-    }
+.progress-bar-container {
+  width:100%;
+  height:6px;
+  background:#121220;
+  border-radius:3px;
+  overflow:hidden;
+  margin:15px 0 10px;
+}
 
-    .progress-bar-fill {
-      height: 100%;
-      width: 0%;
-      background: var(--primary);
-      transition: width 0.2s linear, background-color 0.3s ease;
-      box-shadow: 0 0 10px var(--primary);
-    }
+.progress-bar-fill {
+  height:100%;
+  width:0%;
+  background:var(--primary);
+  transition:width .2s linear,background-color .3s ease;
+  box-shadow:0 0 10px var(--primary);
+}
 
-    .status-box.pause .progress-bar-fill {
-      background: var(--stop);
-      box-shadow: 0 0 10px var(--stop);
-    }
+.status-box.pause .progress-bar-fill {
+  background:var(--stop);
+}
 
-    .status-box.release .progress-bar-fill {
-      background: var(--cum);
-      box-shadow: 0 0 10px var(--cum);
-    }
+.status-box.release .progress-bar-fill {
+  background:var(--cum);
+}
 
-    .intensity-container {
-      width: 100%;
-      margin: 15px 0;
-      background: #06060c;
-      border: 1px solid #1a1a29;
-      border-radius: 12px;
-      padding: 12px 16px;
-    }
+.intensity-container {
+  width:100%;
+  margin:15px 0;
+  background:#06060c;
+  border:1px solid #1a1a29;
+  border-radius:12px;
+  padding:12px 16px;
+}
 
-    .intensity-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.75rem;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      color: #8a8a9e;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
+.intensity-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:.75rem;
+  letter-spacing:1px;
+  text-transform:uppercase;
+  color:#8a8a9e;
+  margin-bottom:8px;
+  font-weight:600;
+}
 
-    .intensity-header span:last-child {
-      color: var(--primary);
-      font-weight: 700;
-    }
+.intensity-header span:last-child {
+  color:var(--primary);
+  font-weight:700;
+}
 
-    .intensity-bar-bg {
-      width: 100%;
-      height: 10px;
-      background: #000;
-      border-radius: 5px;
-      overflow: hidden;
-      border: 1px solid #1a1a29;
-    }
+.intensity-bar-bg {
+  width:100%;
+  height:10px;
+  background:#000;
+  border-radius:5px;
+  overflow:hidden;
+  border:1px solid #1a1a29;
+}
 
-    .intensity-bar-fill {
-      height: 100%;
-      width: 20%;
-      background: linear-gradient(90deg, #00f0ff, #7000ff);
-      box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
-      transition: width 0.5s ease-out, background 0.3s ease;
-    }
+.intensity-bar-fill {
+  height:100%;
+  width:20%;
+  background:linear-gradient(90deg,#00f0ff,#7000ff);
+  box-shadow:0 0 8px rgba(0,240,255,.5);
+  transition:width .5s ease-out,background .3s ease;
+}
 
-    .status-box {
-      background: #06060c;
-      border: 2px solid var(--primary);
-      border-radius: 16px;
-      padding: 20px;
-      margin: 10px 0;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.1);
-    }
+.status-box {
+  background:#06060c;
+  border:2px solid var(--primary);
+  border-radius:16px;
+  padding:20px;
+  margin:10px 0;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 25px rgba(0,240,255,.1);
+}
 
-    .status-box.pause {
-      border-color: var(--stop);
-      box-shadow: 0 0 35px rgba(255, 0, 85, 0.35);
-    }
+.status-box.pause {
+  border-color:var(--stop);
+  box-shadow:0 0 35px rgba(255,0,85,.35);
+}
 
-    .status-box.release {
-      border-color: var(--cum);
-      box-shadow: 0 0 45px rgba(255, 255, 255, 0.8);
-      animation: pulseGlow 1s infinite alternate;
-    }
+.status-box.release {
+  border-color:var(--cum);
+  box-shadow:0 0 45px rgba(255,255,255,.8);
+  animation:pulseGlow 1s infinite alternate;
+}
 
-    @keyframes pulseGlow {
-      from {
-        box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
-      }
+@keyframes pulseGlow {
+  from {box-shadow:0 0 20px rgba(255,255,255,.4);}
+  to {box-shadow:0 0 50px rgba(255,255,255,.9);}
+}
 
-      to {
-        box-shadow: 0 0 50px rgba(255, 255, 255, 0.9);
-      }
-    }
+.prompt-text {
+  font-size:1.3rem;
+  font-weight:700;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  color:var(--primary);
+}
 
-    .prompt-text {
-      font-size: 1.3rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: var(--primary);
-    }
+.status-box.pause .prompt-text {
+  color:var(--stop);
+}
 
-    .status-box.pause .prompt-text {
-      color: var(--stop);
-    }
+.status-box.release .prompt-text {
+  color:var(--cum);
+}
 
-    .status-box.release .prompt-text {
-      color: var(--cum);
-    }
+.sub-prompt {
+  font-size:.9rem;
+  color:#8a8a9e;
+  margin-top:6px;
+  font-weight:500;
+}
 
-    .sub-prompt {
-      font-size: 0.9rem;
-      color: #8a8a9e;
-      margin-top: 6px;
-      font-weight: 500;
-    }
+.technique-tag {
+  display:inline-block;
+  margin-top:10px;
+  background:rgba(0,240,255,.1);
+  color:var(--primary);
+  border:1px solid var(--primary);
+  font-size:.75rem;
+  padding:4px 12px;
+  border-radius:20px;
+  text-transform:uppercase;
+  font-weight:600;
+  letter-spacing:1px;
+}
 
-    .technique-tag {
-      display: inline-block;
-      margin-top: 10px;
-      background: rgba(0, 240, 255, 0.1);
-      color: var(--primary);
-      border: 1px solid var(--primary);
-      font-size: 0.75rem;
-      padding: 4px 12px;
-      border-radius: 20px;
-      text-transform: uppercase;
-      font-weight: 600;
-      letter-spacing: 1px;
-    }
+.status-box.pause .technique-tag {
+  border-color:var(--stop);
+  color:var(--stop);
+  background:rgba(255,0,85,.1);
+}
 
-    .status-box.pause .technique-tag {
-      border-color: var(--stop);
-      color: var(--stop);
-      background: rgba(255, 0, 85, 0.1);
-    }
+.status-box.release .technique-tag {
+  border-color:var(--cum);
+  color:var(--cum);
+  background:rgba(255,255,255,.15);
+}
 
-    .status-box.release .technique-tag {
-      border-color: var(--cum);
-      color: var(--cum);
-      background: rgba(255, 255, 255, 0.15);
-    }
+.control-panel {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  margin-top:15px;
+}
 
-    .control-panel {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 15px;
-    }
+.mode-select {
+  background:#06060c;
+  color:var(--primary);
+  border:1px solid #22223a;
+  padding:12px;
+  border-radius:8px;
+  font-weight:bold;
+  width:100%;
+  font-size:.85rem;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  outline:none;
+}
 
-    .mode-select {
-      background: #06060c;
-      color: var(--primary);
-      border: 1px solid #22223a;
-      padding: 12px;
-      border-radius: 8px;
-      font-weight: bold;
-      width: 100%;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      outline: none;
-    }
+.stats-row {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin:15px 0 5px;
+}
 
-    .stats-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 15px 0 5px 0;
-    }
+.stat-card {
+  background:#06060c;
+  padding:12px;
+  border-radius:10px;
+  border:1px solid #161626;
+}
 
-    .stat-card {
-      background: #06060c;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #161626;
-    }
+.stat-val {
+  font-size:1.4rem;
+  font-weight:700;
+  color:var(--primary);
+}
 
-    .stat-val {
-      font-size: 1.4rem;
-      font-weight: 700;
-      color: var(--primary);
-    }
+.stat-lbl {
+  font-size:.7rem;
+  color:#6c6c80;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  margin-top:2px;
+}
 
-    .stat-lbl {
-      font-size: 0.7rem;
-      color: #6c6c80;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-top: 2px;
-    }
+button.action-btn {
+  background:linear-gradient(135deg,var(--accent),var(--primary));
+  color:#fff;
+  border:none;
+  padding:16px;
+  border-radius:10px;
+  font-weight:700;
+  cursor:pointer;
+  text-transform:uppercase;
+  letter-spacing:1.5px;
+  transition:transform .1s,opacity .2s;
+  font-size:.9rem;
+  width:100%;
+}
 
-    button.action-btn {
-      background: linear-gradient(135deg, var(--accent), var(--primary));
-      color: #fff;
-      border: none;
-      padding: 16px;
-      border-radius: 10px;
-      font-weight: 700;
-      cursor: pointer;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      transition: transform 0.1s, opacity 0.2s;
-      font-size: 0.9rem;
-      width: 100%;
-    }
+button.action-btn:active {
+  transform:scale(.98);
+}
 
-    button.action-btn:active {
-      transform: scale(0.98);
-    }
+button.edge-btn {
+  background:linear-gradient(135deg,#ff0055,#ff5500);
+}
 
-    button.edge-btn {
-      background: linear-gradient(135deg, #ff0055, #ff5500);
-      margin-top: 5px;
-    }
+button.cummed-btn {
+  background:linear-gradient(135deg,#fff,#dcdcdc);
+  color:#000;
+  font-size:1rem;
+  font-weight:800;
+  box-shadow:0 0 25px rgba(255,255,255,.8);
+  animation:pulseBtn 1s infinite alternate;
+}
 
-    button.cummed-btn {
-      background: linear-gradient(135deg, #ffffff, #dcdcdc);
-      color: #000;
-      font-size: 1rem;
-      font-weight: 800;
-      box-shadow: 0 0 25px rgba(255, 255, 255, 0.8);
-      animation: pulseBtn 1s infinite alternate;
-    }
-
-    @keyframes pulseBtn {
-      from {
-        transform: scale(1);
-        box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-      }
-
-      to {
-        transform: scale(1.02);
-        box-shadow: 0 0 30px rgba(255, 255, 255, 0.95);
-      }
-    }
-
-    /* Completion overlay */
-    #completionLabel {
-      position: fixed;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%) scale(0.5);
-      z-index: 10000;
-      pointer-events: none;
-      opacity: 0;
-      font-size: clamp(2rem, 7vw, 5rem);
-      font-weight: 900;
-      letter-spacing: 8px;
-      text-transform: uppercase;
-      color: white;
-      text-align: center;
-      text-shadow:
-        0 0 10px white,
-        0 0 30px white,
-        0 0 70px #00f0ff;
-    }
-
-    #completionLabel.show {
-      animation: completionText 2.2s ease-out forwards;
-    }
-
-    @keyframes completionText {
-      0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.4);
-      }
-
-      20% {
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.15);
-      }
-
-      40% {
-        transform: translate(-50%, -50%) scale(1);
-      }
-
-      100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(1.5);
-      }
-    }
-
-    body.completion-shake {
-      animation: screenShake 0.5s ease-out;
-    }
-
-    @keyframes screenShake {
-      0% { transform: translate(0, 0); }
-      15% { transform: translate(-5px, 3px); }
-      30% { transform: translate(5px, -3px); }
-      45% { transform: translate(-4px, -2px); }
-      60% { transform: translate(4px, 2px); }
-      75% { transform: translate(-2px, 1px); }
-      100% { transform: translate(0, 0); }
-    }
-  </style>
+@keyframes pulseBtn {
+  from {
+    transform:scale(1);
+    box-shadow:0 0 15px rgba(255,255,255,.5);
+  }
+  to {
+    transform:scale(1.02);
+    box-shadow:0 0 30px rgba(255,255,255,.95);
+  }
+}
+</style>
 </head>
 
 <body>
 
 <canvas id="fxCanvas"></canvas>
 
-<div id="completionLabel">RELEASE</div>
-
 <div class="app-layout">
 
-  <div class="container">
+<div class="container">
 
-    <h1>Apex Edge Trainer</h1>
+<h1>Apex Edge Trainer</h1>
 
-    <select id="modeSelect" class="mode-select">
-      <option value="burst1">Mode: Ultra Burst (1 min)</option>
-      <option value="burst2">Mode: Sprint Edge (2 mins)</option>
-      <option value="quick">Mode: Quick Edge (3-5 mins)</option>
-      <option value="warmup">Mode: Warm-Up (15 mins)</option>
-      <option value="standard" selected>Mode: Standard Balanced (25 mins)</option>
-      <option value="endurance">Mode: Endurance Hold (40 mins)</option>
-      <option value="ladder">Mode: Ladder Surge (20 mins)</option>
-      <option value="toy">Mode: Toy Sleeve Marathon (2-3 hrs)</option>
-    </select>
+<select id="modeSelect" class="mode-select">
+<option value="burst1">Mode: Ultra Burst (1 min)</option>
+<option value="burst2">Mode: Sprint Edge (2 mins)</option>
+<option value="quick">Mode: Quick Edge (3-5 mins)</option>
+<option value="warmup">Mode: Warm-Up (15 mins)</option>
+<option value="standard" selected>Mode: Standard Balanced (25 mins)</option>
+<option value="endurance">Mode: Endurance Hold (40 mins)</option>
+<option value="ladder">Mode: Ladder Surge (20 mins)</option>
+<option value="toy">Mode: Marathon (2-3 hrs)</option>
+</select>
 
-    <div class="visualizer-wrapper">
-      <canvas id="pulseCanvas" class="main-canvas" width="200" height="200"></canvas>
-      <div class="timer-overlay" id="mainTimer">00:00:00</div>
-    </div>
+<div class="visualizer-wrapper">
+<canvas id="pulseCanvas" class="main-canvas" width="200" height="200"></canvas>
+<div class="timer-overlay" id="mainTimer">00:00:00</div>
+</div>
 
-    <div class="progress-bar-container">
-      <div class="progress-bar-fill" id="sessionProgressBar"></div>
-    </div>
+<div class="progress-bar-container">
+<div class="progress-bar-fill" id="sessionProgressBar"></div>
+</div>
 
-    <div class="intensity-container">
-      <div class="intensity-header">
-        <span>Target Intensity Level</span>
-        <span id="intensityLabel">20% (Low)</span>
-      </div>
+<div class="intensity-container">
+<div class="intensity-header">
+<span>Target Intensity Level</span>
+<span id="intensityLabel">20% (Low)</span>
+</div>
 
-      <div class="intensity-bar-bg">
-        <div class="intensity-bar-fill" id="intensityBarFill"></div>
-      </div>
-    </div>
+<div class="intensity-bar-bg">
+<div class="intensity-bar-fill" id="intensityBarFill"></div>
+</div>
+</div>
 
-    <div class="status-box" id="statusBox">
-      <div class="prompt-text" id="promptText">READY</div>
+<div class="status-box" id="statusBox">
 
-      <div class="sub-prompt" id="subPrompt">
-        Select mode to start guided training session
-      </div>
+<div class="prompt-text" id="promptText">READY</div>
 
-      <div class="technique-tag" id="techniqueTag" style="display:none;">
-        Technique
-      </div>
-    </div>
+<div class="sub-prompt" id="subPrompt">
+Select a mode and start the guided session.
+</div>
 
-    <div class="stats-row">
+<div class="technique-tag" id="techniqueTag" style="display:none;">
+Technique
+</div>
 
-      <div class="stat-card">
-        <div class="stat-val" id="edgeCount">0</div>
-        <div class="stat-lbl">Edges Logged</div>
-      </div>
+</div>
 
-      <div class="stat-card">
-        <div class="stat-val" id="phaseTimer">--</div>
-        <div class="stat-lbl">Next Cue</div>
-      </div>
+<div class="stats-row">
 
-    </div>
+<div class="stat-card">
+<div class="stat-val" id="edgeCount">0</div>
+<div class="stat-lbl">Rounds Logged</div>
+</div>
 
-    <div class="control-panel">
+<div class="stat-card">
+<div class="stat-val" id="phaseTimer">--</div>
+<div class="stat-lbl">Next Cue</div>
+</div>
 
-      <button
-        id="startBtn"
-        class="action-btn"
-        onclick="toggleSession()">
-        Start Session
-      </button>
+</div>
 
-      <button
-        id="edgeBtn"
-        class="action-btn edge-btn"
-        onclick="logEdge()"
-        style="display:none;">
-        Edge Reached
-      </button>
+<div class="control-panel">
 
-      <button
-        id="cummedBtn"
-        class="action-btn cummed-btn"
-        onclick="finishClimaxSession()"
-        style="display:none;">
-        FINISH SESSION
-      </button>
+<button id="startBtn"
+class="action-btn"
+onclick="toggleSession()">
+Start Session
+</button>
 
-    </div>
+<button id="edgeBtn"
+class="action-btn edge-btn"
+onclick="logEdge()"
+style="display:none;">
+Round Reached
+</button>
 
-  </div>
+<button id="cummedBtn"
+class="action-btn cummed-btn"
+onclick="finishClimaxSession()"
+style="display:none;">
+FINISH SESSION
+</button>
 
-  <div class="stroke-panel">
+</div>
 
-    <div class="stroke-title">
-      Anatomy Motion
-    </div>
+</div>
 
-    <div class="stroke-canvas-container">
-      <canvas id="strokeCanvas" width="160" height="300"></canvas>
-    </div>
+<div class="stroke-panel">
 
-  </div>
+<div class="stroke-title">
+Motion Guide
+</div>
+
+<div class="stroke-canvas-container">
+<canvas id="strokeCanvas" width="160" height="300"></canvas>
+</div>
+
+</div>
 
 </div>
 
 <script>
 
-  /* =========================================================
-     SESSION STATE
-  ========================================================= */
+/* =========================================================
+   CORE STATE
+========================================================= */
 
-  let active = false;
-  let seconds = 0;
-  let edges = 0;
-  let totalSessionSeconds = 1800;
+let active=false;
+let seconds=0;
+let edges=0;
+let totalSessionSeconds=1500;
+
+let timerInterval=null;
+let phaseInterval=null;
+
+let phaseTimeLeft=0;
+let currentPhase='idle';
+
+let targetIntensity=20;
+let ladderStep=0;
+
+
+/* =========================================================
+   AUDIO
+========================================================= */
+
+const synth=window.speechSynthesis;
+
+const audioCtx=
+new(window.AudioContext||window.webkitAudioContext)();
+
+let trainerVoice=null;
+
+function setTrainerVoice(){
+
+if(!synth)return;
+
+const voices=synth.getVoices();
+
+trainerVoice=
+voices.find(v =>
+v.lang.includes('en') &&
+(
+v.name.includes('Male') ||
+v.name.includes('David') ||
+v.name.includes('Daniel')
+)
+) || voices[0];
 
-  let timerInterval = null;
-  let phaseInterval = null;
+}
 
-  let phaseTimeLeft = 0;
-  let currentPhase = 'idle';
-  let targetIntensity = 20;
-  let ladderStep = 0;
+if(synth){
 
+setTrainerVoice();
 
-  /* =========================================================
-     AUDIO / VOICE
-  ========================================================= */
+if(synth.onvoiceschanged!==undefined){
+synth.onvoiceschanged=setTrainerVoice;
+}
 
-  const synth = window.speechSynthesis;
+}
 
-  const audioCtx =
-    new (window.AudioContext || window.webkitAudioContext)();
 
-  let trainerVoice = null;
+/* =========================================================
+   CONVERSATIONAL TRAINER VOICE
+========================================================= */
 
+const rawVoice={
 
-  /* =========================================================
-     FULL SCREEN FX SYSTEM
-  ========================================================= */
+start:[
+"Alright, you're in. Let's get this damn session moving.",
+"Okay, we're live. No messing around now. Stay with the pace.",
+"Let's go. Keep your head in the game and follow the cues.",
+"You're on the clock. Stay focused and let's get moving."
+],
 
-  const fxCanvas = document.getElementById('fxCanvas');
-  const fxCtx = fxCanvas.getContext('2d');
+action:[
+"Come on, keep that pace. Don't get sloppy.",
+"That's it. Stay steady and keep pushing.",
+"Pick it up. You've got more in you.",
+"Good rhythm. Don't lose it now.",
+"Keep going. Breathe, stay controlled, and don't rush.",
+"Alright, push the pace a little. You've got this.",
+"That's better. Stay locked in and keep moving.",
+"Come on. Keep working. Don't quit on me now."
+],
 
-  let burstParticles = [];
-  let burstRings = [];
-  let fxActive = false;
-  let screenFlash = 0;
+highIntensity:[
+"Alright, here we go. High intensity. Stay sharp.",
+"Push hard now. Don't lose control.",
+"Come on, keep driving. This is the tough part.",
+"You're getting close to the limit. Stay controlled.",
+"That's it. Keep the pressure on and stay focused.",
+"No slacking now. Hold that pace.",
+"Come on. This is where you earn the damn result."
+],
 
-  function resizeFxCanvas() {
+pause:[
+"Stop. Hands off and breathe.",
+"Alright, freeze there. Take a breath.",
+"Easy. Back off for a second and recover.",
+"Hold it. Don't rush the next round.",
+"Good. Take the damn break and reset.",
+"Relax for a moment. The next round is coming.",
+"Stop right there. Breathe and get your control back."
+],
 
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+edge:[
+"Round recorded. Freeze there and recover.",
+"Nice. That's one logged. Now calm down.",
+"Good catch. Stop and reset before the next push.",
+"Recorded. Don't get carried away. Take your break.",
+"That's another one. Breathe and get ready.",
+"Logged. Stay calm and wait for the next cue."
+],
 
-    fxCanvas.width = window.innerWidth * dpr;
-    fxCanvas.height = window.innerHeight * dpr;
+finish:[
+"That's it. You made it through the session.",
+"Session complete. Nice work.",
+"You hit the target. That's a wrap.",
+"Done. You pushed through the whole damn session.",
+"That's the finish. Good job staying with it."
+],
 
-    fxCanvas.style.width = window.innerWidth + 'px';
-    fxCanvas.style.height = window.innerHeight + 'px';
+manualStop:[
+"Session stopped. You put in the work.",
+"Alright, stopping here. Not bad.",
+"Session terminated. You got your work in.",
+"We're done for now. Good effort."
+]
 
-    fxCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
+};
 
-  window.addEventListener('resize', resizeFxCanvas);
-  resizeFxCanvas();
+function randomRawLine(group){
 
+const lines=rawVoice[group];
 
-  /* =========================================================
-     CREATE FULL SCREEN COMPLETION BURST
-  ========================================================= */
+return lines[
+Math.floor(Math.random()*lines.length)
+];
 
-  function createSplashParticles() {
+}
 
-    burstParticles = [];
-    burstRings = [];
-    screenFlash = 1;
+function speak(text){
 
-    const centerX = window.innerWidth / 2;
-    const centerY = window.innerHeight / 2;
+if(!synth)return;
 
+synth.cancel();
 
-    /* Large particles */
+const utterance=
+new SpeechSynthesisUtterance(text);
 
-    for (let i = 0; i < 260; i++) {
+if(trainerVoice)
+utterance.voice=trainerVoice;
 
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 18 + 4;
+utterance.rate=1.05;
+utterance.pitch=.85;
+utterance.volume=1;
 
-      burstParticles.push({
+synth.speak(utterance);
 
-        x: centerX,
-        y: centerY,
+}
 
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
 
-        size: Math.random() * 6 + 2,
+/* =========================================================
+   SOUND EFFECTS
+========================================================= */
 
-        life: 1,
+function playTone(
+freq=440,
+type='sine',
+duration=.15
+){
 
-        decay: Math.random() * 0.012 + 0.006,
+if(audioCtx.state==='suspended')
+audioCtx.resume();
 
-        gravity: 0.08,
+const osc=audioCtx.createOscillator();
+const gain=audioCtx.createGain();
 
-        glow: Math.random() * 18 + 10
+osc.type=type;
+osc.frequency.value=freq;
 
-      });
+gain.gain.setValueAtTime(
+.1,
+audioCtx.currentTime
+);
 
-    }
+gain.gain.exponentialRampToValueAtTime(
+.01,
+audioCtx.currentTime+duration
+);
 
+osc.connect(gain);
+gain.connect(audioCtx.destination);
 
-    /* Fine particles */
+osc.start();
 
-    for (let i = 0; i < 220; i++) {
+osc.stop(
+audioCtx.currentTime+duration
+);
 
-      const angle = Math.random() * Math.PI * 2;
-      const speed = Math.random() * 10 + 2;
+}
 
-      burstParticles.push({
 
-        x: centerX,
-        y: centerY,
+/* =========================================================
+   FULL SCREEN SPLASH FX
+========================================================= */
 
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
+const fxCanvas=
+document.getElementById('fxCanvas');
 
-        size: Math.random() * 3 + 1,
+const fxCtx=
+fxCanvas.getContext('2d');
 
-        life: 1,
+let drops=[];
+let drips=[];
+let splatters=[];
+let fxActive=false;
 
-        decay: Math.random() * 0.018 + 0.008,
+function resizeFxCanvas(){
 
-        gravity: 0.03,
+fxCanvas.width=window.innerWidth;
+fxCanvas.height=window.innerHeight;
 
-        glow: 10
+}
 
-      });
+window.addEventListener(
+'resize',
+resizeFxCanvas
+);
 
-    }
+resizeFxCanvas();
 
 
-    /* Shockwave rings */
+function createSplashParticles(){
 
-    for (let i = 0; i < 7; i++) {
+drops=[];
+drips=[];
+splatters=[];
 
-      burstRings.push({
+const cx=fxCanvas.width/2;
+const cy=fxCanvas.height/2;
 
-        radius: 20 + i * 30,
 
-        maxRadius:
-          Math.max(window.innerWidth, window.innerHeight) * 1.3,
+/* central burst */
 
-        alpha: 0.9 - i * 0.09,
+for(let i=0;i<120;i++){
 
-        speed: 9 + i * 2
+const angle=
+Math.random()*Math.PI*2;
 
-      });
+const speed=
+Math.random()*18+5;
 
-    }
+drops.push({
 
-  }
+x:cx,
+y:cy,
 
+vx:Math.cos(angle)*speed,
+vy:Math.sin(angle)*speed-
+(Math.random()*8+3),
 
-  /* =========================================================
-     FULL SCREEN FX RENDER LOOP
-  ========================================================= */
+radius:Math.random()*18+6,
 
-  function renderFx() {
+viscosity:
+Math.random()*.15+.82,
 
-    fxCtx.clearRect(
-      0,
-      0,
-      window.innerWidth,
-      window.innerHeight
-    );
+opacity:
+Math.random()*.2+.8,
 
+splatOnBoundary:true
 
-    if (fxActive) {
+});
 
+}
 
-      /* Screen flash */
 
-      if (screenFlash > 0) {
+/* background droplets */
 
-        fxCtx.fillStyle =
-          `rgba(255,255,255,${screenFlash * 0.40})`;
+for(let i=0;i<50;i++){
 
-        fxCtx.fillRect(
-          0,
-          0,
-          window.innerWidth,
-          window.innerHeight
-        );
+drips.push({
 
-        screenFlash *= 0.90;
+x:Math.random()*fxCanvas.width,
 
-        if (screenFlash < 0.01) {
-          screenFlash = 0;
-        }
+y:Math.random()*-100,
 
-      }
+vy:Math.random()*1.5+.5,
 
+radius:Math.random()*14+6,
 
-      /* Shockwaves */
+length:Math.random()*60+30
 
-      for (let i = burstRings.length - 1; i >= 0; i--) {
+});
 
-        const ring = burstRings[i];
+}
 
-        fxCtx.beginPath();
+}
 
-        fxCtx.arc(
-          window.innerWidth / 2,
-          window.innerHeight / 2,
-          ring.radius,
-          0,
-          Math.PI * 2
-        );
 
-        fxCtx.strokeStyle =
-          `rgba(255,255,255,${ring.alpha})`;
+function drawBlob(
+ctx,
+x,
+y,
+radius,
+angle,
+scale,
+opacity
+){
 
-        fxCtx.lineWidth = 5;
+ctx.save();
 
-        fxCtx.shadowColor = '#ffffff';
-        fxCtx.shadowBlur = 25;
+ctx.translate(x,y);
+ctx.rotate(angle);
+ctx.scale(1,scale);
 
-        fxCtx.stroke();
+ctx.beginPath();
 
-        ring.radius += ring.speed;
-        ring.alpha *= 0.965;
+ctx.arc(
+0,
+0,
+radius,
+0,
+Math.PI*2
+);
 
+ctx.fillStyle=
+`rgba(255,255,255,${opacity})`;
 
-        if (
-          ring.radius > ring.maxRadius ||
-          ring.alpha < 0.02
-        ) {
+ctx.shadowColor=
+'rgba(255,255,255,.8)';
 
-          burstRings.splice(i, 1);
+ctx.shadowBlur=15;
 
-        }
+ctx.fill();
 
-      }
+ctx.shadowBlur=0;
 
+ctx.beginPath();
 
-      /* Particles */
+ctx.ellipse(
+-radius*.3,
+-radius*.3,
+radius*.35,
+radius*.2,
+Math.PI/4,
+0,
+Math.PI*2
+);
 
-      for (
-        let i = burstParticles.length - 1;
-        i >= 0;
-        i--
-      ) {
+ctx.fillStyle=
+'rgba(255,255,255,.95)';
 
-        const p = burstParticles[i];
+ctx.fill();
 
-        const angle = Math.atan2(
-          p.vy,
-          p.vx
-        );
+ctx.restore();
 
-        const velocity = Math.hypot(
-          p.vx,
-          p.vy
-        );
+}
 
 
-        fxCtx.save();
+function renderFx(){
 
-        fxCtx.translate(
-          p.x,
-          p.y
-        );
+fxCtx.clearRect(
+0,
+0,
+fxCanvas.width,
+fxCanvas.height
+);
 
-        fxCtx.rotate(angle);
+if(fxActive){
 
+/* splatter marks */
 
-        /* Motion streak */
+for(const s of splatters){
 
-        fxCtx.beginPath();
+fxCtx.save();
 
-        fxCtx.moveTo(0, 0);
+fxCtx.beginPath();
 
-        fxCtx.lineTo(
-          -velocity * 2.5,
-          0
-        );
+fxCtx.ellipse(
+s.x,
+s.y,
+s.rx,
+s.ry,
+s.angle,
+0,
+Math.PI*2
+);
 
-        fxCtx.strokeStyle =
-          `rgba(255,255,255,${p.life * 0.65})`;
+fxCtx.fillStyle=
+`rgba(255,255,255,${s.opacity})`;
 
-        fxCtx.lineWidth = p.size;
+fxCtx.shadowColor=
+'rgba(255,255,255,.5)';
 
-        fxCtx.shadowColor = '#ffffff';
-        fxCtx.shadowBlur = p.glow;
+fxCtx.shadowBlur=8;
 
-        fxCtx.stroke();
+fxCtx.fill();
 
+fxCtx.restore();
 
-        /* Particle core */
+}
 
-        fxCtx.beginPath();
 
-        fxCtx.arc(
-          0,
-          0,
-          p.size,
-          0,
-          Math.PI * 2
-        );
+/* flying particles */
 
-        fxCtx.fillStyle =
-          `rgba(255,255,255,${p.life})`;
+for(const p of drops){
 
-        fxCtx.shadowColor = '#ffffff';
-        fxCtx.shadowBlur = p.glow;
+const velocity=
+Math.hypot(p.vx,p.vy);
 
-        fxCtx.fill();
+const angle=
+Math.atan2(p.vy,p.vx);
 
-        fxCtx.restore();
+const scale=
+Math.max(.4,1-velocity*.03);
 
+drawBlob(
+fxCtx,
+p.x,
+p.y,
+p.radius,
+angle,
+scale,
+p.opacity
+);
 
-        /* Physics */
+p.x+=p.vx;
+p.y+=p.vy;
 
-        p.x += p.vx;
-        p.y += p.vy;
+p.vx*=p.viscosity;
 
-        p.vx *= 0.985;
-        p.vy *= 0.985;
+p.vy=
+p.vy*p.viscosity+.45;
 
-        p.vy += p.gravity;
 
-        p.life -= p.decay;
+/* screen collision */
 
+if(
+p.x<=p.radius ||
+p.x>=fxCanvas.width-p.radius ||
+p.y>=fxCanvas.height-p.radius
+){
 
-        if (p.life <= 0) {
+splatters.push({
 
-          burstParticles.splice(i, 1);
+x:Math.max(
+p.radius,
+Math.min(
+fxCanvas.width-p.radius,
+p.x
+)
+),
 
-        }
+y:Math.max(
+p.radius,
+Math.min(
+fxCanvas.height-p.radius,
+p.y
+)
+),
 
-      }
+rx:p.radius*
+(Math.random()*.8+1.2),
 
+ry:p.radius*
+(Math.random()*.4+.5),
 
-      /* Ambient sparkles */
+angle:Math.random()*Math.PI,
 
-      if (Math.random() < 0.35) {
+opacity:p.opacity
 
-        burstParticles.push({
+});
 
-          x: Math.random() * window.innerWidth,
+p.radius=0;
 
-          y: Math.random() * window.innerHeight,
+}
 
-          vx: (Math.random() - 0.5) * 1.5,
+}
 
-          vy: (Math.random() - 0.5) * 1.5,
 
-          size: Math.random() * 2 + 0.5,
+/* falling droplets */
 
-          life: 1,
+for(const d of drips){
 
-          decay: 0.015,
+fxCtx.save();
 
-          gravity: 0,
+fxCtx.beginPath();
 
-          glow: 10
+fxCtx.arc(
+d.x,
+d.y,
+d.radius,
+0,
+Math.PI*2
+);
 
-        });
+fxCtx.fillStyle=
+'rgba(255,255,255,.92)';
 
-      }
+fxCtx.shadowColor=
+'rgba(255,255,255,.6)';
 
-    }
+fxCtx.shadowBlur=10;
 
+fxCtx.fill();
 
-    requestAnimationFrame(renderFx);
+fxCtx.restore();
 
-  }
+d.y+=d.vy;
 
-  renderFx();
+d.vy+=.03;
 
+d.length=
+Math.min(
+120,
+d.length+d.vy*.8
+);
 
-  /* =========================================================
-     COMPLETION TEXT
-  ========================================================= */
+if(d.y>fxCanvas.height+150){
 
-  function showCompletionEffect() {
+d.y=Math.random()*-50;
+d.x=Math.random()*fxCanvas.width;
+d.vy=Math.random()*1.5+.5;
+d.length=Math.random()*60+30;
 
-    const label =
-      document.getElementById('completionLabel');
+}
 
-    label.classList.remove('show');
+}
 
-    void label.offsetWidth;
+}
 
-    label.classList.add('show');
+requestAnimationFrame(renderFx);
 
-    document.body.classList.remove(
-      'completion-shake'
-    );
+}
 
-    void document.body.offsetWidth;
+renderFx();
 
-    document.body.classList.add(
-      'completion-shake'
-    );
 
-  }
+/* =========================================================
+   MAIN VISUALIZER
+========================================================= */
 
+const mainCanvas=
+document.getElementById('pulseCanvas');
 
-  /* =========================================================
-     VOICE
-  ========================================================= */
+const mainCtx=
+mainCanvas.getContext('2d');
 
-  function setTrainerVoice() {
+let pulseAngle=0;
 
-    if (!synth) return;
 
-    const voices = synth.getVoices();
+/* =========================================================
+   MOTION GUIDE
+========================================================= */
 
-    trainerVoice =
-      voices.find(v =>
-        v.lang.includes('en') &&
-        (
-          v.name.includes('Male') ||
-          v.name.includes('David') ||
-          v.name.includes('Daniel')
-        )
-      ) || voices[0];
+const strokeCanvas=
+document.getElementById('strokeCanvas');
 
-  }
+const strokeCtx=
+strokeCanvas.getContext('2d');
 
-  if (synth) {
+let strokePos=.85;
+let strokeDirection=1;
 
-    setTrainerVoice();
+let strokeSpeed=.03;
 
-    if (synth.onvoiceschanged !== undefined) {
-      synth.onvoiceschanged =
-        setTrainerVoice;
-    }
+let strokeRangeMin=.2;
+let strokeRangeMax=.8;
 
-  }
+let handsCount=1;
+let activeHandSide='right';
 
 
-  /* =========================================================
-     MAIN VISUALIZER
-  ========================================================= */
+/* =========================================================
+   INTENSITY
+========================================================= */
 
-  const mainCanvas =
-    document.getElementById('pulseCanvas');
+function updateIntensityMeter(value){
 
-  const mainCtx =
-    mainCanvas.getContext('2d');
+targetIntensity=
+Math.min(
+100,
+Math.max(5,value)
+);
 
-  let pulseAngle = 0;
+const bar=
+document.getElementById(
+'intensityBarFill'
+);
 
+const label=
+document.getElementById(
+'intensityLabel'
+);
 
-  /* =========================================================
-     STROKE VISUALIZER
-  ========================================================= */
+bar.style.width=
+`${targetIntensity}%`;
 
-  const strokeCanvas =
-    document.getElementById('strokeCanvas');
+let desc='Low';
 
-  const strokeCtx =
-    strokeCanvas.getContext('2d');
+if(targetIntensity>=85){
 
-  let strokePos = 0;
-  let strokeDirection = 1;
-  let strokeSpeed = 0.03;
-  let strokeRangeMin = 0.2;
-  let strokeRangeMax = 0.8;
-  let handsCount = 1;
-  let activeHandSide = 'right';
+desc='Extreme';
 
+bar.style.background=
+'linear-gradient(90deg,#ff0055,#ff5500)';
 
-  /* =========================================================
-     INTENSITY
-  ========================================================= */
+}
+else if(targetIntensity>=65){
 
-  function updateIntensityMeter(value) {
+desc='High';
 
-    targetIntensity =
-      Math.min(
-        100,
-        Math.max(5, value)
-      );
+bar.style.background=
+'linear-gradient(90deg,#7000ff,#ff0055)';
 
-    const bar =
-      document.getElementById(
-        'intensityBarFill'
-      );
+}
+else if(targetIntensity>=40){
 
-    const label =
-      document.getElementById(
-        'intensityLabel'
-      );
+desc='Moderate';
 
-    bar.style.width =
-      `${targetIntensity}%`;
+bar.style.background=
+'linear-gradient(90deg,#00f0ff,#7000ff)';
 
+}
+else if(targetIntensity>=20){
 
-    let desc = "Low";
+desc='Controlled';
 
+bar.style.background=
+'linear-gradient(90deg,#00f0ff,#ffffff)';
 
-    if (targetIntensity >= 85) {
+}
+else{
 
-      desc = "Extreme Overload";
+desc='Cooling';
 
-      bar.style.background =
-        'linear-gradient(90deg,#ff0055,#ff5500)';
+bar.style.background='#fff';
 
-    }
+}
 
-    else if (targetIntensity >= 65) {
+label.innerText=
+`${Math.round(targetIntensity)}% (${desc})`;
 
-      desc = "High Edge";
+}
 
-      bar.style.background =
-        'linear-gradient(90deg,#7000ff,#ff0055)';
 
-    }
+/* =========================================================
+   HAND GUIDE
+========================================================= */
 
-    else if (targetIntensity >= 40) {
+function drawHandGrip(
+x,
+y,
+isRightSide,
+color
+){
 
-      desc = "Moderate Build";
+strokeCtx.save();
 
-      bar.style.background =
-        'linear-gradient(90deg,#00f0ff,#7000ff)';
+const flip=
+isRightSide?1:-1;
 
-    }
+strokeCtx.beginPath();
 
-    else if (targetIntensity >= 20) {
+strokeCtx.moveTo(
+x-(30*flip),
+y-12
+);
 
-      desc = "Low Controlled";
+strokeCtx.bezierCurveTo(
+x-(38*flip),
+y-6,
+x-(38*flip),
+y+16,
+x-(24*flip),
+y+18
+);
 
-      bar.style.background =
-        'linear-gradient(90deg,#00f0ff,#ffffff)';
+strokeCtx.lineTo(
+x+(24*flip),
+y+18
+);
 
-    }
+strokeCtx.bezierCurveTo(
+x+(34*flip),
+y+16,
+x+(34*flip),
+y-8,
+x+(24*flip),
+y-12
+);
 
-    else {
+strokeCtx.closePath();
 
-      desc = "Cooling Down";
+strokeCtx.fillStyle=color;
 
-      bar.style.background =
-        '#ffffff';
+strokeCtx.shadowBlur=12;
+strokeCtx.shadowColor=color;
 
-    }
+strokeCtx.fill();
 
+strokeCtx.shadowBlur=0;
 
-    label.innerText =
-      `${Math.round(targetIntensity)}% (${desc})`;
+strokeCtx.strokeStyle='#040406';
+strokeCtx.lineWidth=2;
 
-  }
+for(let i=-4;i<=8;i+=6){
 
+strokeCtx.beginPath();
 
-  /* =========================================================
-     HAND DRAWING
-  ========================================================= */
+strokeCtx.moveTo(
+x-(8*flip),
+y+i
+);
 
-  function drawHandGrip(
-    x,
-    y,
-    isRightSide,
-    color
-  ) {
+strokeCtx.lineTo(
+x+(26*flip),
+y+i
+);
 
-    strokeCtx.save();
+strokeCtx.stroke();
 
-    const flip =
-      isRightSide ? 1 : -1;
+}
 
+strokeCtx.restore();
 
-    strokeCtx.beginPath();
+}
 
-    strokeCtx.moveTo(
-      x - (30 * flip),
-      y - 12
-    );
 
-    strokeCtx.bezierCurveTo(
-      x - (38 * flip),
-      y - 6,
-      x - (38 * flip),
-      y + 16,
-      x - (24 * flip),
-      y + 18
-    );
+/* =========================================================
+   ANIMATION LOOP
+========================================================= */
 
-    strokeCtx.lineTo(
-      x + (24 * flip),
-      y + 18
-    );
+function renderAnimations(){
 
-    strokeCtx.bezierCurveTo(
-      x + (34 * flip),
-      y + 16,
-      x + (34 * flip),
-      y - 8,
-      x + (24 * flip),
-      y - 12
-    );
+mainCtx.clearRect(
+0,
+0,
+mainCanvas.width,
+mainCanvas.height
+);
 
-    strokeCtx.closePath();
+const cx=mainCanvas.width/2;
+const cy=mainCanvas.height/2;
 
-    strokeCtx.fillStyle = color;
+const mult=
+targetIntensity/50;
 
-    strokeCtx.shadowBlur = 12;
-    strokeCtx.shadowColor = color;
+if(active){
 
-    strokeCtx.fill();
+pulseAngle+=
+(
+currentPhase==='action'||
+currentPhase==='release'
+? .05
+: .02
+)*mult;
 
+const radius=
+75+
+Math.sin(pulseAngle)*
+(
+currentPhase==='action'||
+currentPhase==='release'
+?7
+:2
+);
 
-    strokeCtx.beginPath();
+mainCtx.beginPath();
 
-    strokeCtx.ellipse(
-      x - (18 * flip),
-      y - 8,
-      12,
-      8,
-      (isRightSide ? -1 : 1) *
-        Math.PI / 6,
-      0,
-      Math.PI * 2
-    );
+mainCtx.arc(
+cx,
+cy,
+radius,
+0,
+Math.PI*2
+);
 
-    strokeCtx.fill();
+const color=
+currentPhase==='release'
+?'#fff':
+currentPhase==='action'
+?'#00f0ff':
+'#ff0055';
 
+mainCtx.strokeStyle=color;
+mainCtx.lineWidth=4;
 
-    strokeCtx.shadowBlur = 0;
+mainCtx.shadowBlur=15;
+mainCtx.shadowColor=color;
 
-    strokeCtx.strokeStyle =
-      '#040406';
+mainCtx.stroke();
 
-    strokeCtx.lineWidth = 2;
+}
+else{
 
+mainCtx.beginPath();
 
-    for (let i = -4; i <= 8; i += 6) {
+mainCtx.arc(
+cx,
+cy,
+75,
+0,
+Math.PI*2
+);
 
-      strokeCtx.beginPath();
+mainCtx.strokeStyle='#1a1a29';
+mainCtx.lineWidth=2;
+mainCtx.shadowBlur=0;
 
-      strokeCtx.moveTo(
-        x - (8 * flip),
-        y + i
-      );
+mainCtx.stroke();
 
-      strokeCtx.lineTo(
-        x + (26 * flip),
-        y + i
-      );
+}
 
-      strokeCtx.stroke();
 
-    }
+/* motion guide */
 
+strokeCtx.clearRect(
+0,
+0,
+strokeCanvas.width,
+strokeCanvas.height
+);
 
-    strokeCtx.restore();
+const w=strokeCanvas.width;
+const h=strokeCanvas.height;
 
-  }
+const midX=w/2;
+const topY=30;
+const bottomY=h-65;
 
+const totalLen=
+bottomY-topY;
 
-  /* =========================================================
-     ANIMATION LOOP
-  ========================================================= */
+const strokeColor=
+currentPhase==='release'
+?'#fff':
+currentPhase==='action'
+?'#00f0ff':
+'#ff0055';
 
-  function renderAnimations() {
+const fillColor=
+currentPhase==='release'
+?'rgba(255,255,255,.2)':
+currentPhase==='action'
+?'rgba(0,240,255,.08)':
+'rgba(255,0,85,.08)';
 
-    mainCtx.clearRect(
-      0,
-      0,
-      mainCanvas.width,
-      mainCanvas.height
-    );
+const shaftHalfWidth=25;
+const lowerWidth=40;
 
 
-    const centerX =
-      mainCanvas.width / 2;
+/* guide shape */
 
-    const centerY =
-      mainCanvas.height / 2;
+strokeCtx.beginPath();
 
-    const intensityMult =
-      targetIntensity / 50;
+strokeCtx.moveTo(
+midX-25,
+topY+48
+);
 
+strokeCtx.lineTo(
+midX-32,
+topY+42
+);
 
-    if (active) {
+strokeCtx.bezierCurveTo(
+midX-32,
+topY+12,
+midX-18,
+topY,
+midX,
+topY
+);
 
-      pulseAngle +=
-        (
-          currentPhase === 'action' ||
-          currentPhase === 'release'
-            ? 0.05
-            : 0.02
-        ) * intensityMult;
+strokeCtx.bezierCurveTo(
+midX+18,
+topY,
+midX+32,
+topY+12,
+midX+32,
+topY+42
+);
 
+strokeCtx.lineTo(
+midX+25,
+topY+48
+);
 
-      const radius =
-        75 +
-        Math.sin(pulseAngle) *
-        (
-          currentPhase === 'action' ||
-          currentPhase === 'release'
-            ? 7
-            : 2
-        );
+strokeCtx.lineTo(
+midX+shaftHalfWidth,
+bottomY-7
+);
 
+strokeCtx.bezierCurveTo(
+midX+lowerWidth,
+bottomY+8,
+midX+lowerWidth,
+bottomY+30,
+midX+24,
+bottomY+40
+);
 
-      mainCtx.beginPath();
+strokeCtx.bezierCurveTo(
+midX+16,
+bottomY+44,
+midX+7,
+bottomY+45,
+midX,
+bottomY+43
+);
 
-      mainCtx.arc(
-        centerX,
-        centerY,
-        radius,
-        0,
-        Math.PI * 2
-      );
+strokeCtx.bezierCurveTo(
+midX-7,
+bottomY+45,
+midX-16,
+bottomY+44,
+midX-24,
+bottomY+40
+);
 
+strokeCtx.bezierCurveTo(
+midX-lowerWidth,
+bottomY+30,
+midX-lowerWidth,
+bottomY+8,
+midX-shaftHalfWidth,
+bottomY-7
+);
 
-      const color =
-        currentPhase === 'release'
-          ? '#ffffff'
-          : currentPhase === 'action'
-            ? '#00f0ff'
-            : '#ff0055';
+strokeCtx.lineTo(
+midX-25,
+topY+48
+);
 
+strokeCtx.closePath();
 
-      mainCtx.strokeStyle = color;
-      mainCtx.lineWidth = 4;
+strokeCtx.fillStyle=fillColor;
+strokeCtx.fill();
 
-      mainCtx.shadowBlur = 15;
-      mainCtx.shadowColor = color;
+strokeCtx.strokeStyle=strokeColor;
+strokeCtx.lineWidth=2;
+strokeCtx.stroke();
 
-      mainCtx.stroke();
 
-    }
+/* motion */
 
-    else {
+if(
+active &&
+(
+currentPhase==='action'||
+currentPhase==='release'
+)
+){
 
-      mainCtx.beginPath();
+strokePos+=
+strokeSpeed*
+strokeDirection*
+mult;
 
-      mainCtx.arc(
-        centerX,
-        centerY,
-        75,
-        0,
-        Math.PI * 2
-      );
+if(strokePos>=strokeRangeMax){
 
-      mainCtx.strokeStyle =
-        '#1a1a29';
+strokePos=strokeRangeMax;
+strokeDirection=-1;
 
-      mainCtx.lineWidth = 2;
+}
 
-      mainCtx.shadowBlur = 0;
+else if(strokePos<=strokeRangeMin){
 
-      mainCtx.stroke();
+strokePos=strokeRangeMin;
+strokeDirection=1;
 
-    }
+}
 
+}
+else if(
+active &&
+currentPhase==='pause'
+){
 
-    /* Stroke canvas */
+strokePos+=
+(.85-strokePos)*.1;
 
-    strokeCtx.clearRect(
-      0,
-      0,
-      strokeCanvas.width,
-      strokeCanvas.height
-    );
+}
+else{
 
+strokePos=.85;
 
-    const w =
-      strokeCanvas.width;
+}
 
-    const h =
-      strokeCanvas.height;
+const currentY=
+topY+
+strokePos*
+totalLen;
 
-    const midX =
-      w / 2;
+const handColor=
+currentPhase==='release'
+?'rgba(255,255,255,.95)':
+currentPhase==='action'
+?'rgba(0,240,255,.88)':
+'rgba(255,0,85,.88)';
 
-    const topY = 30;
+drawHandGrip(
+midX,
+currentY,
+activeHandSide==='right',
+handColor
+);
 
-    const bottomY =
-      h - 65;
+requestAnimationFrame(
+renderAnimations
+);
 
-    const totalLen =
-      bottomY - topY;
+}
 
+renderAnimations();
 
-    const strokeColor =
-      currentPhase === 'release'
-        ? '#ffffff'
-        : currentPhase === 'action'
-          ? '#00f0ff'
-          : '#ff0055';
 
+/* =========================================================
+   DISPLAY
+========================================================= */
 
-    const fillColor =
-      currentPhase === 'release'
-        ? 'rgba(255,255,255,0.2)'
-        : currentPhase === 'action'
-          ? 'rgba(0,240,255,0.08)'
-          : 'rgba(255,0,85,0.08)';
+function updateDisplay(){
 
+const hrs=
+String(
+Math.floor(seconds/3600)
+).padStart(2,'0');
 
-    const shaftHalfWidth = 25;
-    const lowerWidth = 40;
+const mins=
+String(
+Math.floor((seconds%3600)/60)
+).padStart(2,'0');
 
+const secs=
+String(seconds%60)
+.padStart(2,'0');
 
-    strokeCtx.beginPath();
+document.getElementById(
+'mainTimer'
+).innerText=
+`${hrs}:${mins}:${secs}`;
 
-    strokeCtx.moveTo(
-      midX - 25,
-      topY + 48
-    );
+const progress=
+Math.min(
+100,
+(seconds/totalSessionSeconds)*100
+);
 
-    strokeCtx.lineTo(
-      midX - 32,
-      topY + 42
-    );
+document.getElementById(
+'sessionProgressBar'
+).style.width=
+`${progress}%`;
 
-    strokeCtx.bezierCurveTo(
-      midX - 32,
-      topY + 12,
-      midX - 18,
-      topY,
-      midX,
-      topY
-    );
+}
 
-    strokeCtx.bezierCurveTo(
-      midX + 18,
-      topY,
-      midX + 32,
-      topY + 12,
-      midX + 32,
-      topY + 42
-    );
 
-    strokeCtx.lineTo(
-      midX + 25,
-      topY + 48
-    );
+/* =========================================================
+   SESSION LENGTH
+========================================================= */
 
-    strokeCtx.lineTo(
-      midX + shaftHalfWidth,
-      bottomY - 7
-    );
+function setSessionDuration(mode){
 
-    strokeCtx.bezierCurveTo(
-      midX + lowerWidth,
-      bottomY + 8,
-      midX + lowerWidth,
-      bottomY + 30,
-      midX + 24,
-      bottomY + 40
-    );
+if(mode==='burst1')
+totalSessionSeconds=60;
 
-    strokeCtx.bezierCurveTo(
-      midX + 16,
-      bottomY + 44,
-      midX + 7,
-      bottomY + 45,
-      midX,
-      bottomY + 43
-    );
+else if(mode==='burst2')
+totalSessionSeconds=120;
 
-    strokeCtx.bezierCurveTo(
-      midX - 7,
-      bottomY + 45,
-      midX - 16,
-      bottomY + 44,
-      midX - 24,
-      bottomY + 40
-    );
+else if(mode==='quick')
+totalSessionSeconds=
+Math.floor(Math.random()*120)+180;
 
-    strokeCtx.bezierCurveTo(
-      midX - lowerWidth,
-      bottomY + 30,
-      midX - lowerWidth,
-      bottomY + 8,
-      midX - shaftHalfWidth,
-      bottomY - 7
-    );
+else if(mode==='warmup')
+totalSessionSeconds=900;
 
-    strokeCtx.lineTo(
-      midX - 25,
-      topY + 48
-    );
+else if(mode==='standard')
+totalSessionSeconds=1500;
 
-    strokeCtx.closePath();
+else if(mode==='endurance')
+totalSessionSeconds=2400;
 
+else if(mode==='ladder')
+totalSessionSeconds=1200;
 
-    strokeCtx.fillStyle =
-      fillColor;
+else if(mode==='toy')
+totalSessionSeconds=
+Math.floor(Math.random()*3600)+7200;
 
-    strokeCtx.fill();
+}
 
-    strokeCtx.lineWidth = 2;
 
-    strokeCtx.strokeStyle =
-      strokeColor;
+/* =========================================================
+   START / STOP
+========================================================= */
 
-    strokeCtx.lineCap =
-      'round';
+function toggleSession(){
 
-    strokeCtx.lineJoin =
-      'round';
+if(!active){
 
-    strokeCtx.stroke();
+active=true;
 
+seconds=0;
+edges=0;
+ladderStep=0;
 
-    /* Movement */
+fxActive=false;
 
-    if (
-      active &&
-      (
-        currentPhase === 'action' ||
-        currentPhase === 'release'
-      )
-    ) {
+const mode=
+document.getElementById(
+'modeSelect'
+).value;
 
-      strokePos +=
-        strokeSpeed *
-        strokeDirection *
-        intensityMult;
+setSessionDuration(mode);
 
+document.getElementById(
+'edgeCount'
+).innerText='0';
 
-      if (strokePos >= strokeRangeMax) {
+document.getElementById(
+'modeSelect'
+).disabled=true;
 
-        strokePos =
-          strokeRangeMax;
+document.getElementById(
+'startBtn'
+).innerText='Stop Session';
 
-        strokeDirection = -1;
+document.getElementById(
+'edgeBtn'
+).style.display='block';
 
-      }
+document.getElementById(
+'cummedBtn'
+).style.display='none';
 
-      else if (
-        strokePos <= strokeRangeMin
-      ) {
+document.getElementById(
+'techniqueTag'
+).style.display='inline-block';
 
-        strokePos =
-          strokeRangeMin;
 
-        strokeDirection = 1;
+timerInterval=
+setInterval(()=>{
 
-      }
+seconds++;
 
-    }
+updateDisplay();
 
-    else if (
-      active &&
-      currentPhase === 'pause'
-    ) {
+if(
+seconds>=totalSessionSeconds &&
+currentPhase!=='release'
+){
 
-      strokePos +=
-        (0.85 - strokePos) *
-        0.1;
+triggerReleasePhase();
 
-    }
+}
 
-    else {
+},1000);
 
-      strokePos = 0.85;
 
-    }
+playTone(660,'sine',.2);
 
+speak(
+randomRawLine('start')
+);
 
-    const currentY =
-      topY +
-      strokePos *
-      totalLen;
+startNextPhase('action');
 
+}
+else{
 
-    const handColor =
-      currentPhase === 'release'
-        ? 'rgba(255,255,255,0.95)'
-        : currentPhase === 'action'
-          ? 'rgba(0,240,255,0.88)'
-          : 'rgba(255,0,85,0.88)';
+endSession();
 
+}
 
-    if (handsCount === 2) {
+}
 
-      drawHandGrip(
-        midX,
-        currentY + 12,
-        true,
-        handColor
-      );
 
-      drawHandGrip(
-        midX,
-        currentY - 18,
-        false,
-        handColor
-      );
+/* =========================================================
+   RELEASE / FINISH PHASE
+========================================================= */
 
-    }
+function triggerReleasePhase(){
 
-    else {
+clearInterval(phaseInterval);
 
-      drawHandGrip(
-        midX,
-        currentY,
-        activeHandSide === 'right',
-        handColor
-      );
+currentPhase='release';
 
-    }
+fxActive=true;
 
+createSplashParticles();
 
-    requestAnimationFrame(
-      renderAnimations
-    );
+const box=
+document.getElementById(
+'statusBox'
+);
 
-  }
+box.className=
+'status-box release';
 
-  renderAnimations();
+updateIntensityMeter(100);
 
+const mode=
+document.getElementById(
+'modeSelect'
+).value;
 
-  /* =========================================================
-     SOUND
-  ========================================================= */
+document.getElementById(
+'promptText'
+).innerText=
+'SESSION COMPLETE';
 
-  function playTone(
-    freq = 440,
-    type = 'sine',
-    duration = 0.15
-  ) {
+document.getElementById(
+'subPrompt'
+).innerText=
+'Target time reached. Final phase engaged.';
 
-    if (
-      audioCtx.state === 'suspended'
-    ) {
+document.getElementById(
+'techniqueTag'
+).innerText=
+'Status: Final Phase';
 
-      audioCtx.resume();
+document.getElementById(
+'phaseTimer'
+).innerText='GO!';
 
-    }
+document.getElementById(
+'startBtn'
+).style.display='none';
 
+document.getElementById(
+'edgeBtn'
+).style.display='none';
 
-    const osc =
-      audioCtx.createOscillator();
+document.getElementById(
+'cummedBtn'
+).style.display='block';
 
-    const gain =
-      audioCtx.createGain();
+playTone(880,'sine',.5);
 
+const lines=[
 
-    osc.type = type;
+"Target time reached. You made it. Finish the session strong.",
 
-    osc.frequency.value =
-      freq;
+"That's the target. You've got through the whole damn thing.",
 
+"Time's up. Final phase is active. Finish strong.",
 
-    gain.gain.setValueAtTime(
-      0.1,
-      audioCtx.currentTime
-    );
+mode==='burst1'||
+mode==='burst2'
+?
+"Rapid session complete. Nice work. That's a wrap."
+:
+"Session complete. You made it to the finish."
 
-    gain.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioCtx.currentTime + duration
-    );
+];
 
+speak(
+lines[
+Math.floor(Math.random()*lines.length)
+]
+);
 
-    osc.connect(gain);
+}
 
-    gain.connect(
-      audioCtx.destination
-    );
 
+/* =========================================================
+   FINISH BUTTON
+========================================================= */
 
-    osc.start();
+function finishClimaxSession(){
 
-    osc.stop(
-      audioCtx.currentTime +
-      duration
-    );
+playTone(990,'sine',.6);
 
-  }
+speak(
+`${randomRawLine('finish')} You logged ${edges} rounds.`
+);
 
+endSession('climax');
 
-  /* =========================================================
-     SPEECH
-  ========================================================= */
+}
 
-  function speak(text) {
 
-    if (!synth) return;
+/* =========================================================
+   PHASE ENGINE
+========================================================= */
 
-    synth.cancel();
+function startNextPhase(forcedPhase=null){
 
+if(currentPhase==='release')
+return;
 
-    const utterance =
-      new SpeechSynthesisUtterance(text);
+clearInterval(phaseInterval);
 
+if(forcedPhase){
 
-    if (trainerVoice) {
-      utterance.voice =
-        trainerVoice;
-    }
+currentPhase=forcedPhase;
 
+}
+else{
 
-    utterance.rate = 1.05;
-    utterance.pitch = 0.8;
+currentPhase=
+currentPhase==='action'
+?'pause'
+:'action';
 
-    synth.speak(
-      utterance
-    );
+}
 
-  }
+const mode=
+document.getElementById(
+'modeSelect'
+).value;
 
+const box=
+document.getElementById(
+'statusBox'
+);
 
-  /* =========================================================
-     DISPLAY
-  ========================================================= */
+const prompt=
+document.getElementById(
+'promptText'
+);
 
-  function updateDisplay() {
+const sub=
+document.getElementById(
+'subPrompt'
+);
 
-    const hrs =
-      String(
-        Math.floor(seconds / 3600)
-      ).padStart(2, '0');
+const tag=
+document.getElementById(
+'techniqueTag'
+);
 
-    const mins =
-      String(
-        Math.floor(
-          (seconds % 3600) / 60
-        )
-      ).padStart(2, '0');
 
-    const secs =
-      String(
-        seconds % 60
-      ).padStart(2, '0');
+/* ACTION */
 
+if(currentPhase==='action'){
 
-    document.getElementById(
-      'mainTimer'
-    ).innerText =
-      `${hrs}:${mins}:${secs}`;
+box.className='status-box';
 
+playTone(520,'sine',.15);
 
-    const progress =
-      Math.min(
-        100,
-        (seconds /
-          totalSessionSeconds) *
-          100
-      );
+ladderStep++;
 
 
-    document.getElementById(
-      'sessionProgressBar'
-    ).style.width =
-      `${progress}%`;
+if(mode==='burst1'){
 
-  }
+updateIntensityMeter(
+Math.min(
+95,
+70+ladderStep*10
+)
+);
 
+phaseTimeLeft=12;
 
-  /* =========================================================
-     SESSION DURATIONS
-  ========================================================= */
+}
 
-  function setSessionDuration(mode) {
+else if(mode==='burst2'){
 
-    if (mode === 'burst1') {
+updateIntensityMeter(
+Math.min(
+95,
+60+ladderStep*10
+)
+);
 
-      totalSessionSeconds = 60;
+phaseTimeLeft=15;
 
-    }
+}
 
-    else if (mode === 'burst2') {
+else if(mode==='quick'){
 
-      totalSessionSeconds = 120;
+updateIntensityMeter(
+Math.min(
+95,
+50+ladderStep*15
+)
+);
 
-    }
+phaseTimeLeft=20;
 
-    else if (mode === 'quick') {
+}
 
-      totalSessionSeconds =
-        Math.floor(
-          Math.random() * 120
-        ) + 180;
+else if(mode==='warmup'){
 
-    }
+updateIntensityMeter(
+25+Math.sin(ladderStep)*10
+);
 
-    else if (mode === 'warmup') {
+phaseTimeLeft=
+Math.floor(
+Math.random()*10+25
+);
 
-      totalSessionSeconds = 900;
+}
 
-    }
+else if(mode==='standard'){
 
-    else if (mode === 'standard') {
+updateIntensityMeter(
+Math.min(
+85,
+40+ladderStep*6
+)
+);
 
-      totalSessionSeconds = 1500;
+phaseTimeLeft=
+Math.floor(
+Math.random()*15+20
+);
 
-    }
+}
 
-    else if (mode === 'endurance') {
+else if(mode==='endurance'){
 
-      totalSessionSeconds = 2400;
+updateIntensityMeter(
+60+(ladderStep%3)*10
+);
 
-    }
+phaseTimeLeft=
+Math.floor(
+Math.random()*20+35
+);
 
-    else if (mode === 'ladder') {
+}
 
-      totalSessionSeconds = 1200;
+else if(mode==='ladder'){
 
-    }
+const stepVal=
+(ladderStep%5)*18+20;
 
-    else if (mode === 'toy') {
+updateIntensityMeter(stepVal);
 
-      totalSessionSeconds =
-        Math.floor(
-          Math.random() * 3600
-        ) + 7200;
+phaseTimeLeft=15;
 
-    }
+}
 
-  }
+else if(mode==='toy'){
 
+updateIntensityMeter(
+Math.min(
+80,
+35+ladderStep*3
+)
+);
 
-  /* =========================================================
-     START / STOP
-  ========================================================= */
+phaseTimeLeft=
+Math.floor(
+Math.random()*30+45
+);
 
-  function toggleSession() {
+}
 
-    if (!active) {
 
-      active = true;
+phaseTimeLeft=
+Math.max(
+3,
+phaseTimeLeft
+);
 
-      seconds = 0;
 
-      edges = 0;
+strokeSpeed=
+mode==='burst1'||mode==='burst2'
+?.08
+:mode==='quick'
+?.06
+:.035;
 
-      ladderStep = 0;
+strokeRangeMin=.1;
+strokeRangeMax=.85;
 
-      fxActive = false;
+handsCount=1;
+activeHandSide='right';
 
 
-      const selectedMode =
-        document.getElementById(
-          'modeSelect'
-        ).value;
+prompt.innerText=
+'BUILD / PUSH';
 
+sub.innerText=
+`${randomRawLine('action')} Target ${Math.round(targetIntensity)}% intensity.`;
 
-      setSessionDuration(
-        selectedMode
-      );
+tag.innerText=
+'Focus: Controlled Pace';
 
 
-      document.getElementById(
-        'edgeCount'
-      ).innerText = '0';
+/* conversational voice */
 
+if(targetIntensity>=70){
 
-      document.getElementById(
-        'modeSelect'
-      ).disabled = true;
+speak(
+randomRawLine('highIntensity')
+);
 
+}
+else{
 
-      document.getElementById(
-        'startBtn'
-      ).style.display = 'block';
+speak(
+randomRawLine('action')
+);
 
+}
 
-      document.getElementById(
-        'startBtn'
-      ).innerText =
-        'Stop Session';
+}
 
 
-      document.getElementById(
-        'edgeBtn'
-      ).style.display = 'block';
+/* PAUSE */
 
+else{
 
-      document.getElementById(
-        'cummedBtn'
-      ).style.display = 'none';
+box.className='status-box pause';
 
+playTone(280,'triangle',.3);
 
-      document.getElementById(
-        'techniqueTag'
-      ).style.display =
-        'inline-block';
+updateIntensityMeter(
+Math.max(
+5,
+targetIntensity*.2
+)
+);
 
 
-      timerInterval =
-        setInterval(() => {
+if(mode==='burst1')
+phaseTimeLeft=3;
 
-          seconds++;
+else if(mode==='burst2')
+phaseTimeLeft=4;
 
-          updateDisplay();
+else if(mode==='quick')
+phaseTimeLeft=5;
 
+else if(mode==='toy')
+phaseTimeLeft=
+Math.floor(
+Math.random()*15
+)+15;
 
-          if (
-            seconds >=
-              totalSessionSeconds &&
-            currentPhase !== 'release'
-          ) {
+else
+phaseTimeLeft=
+Math.floor(
+Math.random()*10
+)+8;
 
-            triggerReleasePhase();
 
-          }
+prompt.innerText=
+'HALT / RESET';
 
-        }, 1000);
+sub.innerText=
+'Back off, breathe, and get ready for the next round.';
 
+tag.innerText=
+'Focus: Recovery';
 
-      playTone(
-        660,
-        'sine',
-        0.2
-      );
+speak(
+randomRawLine('pause')
+);
 
+}
 
-      speak(
-        "Session started. Fasten up, follow the pace, and push hard!"
-      );
 
+document.getElementById(
+'phaseTimer'
+).innerText=
+`${phaseTimeLeft}s`;
 
-      startNextPhase(
-        'action'
-      );
 
-    }
+phaseInterval=
+setInterval(()=>{
 
-    else {
+phaseTimeLeft--;
 
-      endSession();
+document.getElementById(
+'phaseTimer'
+).innerText=
+`${phaseTimeLeft}s`;
 
-    }
+if(phaseTimeLeft<=0){
 
-  }
+startNextPhase();
 
+}
 
-  /* =========================================================
-     RELEASE / COMPLETION
-  ========================================================= */
+},1000);
 
-  function triggerReleasePhase() {
+}
 
-    clearInterval(
-      phaseInterval
-    );
 
+/* =========================================================
+   LOG ROUND
+========================================================= */
 
-    currentPhase =
-      'release';
+function logEdge(){
 
+if(
+!active ||
+currentPhase==='release'
+)
+return;
 
-    fxActive = true;
+edges++;
 
-    createSplashParticles();
+document.getElementById(
+'edgeCount'
+).innerText=
+edges;
 
-    showCompletionEffect();
+playTone(
+200,
+'sawtooth',
+.4
+);
 
+speak(
+randomRawLine('edge')
+);
 
-    const box =
-      document.getElementById(
-        'statusBox'
-      );
+startNextPhase('pause');
 
+}
 
-    box.className =
-      'status-box release';
 
+/* =========================================================
+   END SESSION
+========================================================= */
 
-    updateIntensityMeter(
-      100
-    );
+function endSession(reason='manual'){
 
+active=false;
 
-    const mode =
-      document.getElementById(
-        'modeSelect'
-      ).value;
+fxActive=false;
 
+clearInterval(timerInterval);
+clearInterval(phaseInterval);
 
-    document.getElementById(
-      'promptText'
-    ).innerText =
-      'SESSION COMPLETE — RELEASE BURST';
+fxCtx.clearRect(
+0,
+0,
+fxCanvas.width,
+fxCanvas.height
+);
 
+document.getElementById(
+'modeSelect'
+).disabled=false;
 
-    document.getElementById(
-      'subPrompt'
-    ).innerText =
-      'Target time reached! Maximum intensity complete. Final phase engaged.';
+document.getElementById(
+'startBtn'
+).style.display='block';
 
+document.getElementById(
+'startBtn'
+).innerText=
+'Start Session';
 
-    document.getElementById(
-      'techniqueTag'
-    ).innerText =
-      'Status: Final Phase';
+document.getElementById(
+'edgeBtn'
+).style.display='none';
 
+document.getElementById(
+'cummedBtn'
+).style.display='none';
 
-    document.getElementById(
-      'phaseTimer'
-    ).innerText =
-      'GO!';
+document.getElementById(
+'techniqueTag'
+).style.display='none';
 
 
-    document.getElementById(
-      'startBtn'
-    ).style.display =
-      'none';
+document.getElementById(
+'promptText'
+).innerText=
+reason==='climax'
+?'COMPLETE'
+:'STOPPED';
 
+document.getElementById(
+'subPrompt'
+).innerText=
+reason==='climax'
+?
+`Session completed. Total rounds: ${edges}`
+:
+'Training session stopped.';
 
-    document.getElementById(
-      'edgeBtn'
-    ).style.display =
-      'none';
 
+document.getElementById(
+'statusBox'
+).className=
+'status-box';
 
-    document.getElementById(
-      'cummedBtn'
-    ).style.display =
-      'block';
+document.getElementById(
+'phaseTimer'
+).innerText='--';
 
+document.getElementById(
+'sessionProgressBar'
+).style.width='0%';
 
-    /* Completion sound sequence */
+updateIntensityMeter(10);
 
-    playTone(
-      880,
-      'sine',
-      0.5
-    );
 
+if(reason==='manual'){
 
-    setTimeout(() => {
+playTone(
+440,
+'sine',
+.3
+);
 
-      playTone(
-        1100,
-        'sine',
-        0.35
-      );
+speak(
+`${randomRawLine('manualStop')} You logged ${edges} rounds.`
+);
 
-    }, 180);
+}
 
+}
 
-    setTimeout(() => {
 
-      playTone(
-        1320,
-        'sine',
-        0.3
-      );
+/* =========================================================
+   INITIAL STATE
+========================================================= */
 
-    }, 350);
-
-
-    const finishVoiceLines = [
-
-      "Target time reached! Maximum pace achieved. Final release phase engaged!",
-
-      "You made it to the end. Full intensity visual activated!",
-
-      mode === 'burst1' ||
-      mode === 'burst2'
-        ? "Rapid burst complete! Final phase engaged!"
-        : "Session complete. Maximum intensity burst enabled!"
-
-    ];
-
-
-    const chosenVoice =
-      finishVoiceLines[
-        Math.floor(
-          Math.random() *
-          finishVoiceLines.length
-        )
-      ];
-
-
-    speak(
-      chosenVoice
-    );
-
-  }
-
-
-  /* =========================================================
-     FINISH
-  ========================================================= */
-
-  function finishClimaxSession() {
-
-    playTone(
-      990,
-      'sine',
-      0.6
-    );
-
-
-    speak(
-      `Session fully completed with ${edges} edges logged.`
-    );
-
-
-    endSession(
-      'climax'
-    );
-
-  }
-
-
-  /* =========================================================
-     PHASE SYSTEM
-  ========================================================= */
-
-  function startNextPhase(
-    forcedPhase = null
-  ) {
-
-    if (
-      currentPhase === 'release'
-    ) {
-
-      return;
-
-    }
-
-
-    clearInterval(
-      phaseInterval
-    );
-
-
-    if (forcedPhase) {
-
-      currentPhase =
-        forcedPhase;
-
-    }
-
-    else {
-
-      currentPhase =
-        currentPhase === 'action'
-          ? 'pause'
-          : 'action';
-
-    }
-
-
-    const mode =
-      document.getElementById(
-        'modeSelect'
-      ).value;
-
-
-    const box =
-      document.getElementById(
-        'statusBox'
-      );
-
-
-    const prompt =
-      document.getElementById(
-        'promptText'
-      );
-
-
-    const sub =
-      document.getElementById(
-        'subPrompt'
-      );
-
-
-    const tag =
-      document.getElementById(
-        'techniqueTag'
-      );
-
-
-    if (
-      currentPhase === 'action'
-    ) {
-
-      box.className =
-        'status-box';
-
-
-      playTone(
-        520,
-        'sine',
-        0.15
-      );
-
-
-      ladderStep++;
-
-
-      if (mode === 'burst1') {
-
-        updateIntensityMeter(
-          Math.min(
-            95,
-            70 + ladderStep * 10
-          )
-        );
-
-        phaseTimeLeft = 12;
-
-      }
-
-      else if (mode === 'burst2') {
-
-        updateIntensityMeter(
-          Math.min(
-            95,
-            60 + ladderStep * 10
-          )
-        );
-
-        phaseTimeLeft = 15;
-
-      }
-
-      else if (mode === 'quick') {
-
-        updateIntensityMeter(
-          Math.min(
-            95,
-            50 + ladderStep * 15
-          )
-        );
-
-        phaseTimeLeft = 20;
-
-      }
-
-      else if (mode === 'warmup') {
-
-        updateIntensityMeter(
-          25 +
-          Math.sin(ladderStep) *
-          10
-        );
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 10 +
-            25
-          );
-
-      }
-
-      else if (mode === 'standard') {
-
-        updateIntensityMeter(
-          Math.min(
-            85,
-            40 + ladderStep * 6
-          )
-        );
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 15 +
-            20
-          );
-
-      }
-
-      else if (mode === 'endurance') {
-
-        updateIntensityMeter(
-          60 +
-          (ladderStep % 3) *
-          10
-        );
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 20 +
-            35
-          );
-
-      }
-
-      else if (mode === 'ladder') {
-
-        const stepVal =
-          (ladderStep % 5) *
-          18 +
-          20;
-
-        updateIntensityMeter(
-          stepVal
-        );
-
-        phaseTimeLeft = 15;
-
-      }
-
-      else if (mode === 'toy') {
-
-        updateIntensityMeter(
-          Math.min(
-            80,
-            35 +
-            ladderStep * 3
-          )
-        );
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 30 +
-            45
-          );
-
-      }
-
-
-      phaseTimeLeft =
-        Math.max(
-          3,
-          phaseTimeLeft
-        );
-
-
-      const burstInstructions = [
-
-        {
-          rhythm:
-            'Maximum rapid pace',
-
-          style:
-            'High Speed Surge',
-
-          vocal:
-            'Maximum speed! Build the heat fast!'
-        },
-
-        {
-          rhythm:
-            'Aggressive tight stroke',
-
-          style:
-            'Rapid Edge Surge',
-
-          vocal:
-            'Push hard right now! Drive straight to the limit!'
-        }
-
-      ];
-
-
-      const standardInstructions = [
-
-        {
-          rhythm:
-            'Slow steady pace',
-
-          style:
-            'Full Range Edging',
-
-          vocal:
-            'Start stroking. Keep a steady pace and stay relaxed.'
-        },
-
-        {
-          rhythm:
-            'Medium rhythm',
-
-          style:
-            'Controlled Edging',
-
-          vocal:
-            'Pick up the tempo. Stay focused and hold the rhythm.'
-        },
-
-        {
-          rhythm:
-            'Gradual speed build',
-
-          style:
-            'Two-Handed Edging',
-
-          vocal:
-            'Increase speed now. Drive it right up toward the edge.'
-        }
-
-      ];
-
-
-      const chosen =
-        (
-          mode === 'burst1' ||
-          mode === 'burst2'
-        )
-          ? burstInstructions[
-              Math.floor(
-                Math.random() *
-                burstInstructions.length
-              )
-            ]
-
-          : standardInstructions[
-              Math.floor(
-                Math.random() *
-                standardInstructions.length
-              )
-            ];
-
-
-      strokeSpeed =
-        (
-          mode === 'burst1' ||
-          mode === 'burst2'
-        )
-          ? 0.08
-          : mode === 'quick'
-            ? 0.06
-            : 0.035;
-
-
-      strokeRangeMin = 0.1;
-
-      strokeRangeMax = 0.85;
-
-      handsCount = 1;
-
-      activeHandSide = 'right';
-
-
-      prompt.innerText =
-        'STROKE / BUILD';
-
-
-      sub.innerText =
-        `${chosen.rhythm} — Target ${Math.round(targetIntensity)}% Intensity`;
-
-
-      tag.innerText =
-        `Focus: ${chosen.style}`;
-
-
-      speak(
-        chosen.vocal
-      );
-
-    }
-
-
-    else {
-
-      box.className =
-        'status-box pause';
-
-
-      playTone(
-        280,
-        'triangle',
-        0.3
-      );
-
-
-      updateIntensityMeter(
-        Math.max(
-          5,
-          targetIntensity * 0.2
-        )
-      );
-
-
-      if (mode === 'burst1') {
-
-        phaseTimeLeft = 3;
-
-      }
-
-      else if (mode === 'burst2') {
-
-        phaseTimeLeft = 4;
-
-      }
-
-      else if (mode === 'quick') {
-
-        phaseTimeLeft = 5;
-
-      }
-
-      else if (mode === 'toy') {
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 15
-          ) + 15;
-
-      }
-
-      else {
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 10
-          ) + 8;
-
-      }
-
-
-      prompt.innerText =
-        'HALT / HOLD';
-
-
-      sub.innerText =
-        'Hands off! Quick breather before the next surge.';
-
-
-      tag.innerText =
-        'Focus: Rapid Reset';
-
-
-      speak(
-        'Hands off! Quick hold right there.'
-      );
-
-    }
-
-
-    document.getElementById(
-      'phaseTimer'
-    ).innerText =
-      `${phaseTimeLeft}s`;
-
-
-    phaseInterval =
-      setInterval(() => {
-
-        phaseTimeLeft--;
-
-
-        document.getElementById(
-          'phaseTimer'
-        ).innerText =
-          `${phaseTimeLeft}s`;
-
-
-        if (
-          phaseTimeLeft <= 0
-        ) {
-
-          startNextPhase();
-
-        }
-
-      }, 1000);
-
-  }
-
-
-  /* =========================================================
-     EDGE
-  ========================================================= */
-
-  function logEdge() {
-
-    if (
-      !active ||
-      currentPhase === 'release'
-    ) {
-
-      return;
-
-    }
-
-
-    edges++;
-
-
-    document.getElementById(
-      'edgeCount'
-    ).innerText =
-      edges;
-
-
-    playTone(
-      200,
-      'sawtooth',
-      0.4
-    );
-
-
-    const edgeVoiceLines = [
-
-      "Edge recorded! Hands off immediately, do not cross the limit!",
-
-      "Freeze! Hold right at the brink and breathe.",
-
-      "Solid hold. Hands off now and settle down."
-
-    ];
-
-
-    speak(
-      edgeVoiceLines[
-        Math.floor(
-          Math.random() *
-          edgeVoiceLines.length
-        )
-      ]
-    );
-
-
-    startNextPhase(
-      'pause'
-    );
-
-  }
-
-
-  /* =========================================================
-     END SESSION
-  ========================================================= */
-
-  function endSession(
-    reason = 'manual'
-  ) {
-
-    active = false;
-
-    fxActive = false;
-
-
-    clearInterval(
-      timerInterval
-    );
-
-    clearInterval(
-      phaseInterval
-    );
-
-
-    fxCtx.clearRect(
-      0,
-      0,
-      window.innerWidth,
-      window.innerHeight
-    );
-
-
-    document.getElementById(
-      'modeSelect'
-    ).disabled = false;
-
-
-    document.getElementById(
-      'startBtn'
-    ).style.display =
-      'block';
-
-
-    document.getElementById(
-      'startBtn'
-    ).innerText =
-      'Start Session';
-
-
-    document.getElementById(
-      'edgeBtn'
-    ).style.display =
-      'none';
-
-
-    document.getElementById(
-      'cummedBtn'
-    ).style.display =
-      'none';
-
-
-    document.getElementById(
-      'techniqueTag'
-    ).style.display =
-      'none';
-
-
-    document.getElementById(
-      'promptText'
-    ).innerText =
-      reason === 'climax'
-        ? 'VICTORY — COMPLETE'
-        : 'COMPLETE';
-
-
-    document.getElementById(
-      'subPrompt'
-    ).innerText =
-      reason === 'climax'
-        ? `Session logged successfully. Total edges: ${edges}`
-        : 'Training session stopped.';
-
-
-    document.getElementById(
-      'statusBox'
-    ).className =
-      'status-box';
-
-
-    document.getElementById(
-      'phaseTimer'
-    ).innerText =
-      '--';
-
-
-    document.getElementById(
-      'sessionProgressBar'
-    ).style.width =
-      '0%';
-
-
-    updateIntensityMeter(
-      10
-    );
-
-
-    if (
-      reason === 'manual'
-    ) {
-
-      playTone(
-        440,
-        'sine',
-        0.3
-      );
-
-
-      speak(
-        `Session terminated manually. You completed ${edges} edges.`
-      );
-
-    }
-
-  }
-
-
-  /* =========================================================
-     INITIAL STATE
-  ========================================================= */
-
-  updateIntensityMeter(
-    20
-  );
-
-  updateDisplay();
+updateIntensityMeter(20);
 
 </script>
 
