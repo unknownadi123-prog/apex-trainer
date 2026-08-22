@@ -147,30 +147,69 @@
       box-shadow: 0 0 10px var(--stop);
     }
 
+    /* Dynamic Intensity Controller Styles */
     .intensity-container {
       width: 100%;
-      margin-bottom: 15px;
-      text-align: left;
+      margin: 15px 0;
+      background: #06060c;
+      border: 1px solid #1a1a29;
+      border-radius: 12px;
+      padding: 10px 14px;
     }
 
     .intensity-header {
       display: flex;
       justify-content: space-between;
-      font-size: 0.7rem;
+      align-items: center;
+      font-size: 0.75rem;
       letter-spacing: 1px;
       text-transform: uppercase;
-      color: #6c6c80;
-      margin-bottom: 4px;
+      color: #8a8a9e;
+      margin-bottom: 8px;
       font-weight: 600;
     }
 
+    .intensity-header span:last-child {
+      color: var(--primary);
+      font-weight: 700;
+    }
+
+    .intensity-bar-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .intensity-btn {
+      background: #121220;
+      color: var(--primary);
+      border: 1px solid #22223a;
+      width: 30px;
+      height: 30px;
+      border-radius: 6px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      transition: all 0.2s ease;
+    }
+
+    .intensity-btn:hover {
+      background: var(--primary);
+      color: #040406;
+      box-shadow: 0 0 10px var(--primary);
+    }
+
     .intensity-bar-bg {
-      width: 100%;
-      height: 8px;
-      background: #06060c;
-      border: 1px solid #1a1a29;
-      border-radius: 4px;
+      flex: 1;
+      height: 10px;
+      background: #000;
+      border-radius: 5px;
       overflow: hidden;
+      border: 1px solid #1a1a29;
     }
 
     .intensity-bar-fill {
@@ -178,7 +217,7 @@
       width: 50%;
       background: linear-gradient(90deg, #00f0ff, #7000ff);
       box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
-      transition: width 0.3s ease, background 0.3s ease;
+      transition: width 0.2s ease, background 0.3s ease;
     }
 
     .status-box {
@@ -242,12 +281,6 @@
       margin-top: 15px;
     }
 
-    .selectors-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-    }
-
     .mode-select {
       background: #06060c;
       color: var(--primary);
@@ -256,7 +289,7 @@
       border-radius: 8px;
       font-weight: bold;
       width: 100%;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       outline: none;
@@ -290,7 +323,7 @@
       margin-top: 2px;
     }
 
-    button {
+    button.action-btn {
       background: linear-gradient(135deg, var(--accent), var(--primary));
       color: #fff;
       border: none;
@@ -302,9 +335,10 @@
       letter-spacing: 1.5px;
       transition: transform 0.1s, opacity 0.2s;
       font-size: 0.9rem;
+      width: 100%;
     }
 
-    button:active {
+    button.action-btn:active {
       transform: scale(0.98);
     }
 
@@ -327,10 +361,6 @@
       .stroke-canvas-container {
         height: 220px;
       }
-
-      .selectors-row {
-        grid-template-columns: 1fr;
-      }
     }
   </style>
 </head>
@@ -343,23 +373,14 @@
 
     <h1>Apex Edge Trainer</h1>
 
-    <div class="selectors-row">
-      <select id="modeSelect" class="mode-select">
-        <option value="warmup">Mode: Warm-Up</option>
-        <option value="standard" selected>Mode: Standard Balanced</option>
-        <option value="endurance">Mode: Endurance Hold</option>
-        <option value="ladder">Mode: Ladder Surge</option>
-        <option value="chaos">Mode: Chaos Randomizer</option>
-        <option value="extreme">Mode: Overload Edge</option>
-      </select>
-
-      <select id="intensitySelect" class="mode-select" onchange="updateIntensityBar()">
-        <option value="0.8">Intensity: Low (x0.8)</option>
-        <option value="1.3" selected>Intensity: Moderate (x1.3)</option>
-        <option value="1.8">Intensity: High (x1.8)</option>
-        <option value="2.5">Intensity: Extreme (x2.5)</option>
-      </select>
-    </div>
+    <select id="modeSelect" class="mode-select">
+      <option value="warmup">Mode: Warm-Up</option>
+      <option value="standard" selected>Mode: Standard Balanced</option>
+      <option value="endurance">Mode: Endurance Hold</option>
+      <option value="ladder">Mode: Ladder Surge</option>
+      <option value="chaos">Mode: Chaos Randomizer</option>
+      <option value="extreme">Mode: Overload Edge</option>
+    </select>
 
     <div class="visualizer-wrapper">
       <canvas id="pulseCanvas"
@@ -376,13 +397,18 @@
       <div class="progress-bar-fill" id="phaseProgressBar"></div>
     </div>
 
+    <!-- Active Interactive Intensity Controller -->
     <div class="intensity-container">
       <div class="intensity-header">
-        <span>Arousal / Intensity Scale</span>
-        <span id="intensityLabel">52%</span>
+        <span>Current Intensity Goal</span>
+        <span id="intensityLabel">50% (Moderate)</span>
       </div>
-      <div class="intensity-bar-bg">
-        <div class="intensity-bar-fill" id="intensityBarFill"></div>
+      <div class="intensity-bar-wrapper">
+        <button class="intensity-btn" onclick="adjustIntensity(-10)">-</button>
+        <div class="intensity-bar-bg">
+          <div class="intensity-bar-fill" id="intensityBarFill"></div>
+        </div>
+        <button class="intensity-btn" onclick="adjustIntensity(10)">+</button>
       </div>
     </div>
 
@@ -393,7 +419,7 @@
       </div>
 
       <div class="sub-prompt" id="subPrompt">
-        Select mode and intensity to start training
+        Select mode and set intensity to start training
       </div>
 
       <div class="technique-tag"
@@ -421,12 +447,13 @@
     <div class="control-panel">
 
       <button id="startBtn"
+              class="action-btn"
               onclick="toggleSession()">
         Start Session
       </button>
 
       <button id="edgeBtn"
-              class="edge-btn"
+              class="action-btn edge-btn"
               onclick="logEdge()"
               style="display:none;">
         Edge Reached
@@ -470,6 +497,7 @@
   let totalPhaseDuration = 1;
 
   let currentPhase = 'idle';
+  let currentIntensityPct = 50; // Dynamic intensity scale (10% to 100%)
 
   const synth = window.speechSynthesis;
 
@@ -524,24 +552,30 @@
   let activeHandSide = 'right';
 
 
-  function updateIntensityBar() {
-    const val = parseFloat(document.getElementById('intensitySelect').value) || 1.3;
-    const maxVal = 2.5;
-    const percentage = Math.min(100, Math.round((val / maxVal) * 100));
+  function adjustIntensity(delta) {
+    currentIntensityPct = Math.min(100, Math.max(10, currentIntensityPct + delta));
+    updateIntensityUI();
+  }
 
+  function updateIntensityUI() {
     const bar = document.getElementById('intensityBarFill');
     const label = document.getElementById('intensityLabel');
 
-    label.innerText = `${percentage}%`;
-    bar.style.width = `${percentage}%`;
+    bar.style.width = `${currentIntensityPct}%`;
 
-    if (val >= 2.0) {
+    let desc = "Low";
+    if (currentIntensityPct >= 80) {
+      desc = "Extreme";
       bar.style.background = 'linear-gradient(90deg, #ff0055, #ff5500)';
-    } else if (val >= 1.3) {
+    } else if (currentIntensityPct >= 50) {
+      desc = "Moderate";
       bar.style.background = 'linear-gradient(90deg, #00f0ff, #7000ff)';
     } else {
+      desc = "Low";
       bar.style.background = 'linear-gradient(90deg, #00f0ff, #00ffaa)';
     }
+
+    label.innerText = `${currentIntensityPct}% (${desc})`;
   }
 
 
@@ -586,8 +620,9 @@
     const centerX = mainCanvas.width / 2;
     const centerY = mainCanvas.height / 2;
 
+    const intensityMult = currentIntensityPct / 50;
+
     if (active) {
-      const intensityMult = parseFloat(document.getElementById('intensitySelect').value) || 1;
       pulseAngle += (currentPhase === 'action' ? 0.05 : 0.02) * intensityMult;
 
       const radius = 75 + Math.sin(pulseAngle) * (currentPhase === 'action' ? 7 : 2);
@@ -673,18 +708,8 @@
     strokeCtx.lineWidth = 1.7;
     strokeCtx.stroke();
 
-    strokeCtx.beginPath();
-    strokeCtx.moveTo(midX - 14, bottomY - 62);
-    strokeCtx.bezierCurveTo(midX - 25, bottomY - 74, midX - 26, bottomY - 90, midX - 18, bottomY - 103);
-
-    strokeCtx.moveTo(midX + 14, bottomY - 70);
-    strokeCtx.bezierCurveTo(midX + 26, bottomY - 82, midX + 27, bottomY - 98, midX + 18, bottomY - 112);
-    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0,240,255,0.25)' : 'rgba(255,0,85,0.25)';
-    strokeCtx.lineWidth = 1.2;
-    strokeCtx.stroke();
-
     if (active && currentPhase === 'action') {
-      strokePos += strokeSpeed * strokeDirection;
+      strokePos += strokeSpeed * strokeDirection * intensityMult;
 
       if (strokePos >= strokeRangeMax) {
         strokePos = strokeRangeMax;
@@ -765,7 +790,6 @@
 
       document.getElementById('edgeCount').innerText = '0';
       document.getElementById('modeSelect').disabled = true;
-      document.getElementById('intensitySelect').disabled = true;
       document.getElementById('startBtn').innerText = 'Stop Session';
       document.getElementById('edgeBtn').style.display = 'block';
       document.getElementById('techniqueTag').style.display = 'inline-block';
@@ -776,7 +800,7 @@
       }, 1000);
 
       playTone(660, 'sine', 0.2);
-      speak("Session started. Focus on your edge control and follow the rhythmic visual cues.");
+      speak("Session started. Keep your intensity locked and follow the cues.");
       startNextPhase('action');
     } else {
       endSession();
@@ -794,7 +818,7 @@
     }
 
     const mode = document.getElementById('modeSelect').value;
-    const intensity = parseFloat(document.getElementById('intensitySelect').value) || 1;
+    const intensityMult = currentIntensityPct / 50;
 
     const box = document.getElementById('statusBox');
     const prompt = document.getElementById('promptText');
@@ -806,17 +830,17 @@
       playTone(520, 'sine', 0.15);
 
       if (mode === 'warmup') {
-        phaseTimeLeft = Math.floor((Math.random() * 15 + 30) / (intensity * 0.7));
+        phaseTimeLeft = Math.floor((Math.random() * 15 + 30) / (intensityMult * 0.7));
       } else if (mode === 'endurance') {
-        phaseTimeLeft = Math.floor((Math.random() * 30 + 45) / (intensity * 0.5));
+        phaseTimeLeft = Math.floor((Math.random() * 30 + 45) / (intensityMult * 0.5));
       } else if (mode === 'ladder') {
-        phaseTimeLeft = Math.floor((Math.random() * 15 + 15) / intensity);
+        phaseTimeLeft = Math.floor((Math.random() * 15 + 15) / intensityMult);
       } else if (mode === 'extreme') {
-        phaseTimeLeft = Math.floor((Math.random() * 20 + 35) / (intensity * 0.8));
+        phaseTimeLeft = Math.floor((Math.random() * 20 + 35) / (intensityMult * 0.8));
       } else if (mode === 'chaos') {
-        phaseTimeLeft = Math.floor((Math.random() * 25 + 10) / intensity);
+        phaseTimeLeft = Math.floor((Math.random() * 25 + 10) / intensityMult);
       } else {
-        phaseTimeLeft = Math.floor((Math.random() * 20 + 25) / intensity);
+        phaseTimeLeft = Math.floor((Math.random() * 20 + 25) / intensityMult);
       }
 
       phaseTimeLeft = Math.max(5, phaseTimeLeft);
@@ -877,11 +901,11 @@
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
 
       if (mode === 'extreme') {
-        strokeSpeed = chosen.baseSpeed * intensity * 1.5;
+        strokeSpeed = chosen.baseSpeed * 1.5;
       } else if (mode === 'warmup') {
-        strokeSpeed = chosen.baseSpeed * intensity * 0.7;
+        strokeSpeed = chosen.baseSpeed * 0.7;
       } else {
-        strokeSpeed = chosen.baseSpeed * intensity;
+        strokeSpeed = chosen.baseSpeed;
       }
 
       strokeRangeMin = chosen.min;
@@ -911,8 +935,8 @@
 
       const pausePhrases = [
         'Halt immediately and hold your edge.',
-        'Hands off. Take a deep breath and steady your arousal.',
-        'Freeze motion and clear your tension.'
+        'Hands off. Clear your tension.',
+        'Freeze motion and steady your breath.'
       ];
 
       const chosenPause = pausePhrases[Math.floor(Math.random() * pausePhrases.length)];
@@ -967,7 +991,6 @@
     clearInterval(phaseInterval);
 
     document.getElementById('modeSelect').disabled = false;
-    document.getElementById('intensitySelect').disabled = false;
     document.getElementById('startBtn').innerText = 'Start Session';
     document.getElementById('edgeBtn').style.display = 'none';
     document.getElementById('techniqueTag').style.display = 'none';
@@ -982,7 +1005,7 @@
     speak(`Session finished. Total training time: ${Math.floor(seconds / 60)} minutes with ${edges} total edges achieved.`);
   }
 
-  updateIntensityBar();
+  updateIntensityUI();
 
 </script>
 
