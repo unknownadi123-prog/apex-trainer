@@ -18,14 +18,21 @@
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
     body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; overflow-x: hidden; }
     
-    .container { width: 100%; max-width: 480px; background: var(--card); border: 1px solid #1a1a29; border-radius: 24px; padding: 28px; box-shadow: 0 0 50px var(--glow); text-align: center; position: relative; z-index: 1; }
+    .app-layout { display: flex; flex-direction: row; gap: 20px; width: 100%; max-width: 820px; align-items: stretch; justify-content: center; }
     
+    .container { flex: 1; min-width: 320px; background: var(--card); border: 1px solid #1a1a29; border-radius: 24px; padding: 28px; box-shadow: 0 0 50px var(--glow); text-align: center; position: relative; z-index: 1; }
+    
+    /* Side Stroke Visualizer Box */
+    .stroke-panel { width: 220px; background: var(--card); border: 1px solid #1a1a29; border-radius: 24px; padding: 20px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; box-shadow: 0 0 30px rgba(0, 0, 0, 0.5); }
+    .stroke-title { font-size: 0.8rem; letter-spacing: 2px; text-transform: uppercase; color: var(--primary); margin-bottom: 10px; font-weight: 700; }
+    .stroke-canvas-container { position: relative; width: 100%; height: 320px; display: flex; justify-content: center; }
+
     h1 { color: var(--primary); font-size: 1.3rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6); }
     
     /* Visualizer Canvas Styling */
-    .visualizer-wrapper { position: relative; width: 220px; height: 220px; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
-    canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
-    .timer-overlay { position: relative; z-index: 2; font-size: 2.8rem; font-weight: 700; color: #fff; text-shadow: 0 0 15px var(--primary); font-variant-numeric: tabular-nums; }
+    .visualizer-wrapper { position: relative; width: 200px; height: 200px; margin: 10px auto; display: flex; align-items: center; justify-content: center; }
+    canvas.main-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+    .timer-overlay { position: relative; z-index: 2; font-size: 2.5rem; font-weight: 700; color: #fff; text-shadow: 0 0 15px var(--primary); font-variant-numeric: tabular-nums; }
     
     .progress-bar-container { width: 100%; height: 6px; background: #121220; border-radius: 3px; overflow: hidden; margin: 15px 0 20px 0; }
     .progress-bar-fill { height: 100%; width: 0%; background: var(--primary); transition: width 0.2s linear, background-color 0.3s ease; box-shadow: 0 0 10px var(--primary); }
@@ -51,53 +58,69 @@
     button { background: linear-gradient(135deg, var(--accent), var(--primary)); color: #fff; border: none; padding: 16px; border-radius: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: transform 0.1s, opacity 0.2s; font-size: 0.9rem; }
     button:active { transform: scale(0.98); }
     button.edge-btn { background: linear-gradient(135deg, #ff0055, #ff5500); margin-top: 5px; }
+
+    @media (max-width: 680px) {
+      .app-layout { flex-direction: column; align-items: center; }
+      .stroke-panel { width: 100%; height: auto; }
+      .stroke-canvas-container { height: 180px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h1>Apex Edge Trainer</h1>
-  
-  <select id="modeSelect" class="mode-select">
-    <option value="standard">Mode: Standard Balanced</option>
-    <option value="endurance">Mode: Endurance (Long Action)</option>
-    <option value="chaos">Mode: Chaos (Randomized Burst)</option>
-  </select>
+<div class="app-layout">
+  <div class="container">
+    <h1>Apex Edge Trainer</h1>
+    
+    <select id="modeSelect" class="mode-select">
+      <option value="standard">Mode: Standard Balanced</option>
+      <option value="endurance">Mode: Endurance (Long Action)</option>
+      <option value="chaos">Mode: Chaos (Randomized Burst)</option>
+    </select>
 
-  <select id="voiceSelect" class="mode-select" style="margin-top: 6px;">
-    <option value="default">Voice: Loading Voices...</option>
-  </select>
+    <select id="voiceSelect" class="mode-select" style="margin-top: 6px;">
+      <option value="default">Voice: Loading Voices...</option>
+    </select>
 
-  <!-- Interactive Pulse Canvas Visualizer -->
-  <div class="visualizer-wrapper">
-    <canvas id="pulseCanvas" width="220" height="220"></canvas>
-    <div class="timer-overlay" id="mainTimer">00:00:00</div>
-  </div>
-
-  <div class="progress-bar-container">
-    <div class="progress-bar-fill" id="phaseProgressBar"></div>
-  </div>
-  
-  <div class="status-box" id="statusBox">
-    <div class="prompt-text" id="promptText">READY</div>
-    <div class="sub-prompt" id="subPrompt">Select options and press Start</div>
-    <div class="technique-tag" id="techniqueTag" style="display:none;">Technique</div>
-  </div>
-
-  <div class="stats-row">
-    <div class="stat-card">
-      <div class="stat-val" id="edgeCount">0</div>
-      <div class="stat-lbl">Edges Logged</div>
+    <!-- Main Circular Pulse Canvas -->
+    <div class="visualizer-wrapper">
+      <canvas id="pulseCanvas" class="main-canvas" width="200" height="200"></canvas>
+      <div class="timer-overlay" id="mainTimer">00:00:00</div>
     </div>
-    <div class="stat-card">
-      <div class="stat-val" id="phaseTimer">--</div>
-      <div class="stat-lbl">Next Cue</div>
+
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" id="phaseProgressBar"></div>
+    </div>
+    
+    <div class="status-box" id="statusBox">
+      <div class="prompt-text" id="promptText">READY</div>
+      <div class="sub-prompt" id="subPrompt">Select options and press Start</div>
+      <div class="technique-tag" id="techniqueTag" style="display:none;">Technique</div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="edgeCount">0</div>
+        <div class="stat-lbl">Edges Logged</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="phaseTimer">--</div>
+        <div class="stat-lbl">Next Cue</div>
+      </div>
+    </div>
+
+    <div class="control-panel">
+      <button id="startBtn" onclick="toggleSession()">Start Session</button>
+      <button id="edgeBtn" class="edge-btn" onclick="logEdge()" style="display:none;">Edge Reached (Halt)</button>
     </div>
   </div>
 
-  <div class="control-panel">
-    <button id="startBtn" onclick="toggleSession()">Start Session</button>
-    <button id="edgeBtn" class="edge-btn" onclick="logEdge()" style="display:none;">Edge Reached (Halt)</button>
+  <!-- Side Motion Visualizer -->
+  <div class="stroke-panel">
+    <div class="stroke-title">Stroke Motion</div>
+    <div class="stroke-canvas-container">
+      <canvas id="strokeCanvas" width="160" height="300"></canvas>
+    </div>
   </div>
 </div>
 
@@ -115,46 +138,112 @@
   const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   let availableVoices = [];
 
-  // Canvas setup
-  const canvas = document.getElementById('pulseCanvas');
-  const ctx = canvas.getContext('2d');
+  // Main Canvas Setup
+  const mainCanvas = document.getElementById('pulseCanvas');
+  const mainCtx = mainCanvas.getContext('2d');
   let pulseAngle = 0;
 
-  function drawVisualizer() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
+  // Stroke Motion Canvas Setup
+  const strokeCanvas = document.getElementById('strokeCanvas');
+  const strokeCtx = strokeCanvas.getContext('2d');
+  let strokePos = 0;
+  let strokeDirection = 1;
+  let strokeSpeed = 0.03;
+  let strokeRangeMin = 0.2; // 0.0 (top) to 1.0 (bottom)
+  let strokeRangeMax = 0.8;
+
+  function renderAnimations() {
+    // 1. Render Circular Pulse Canvas
+    mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+    const centerX = mainCanvas.width / 2;
+    const centerY = mainCanvas.height / 2;
     
     if (active) {
       pulseAngle += currentPhase === 'action' ? 0.05 : 0.02;
-      const radius = 85 + Math.sin(pulseAngle) * (currentPhase === 'action' ? 8 : 3);
+      const radius = 75 + Math.sin(pulseAngle) * (currentPhase === 'action' ? 7 : 2);
       
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      ctx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
-      ctx.lineWidth = 4;
-      ctx.shadowBlur = 15;
-      ctx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
-      ctx.stroke();
-
-      // Inner pulse circle
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, radius - 12, 0, Math.PI * 2);
-      ctx.strokeStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.3)' : 'rgba(255, 0, 85, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      mainCtx.beginPath();
+      mainCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      mainCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+      mainCtx.lineWidth = 4;
+      mainCtx.shadowBlur = 15;
+      mainCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+      mainCtx.stroke();
     } else {
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, 85, 0, Math.PI * 2);
-      ctx.strokeStyle = '#1a1a29';
-      ctx.lineWidth = 2;
-      ctx.shadowBlur = 0;
-      ctx.stroke();
+      mainCtx.beginPath();
+      mainCtx.arc(centerX, centerY, 75, 0, Math.PI * 2);
+      mainCtx.strokeStyle = '#1a1a29';
+      mainCtx.lineWidth = 2;
+      mainCtx.shadowBlur = 0;
+      mainCtx.stroke();
     }
 
-    requestAnimationFrame(drawVisualizer);
+    // 2. Render Side Stroke Visualizer Canvas
+    strokeCtx.clearRect(0, 0, strokeCanvas.width, strokeCanvas.height);
+    
+    const w = strokeCanvas.width;
+    const h = strokeCanvas.height;
+    const shaftX = w / 2;
+    const topY = 40;
+    const bottomY = h - 40;
+    const shaftHeight = bottomY - topY;
+
+    // Draw central guide shaft
+    strokeCtx.beginPath();
+    strokeCtx.moveTo(shaftX, topY);
+    strokeCtx.lineTo(shaftX, bottomY);
+    strokeCtx.lineWidth = 14;
+    strokeCtx.lineCap = 'round';
+    strokeCtx.strokeStyle = '#121220';
+    strokeCtx.shadowBlur = 0;
+    strokeCtx.stroke();
+
+    // Draw glans / tip outline
+    strokeCtx.beginPath();
+    strokeCtx.arc(shaftX, topY, 14, Math.PI, 0, false);
+    strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.2)' : 'rgba(255, 0, 85, 0.2)';
+    strokeCtx.fill();
+    strokeCtx.lineWidth = 2;
+    strokeCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    strokeCtx.stroke();
+
+    // Animate stroke grip ring
+    if (active && currentPhase === 'action') {
+      strokePos += strokeSpeed * strokeDirection;
+      if (strokePos >= strokeRangeMax) {
+        strokePos = strokeRangeMax;
+        strokeDirection = -1;
+      } else if (strokePos <= strokeRangeMin) {
+        strokePos = strokeRangeMin;
+        strokeDirection = 1;
+      }
+    } else if (active && currentPhase === 'pause') {
+      // Hold at bottom during pause phase
+      strokePos += (0.9 - strokePos) * 0.1;
+    } else {
+      strokePos = 0.9;
+    }
+
+    const ringY = topY + strokePos * shaftHeight;
+
+    // Draw active grip ring
+    strokeCtx.beginPath();
+    strokeCtx.arc(shaftX, ringY, 18, 0, Math.PI * 2);
+    strokeCtx.fillStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    strokeCtx.shadowBlur = 20;
+    strokeCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    strokeCtx.fill();
+
+    // Inner ring detail
+    strokeCtx.beginPath();
+    strokeCtx.arc(shaftX, ringY, 10, 0, Math.PI * 2);
+    strokeCtx.fillStyle = '#0a0a12';
+    strokeCtx.shadowBlur = 0;
+    strokeCtx.fill();
+
+    requestAnimationFrame(renderAnimations);
   }
-  drawVisualizer();
+  renderAnimations();
 
   function loadVoices() {
     if (!synth) return;
@@ -263,15 +352,19 @@
       }
 
       const instructions = [
-        { rhythm: "Slow steady pace", style: "Full length strokes" },
-        { rhythm: "Medium rhythm", style: "Tip focus only" },
-        { rhythm: "Light pressure", style: "Base to mid shaft" },
-        { rhythm: "Gradual speed build", style: "Two-handed grip" },
-        { rhythm: "Controlled cadence", style: "Twist motion at head" }
+        { rhythm: "Slow steady pace", style: "Full length strokes", speed: 0.02, min: 0.0, max: 0.9 },
+        { rhythm: "Medium rhythm", style: "Tip focus only", speed: 0.04, min: 0.0, max: 0.35 },
+        { rhythm: "Light pressure", style: "Base to mid shaft", speed: 0.025, min: 0.4, max: 0.9 },
+        { rhythm: "Gradual speed build", style: "Two-handed grip", speed: 0.05, min: 0.1, max: 0.85 },
+        { rhythm: "Controlled cadence", style: "Twist motion at head", speed: 0.03, min: 0.0, max: 0.25 }
       ];
       
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
       
+      strokeSpeed = chosen.speed;
+      strokeRangeMin = chosen.min;
+      strokeRangeMax = chosen.max;
+
       prompt.innerText = "ACTION";
       sub.innerText = chosen.rhythm;
       tag.innerText = `Focus: ${chosen.style}`;
