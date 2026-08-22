@@ -208,6 +208,12 @@
       margin-top: 15px;
     }
 
+    .selectors-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
     .mode-select {
       background: #06060c;
       color: var(--primary);
@@ -287,6 +293,10 @@
       .stroke-canvas-container {
         height: 220px;
       }
+
+      .selectors-row {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
@@ -299,11 +309,20 @@
 
     <h1>Apex Edge Trainer</h1>
 
-    <select id="modeSelect" class="mode-select">
-      <option value="standard">Mode: Standard Balanced</option>
-      <option value="endurance">Mode: Endurance</option>
-      <option value="chaos">Mode: Chaos</option>
-    </select>
+    <div class="selectors-row">
+      <select id="modeSelect" class="mode-select">
+        <option value="standard">Mode: Standard</option>
+        <option value="endurance">Mode: Endurance</option>
+        <option value="chaos">Mode: Chaos</option>
+      </select>
+
+      <select id="intensitySelect" class="mode-select">
+        <option value="1">Intensity: Low (x0.8)</option>
+        <option value="1.3" selected>Intensity: Moderate (x1.3)</option>
+        <option value="1.8">Intensity: High (x1.8)</option>
+        <option value="2.5">Intensity: Extreme (x2.5)</option>
+      </select>
+    </div>
 
     <div class="visualizer-wrapper">
       <canvas id="pulseCanvas"
@@ -327,7 +346,7 @@
       </div>
 
       <div class="sub-prompt" id="subPrompt">
-        Select mode and start training
+        Select mode and intensity to start training
       </div>
 
       <div class="technique-tag"
@@ -342,7 +361,7 @@
 
       <div class="stat-card">
         <div class="stat-val" id="edgeCount">0</div>
-        <div class="stat-lbl">Cycles Logged</div>
+        <div class="stat-lbl">Edges Logged</div>
       </div>
 
       <div class="stat-card">
@@ -363,7 +382,7 @@
               class="edge-btn"
               onclick="logEdge()"
               style="display:none;">
-        Cycle Complete
+        Edge Reached
       </button>
 
     </div>
@@ -415,11 +434,8 @@
 
 
   function setTrainerVoice() {
-
     if (!synth) return;
-
     const voices = synth.getVoices();
-
     trainerVoice =
       voices.find(v =>
         v.lang.includes('en') &&
@@ -429,1260 +445,454 @@
           v.name.includes('Daniel')
         )
       ) || voices[0];
-
   }
 
 
   if (synth) {
-
     setTrainerVoice();
-
     if (synth.onvoiceschanged !== undefined) {
       synth.onvoiceschanged = setTrainerVoice;
     }
-
   }
 
 
   const mainCanvas =
     document.getElementById('pulseCanvas');
-
   const mainCtx =
     mainCanvas.getContext('2d');
-
   let pulseAngle = 0;
 
 
   const strokeCanvas =
     document.getElementById('strokeCanvas');
-
   const strokeCtx =
     strokeCanvas.getContext('2d');
 
   let strokePos = 0;
-
   let strokeDirection = 1;
-
   let strokeSpeed = 0.03;
-
   let strokeRangeMin = 0.2;
-
   let strokeRangeMax = 0.8;
-
   let handsCount = 1;
-
   let activeHandSide = 'right';
 
 
-  function drawHandGrip(
-    x,
-    y,
-    isRightSide,
-    color
-  ) {
-
+  function drawHandGrip(x, y, isRightSide, color) {
     strokeCtx.save();
-
-    const flip =
-      isRightSide ? 1 : -1;
-
+    const flip = isRightSide ? 1 : -1;
 
     strokeCtx.beginPath();
-
-    strokeCtx.moveTo(
-      x - (30 * flip),
-      y - 12
-    );
-
-    strokeCtx.bezierCurveTo(
-      x - (38 * flip),
-      y - 6,
-      x - (38 * flip),
-      y + 16,
-      x - (24 * flip),
-      y + 18
-    );
-
-    strokeCtx.lineTo(
-      x + (24 * flip),
-      y + 18
-    );
-
-    strokeCtx.bezierCurveTo(
-      x + (34 * flip),
-      y + 16,
-      x + (34 * flip),
-      y - 8,
-      x + (24 * flip),
-      y - 12
-    );
-
+    strokeCtx.moveTo(x - (30 * flip), y - 12);
+    strokeCtx.bezierCurveTo(x - (38 * flip), y - 6, x - (38 * flip), y + 16, x - (24 * flip), y + 18);
+    strokeCtx.lineTo(x + (24 * flip), y + 18);
+    strokeCtx.bezierCurveTo(x + (34 * flip), y + 16, x + (34 * flip), y - 8, x + (24 * flip), y - 12);
     strokeCtx.closePath();
 
     strokeCtx.fillStyle = color;
-
     strokeCtx.shadowBlur = 12;
     strokeCtx.shadowColor = color;
-
     strokeCtx.fill();
-
 
     strokeCtx.beginPath();
-
-    strokeCtx.ellipse(
-      x - (18 * flip),
-      y - 8,
-      12,
-      8,
-      (isRightSide ? -1 : 1) *
-      Math.PI / 6,
-      0,
-      Math.PI * 2
-    );
-
+    strokeCtx.ellipse(x - (18 * flip), y - 8, 12, 8, (isRightSide ? -1 : 1) * Math.PI / 6, 0, Math.PI * 2);
     strokeCtx.fill();
 
-
     strokeCtx.shadowBlur = 0;
-
     strokeCtx.strokeStyle = '#040406';
-
     strokeCtx.lineWidth = 2;
 
-
-    for (
-      let i = -4;
-      i <= 8;
-      i += 6
-    ) {
-
+    for (let i = -4; i <= 8; i += 6) {
       strokeCtx.beginPath();
-
-      strokeCtx.moveTo(
-        x - (8 * flip),
-        y + i
-      );
-
-      strokeCtx.lineTo(
-        x + (26 * flip),
-        y + i
-      );
-
+      strokeCtx.moveTo(x - (8 * flip), y + i);
+      strokeCtx.lineTo(x + (26 * flip), y + i);
       strokeCtx.stroke();
-
     }
 
-
     strokeCtx.restore();
-
   }
 
 
   function renderAnimations() {
+    mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
-    mainCtx.clearRect(
-      0,
-      0,
-      mainCanvas.width,
-      mainCanvas.height
-    );
-
-
-    const centerX =
-      mainCanvas.width / 2;
-
-    const centerY =
-      mainCanvas.height / 2;
-
+    const centerX = mainCanvas.width / 2;
+    const centerY = mainCanvas.height / 2;
 
     if (active) {
+      const intensityMult = parseFloat(document.getElementById('intensitySelect').value) || 1;
+      pulseAngle += (currentPhase === 'action' ? 0.05 : 0.02) * intensityMult;
 
-      pulseAngle +=
-        currentPhase === 'action'
-          ? 0.05
-          : 0.02;
-
-
-      const radius =
-        75 +
-        Math.sin(pulseAngle) *
-        (
-          currentPhase === 'action'
-            ? 7
-            : 2
-        );
-
+      const radius = 75 + Math.sin(pulseAngle) * (currentPhase === 'action' ? 7 : 2);
 
       mainCtx.beginPath();
-
-      mainCtx.arc(
-        centerX,
-        centerY,
-        radius,
-        0,
-        Math.PI * 2
-      );
-
-      mainCtx.strokeStyle =
-        currentPhase === 'action'
-          ? '#00f0ff'
-          : '#ff0055';
-
+      mainCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      mainCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
       mainCtx.lineWidth = 4;
-
       mainCtx.shadowBlur = 15;
-
-      mainCtx.shadowColor =
-        currentPhase === 'action'
-          ? '#00f0ff'
-          : '#ff0055';
-
+      mainCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
       mainCtx.stroke();
-
     } else {
-
       mainCtx.beginPath();
-
-      mainCtx.arc(
-        centerX,
-        centerY,
-        75,
-        0,
-        Math.PI * 2
-      );
-
+      mainCtx.arc(centerX, centerY, 75, 0, Math.PI * 2);
       mainCtx.strokeStyle = '#1a1a29';
-
       mainCtx.lineWidth = 2;
-
       mainCtx.shadowBlur = 0;
-
       mainCtx.stroke();
-
     }
 
-
-    strokeCtx.clearRect(
-      0,
-      0,
-      strokeCanvas.width,
-      strokeCanvas.height
-    );
-
+    strokeCtx.clearRect(0, 0, strokeCanvas.width, strokeCanvas.height);
 
     const w = strokeCanvas.width;
-
     const h = strokeCanvas.height;
-
     const midX = w / 2;
-
     const topY = 30;
-
     const bottomY = h - 65;
+    const totalLen = bottomY - topY;
 
-    const totalLen =
-      bottomY - topY;
-
-
-    const strokeColor =
-      currentPhase === 'action'
-        ? '#00f0ff'
-        : '#ff0055';
-
-    const fillColor =
-      currentPhase === 'action'
-        ? 'rgba(0, 240, 255, 0.08)'
-        : 'rgba(255, 0, 85, 0.08)';
-
+    const strokeColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    const fillColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
 
     const shaftHalfWidth = 25;
-
     const lowerWidth = 40;
 
-
     strokeCtx.beginPath();
+    strokeCtx.moveTo(midX - 25, topY + 48);
+    strokeCtx.lineTo(midX - 32, topY + 42);
+    strokeCtx.bezierCurveTo(midX - 32, topY + 12, midX - 18, topY, midX, topY);
+    strokeCtx.bezierCurveTo(midX + 18, topY, midX + 32, topY + 12, midX + 32, topY + 42);
+    strokeCtx.lineTo(midX + 25, topY + 48);
 
+    strokeCtx.lineTo(midX + shaftHalfWidth, bottomY - 7);
 
-    // Upper rounded contour
+    strokeCtx.bezierCurveTo(midX + lowerWidth, bottomY + 8, midX + lowerWidth, bottomY + 30, midX + 24, bottomY + 40);
+    strokeCtx.bezierCurveTo(midX + 16, bottomY + 44, midX + 7, bottomY + 45, midX, bottomY + 43);
+    strokeCtx.bezierCurveTo(midX - 7, bottomY + 45, midX - 16, bottomY + 44, midX - 24, bottomY + 40);
+    strokeCtx.bezierCurveTo(midX - lowerWidth, bottomY + 30, midX - lowerWidth, bottomY + 8, midX - shaftHalfWidth, bottomY - 7);
 
-    strokeCtx.moveTo(
-      midX - 25,
-      topY + 48
-    );
-
-    strokeCtx.lineTo(
-      midX - 32,
-      topY + 42
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - 32,
-      topY + 12,
-      midX - 18,
-      topY,
-      midX,
-      topY
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX + 18,
-      topY,
-      midX + 32,
-      topY + 12,
-      midX + 32,
-      topY + 42
-    );
-
-    strokeCtx.lineTo(
-      midX + 25,
-      topY + 48
-    );
-
-
-    // Main shaft
-
-    strokeCtx.lineTo(
-      midX + shaftHalfWidth,
-      bottomY - 7
-    );
-
-
-    // Lower rounded region
-
-    strokeCtx.bezierCurveTo(
-      midX + lowerWidth,
-      bottomY + 8,
-      midX + lowerWidth,
-      bottomY + 30,
-      midX + 24,
-      bottomY + 40
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX + 16,
-      bottomY + 44,
-      midX + 7,
-      bottomY + 45,
-      midX,
-      bottomY + 43
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - 7,
-      bottomY + 45,
-      midX - 16,
-      bottomY + 44,
-      midX - 24,
-      bottomY + 40
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - lowerWidth,
-      bottomY + 30,
-      midX - lowerWidth,
-      bottomY + 8,
-      midX - shaftHalfWidth,
-      bottomY - 7
-    );
-
-
-    strokeCtx.lineTo(
-      midX - 25,
-      topY + 48
-    );
-
+    strokeCtx.lineTo(midX - 25, topY + 48);
     strokeCtx.closePath();
 
-
     strokeCtx.fillStyle = fillColor;
-
     strokeCtx.fill();
-
     strokeCtx.lineWidth = 2;
-
     strokeCtx.strokeStyle = strokeColor;
-
     strokeCtx.lineCap = 'round';
-
     strokeCtx.lineJoin = 'round';
-
     strokeCtx.stroke();
 
-
-    // Central anatomical contour
-
     strokeCtx.beginPath();
-
-    strokeCtx.moveTo(
-      midX,
-      bottomY + 5
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - 2,
-      bottomY + 18,
-      midX - 2,
-      bottomY + 34,
-      midX,
-      bottomY + 43
-    );
-
-    strokeCtx.strokeStyle =
-      currentPhase === 'action'
-        ? 'rgba(0,240,255,0.42)'
-        : 'rgba(255,0,85,0.42)';
-
+    strokeCtx.moveTo(midX, bottomY + 5);
+    strokeCtx.bezierCurveTo(midX - 2, bottomY + 18, midX - 2, bottomY + 34, midX, bottomY + 43);
+    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0,240,255,0.42)' : 'rgba(255,0,85,0.42)';
     strokeCtx.lineWidth = 1.5;
-
     strokeCtx.stroke();
 
-
-    // Subtle vascular / contour lines
-
-    const veinColor =
-      currentPhase === 'action'
-        ? 'rgba(0,240,255,0.35)'
-        : 'rgba(255,0,85,0.35)';
-
-
-    // Left primary contour
+    const veinColor = currentPhase === 'action' ? 'rgba(0,240,255,0.35)' : 'rgba(255,0,85,0.35)';
 
     strokeCtx.beginPath();
-
-    strokeCtx.moveTo(
-      midX - 8,
-      bottomY - 12
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - 18,
-      bottomY - 40,
-      midX - 7,
-      bottomY - 65,
-      midX - 15,
-      bottomY - 100
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - 21,
-      bottomY - 125,
-      midX - 10,
-      topY + 120,
-      midX - 18,
-      topY + 62
-    );
-
+    strokeCtx.moveTo(midX - 8, bottomY - 12);
+    strokeCtx.bezierCurveTo(midX - 18, bottomY - 40, midX - 7, bottomY - 65, midX - 15, bottomY - 100);
+    strokeCtx.bezierCurveTo(midX - 21, bottomY - 125, midX - 10, topY + 120, midX - 18, topY + 62);
     strokeCtx.strokeStyle = veinColor;
-
     strokeCtx.lineWidth = 1.7;
-
     strokeCtx.stroke();
 
-
-    // Right primary contour
-
     strokeCtx.beginPath();
-
-    strokeCtx.moveTo(
-      midX + 9,
-      bottomY - 14
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX + 19,
-      bottomY - 45,
-      midX + 8,
-      bottomY - 75,
-      midX + 16,
-      bottomY - 108
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX + 22,
-      bottomY - 130,
-      midX + 10,
-      topY + 115,
-      midX + 19,
-      topY + 58
-    );
-
+    strokeCtx.moveTo(midX + 9, bottomY - 14);
+    strokeCtx.bezierCurveTo(midX + 19, bottomY - 45, midX + 8, bottomY - 75, midX + 16, bottomY - 108);
+    strokeCtx.bezierCurveTo(midX + 22, bottomY - 130, midX + 10, topY + 115, midX + 19, topY + 58);
     strokeCtx.strokeStyle = veinColor;
-
     strokeCtx.lineWidth = 1.7;
-
     strokeCtx.stroke();
 
-
-    // Small branching anatomical lines
-
     strokeCtx.beginPath();
+    strokeCtx.moveTo(midX - 14, bottomY - 62);
+    strokeCtx.bezierCurveTo(midX - 25, bottomY - 74, midX - 26, bottomY - 90, midX - 18, bottomY - 103);
 
-    strokeCtx.moveTo(
-      midX - 14,
-      bottomY - 62
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX - 25,
-      bottomY - 74,
-      midX - 26,
-      bottomY - 90,
-      midX - 18,
-      bottomY - 103
-    );
-
-
-    strokeCtx.moveTo(
-      midX + 14,
-      bottomY - 70
-    );
-
-    strokeCtx.bezierCurveTo(
-      midX + 26,
-      bottomY - 82,
-      midX + 27,
-      bottomY - 98,
-      midX + 18,
-      bottomY - 112
-    );
-
-    strokeCtx.strokeStyle =
-      currentPhase === 'action'
-        ? 'rgba(0,240,255,0.25)'
-        : 'rgba(255,0,85,0.25)';
-
+    strokeCtx.moveTo(midX + 14, bottomY - 70);
+    strokeCtx.bezierCurveTo(midX + 26, bottomY - 82, midX + 27, bottomY - 98, midX + 18, bottomY - 112);
+    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0,240,255,0.25)' : 'rgba(255,0,85,0.25)';
     strokeCtx.lineWidth = 1.2;
-
     strokeCtx.stroke();
 
+    if (active && currentPhase === 'action') {
+      strokePos += strokeSpeed * strokeDirection;
 
-    // Motion Logic
-
-    if (
-      active &&
-      currentPhase === 'action'
-    ) {
-
-      strokePos +=
-        strokeSpeed *
-        strokeDirection;
-
-
-      if (
-        strokePos >=
-        strokeRangeMax
-      ) {
-
-        strokePos =
-          strokeRangeMax;
-
+      if (strokePos >= strokeRangeMax) {
+        strokePos = strokeRangeMax;
         strokeDirection = -1;
-
-      } else if (
-        strokePos <=
-        strokeRangeMin
-      ) {
-
-        strokePos =
-          strokeRangeMin;
-
+      } else if (strokePos <= strokeRangeMin) {
+        strokePos = strokeRangeMin;
         strokeDirection = 1;
-
       }
-
-    } else if (
-      active &&
-      currentPhase === 'pause'
-    ) {
-
-      strokePos +=
-        (0.85 - strokePos) * 0.1;
-
+    } else if (active && currentPhase === 'pause') {
+      strokePos += (0.85 - strokePos) * 0.1;
     } else {
-
       strokePos = 0.85;
-
     }
 
-
-    const currentY =
-      topY +
-      strokePos * totalLen;
-
-
-    const handColor =
-      currentPhase === 'action'
-        ? 'rgba(0,240,255,0.88)'
-        : 'rgba(255,0,85,0.88)';
-
+    const currentY = topY + strokePos * totalLen;
+    const handColor = currentPhase === 'action' ? 'rgba(0,240,255,0.88)' : 'rgba(255,0,85,0.88)';
 
     if (handsCount === 2) {
-
-      drawHandGrip(
-        midX,
-        currentY + 12,
-        true,
-        handColor
-      );
-
-      drawHandGrip(
-        midX,
-        currentY - 18,
-        false,
-        handColor
-      );
-
+      drawHandGrip(midX, currentY + 12, true, handColor);
+      drawHandGrip(midX, currentY - 18, false, handColor);
     } else {
-
-      drawHandGrip(
-        midX,
-        currentY,
-        activeHandSide === 'right',
-        handColor
-      );
-
+      drawHandGrip(midX, currentY, activeHandSide === 'right', handColor);
     }
 
-
-    requestAnimationFrame(
-      renderAnimations
-    );
-
+    requestAnimationFrame(renderAnimations);
   }
-
 
   renderAnimations();
 
 
-  function playTone(
-    freq = 440,
-    type = 'sine',
-    duration = 0.15
-  ) {
-
-    if (
-      audioCtx.state === 'suspended'
-    ) {
+  function playTone(freq = 440, type = 'sine', duration = 0.15) {
+    if (audioCtx.state === 'suspended') {
       audioCtx.resume();
     }
-
-
-    const osc =
-      audioCtx.createOscillator();
-
-    const gain =
-      audioCtx.createGain();
-
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
 
     osc.type = type;
-
     osc.frequency.value = freq;
 
-
-    gain.gain.setValueAtTime(
-      0.1,
-      audioCtx.currentTime
-    );
-
-    gain.gain.exponentialRampToValueAtTime(
-      0.01,
-      audioCtx.currentTime + duration
-    );
-
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
 
     osc.connect(gain);
-
-    gain.connect(
-      audioCtx.destination
-    );
-
+    gain.connect(audioCtx.destination);
 
     osc.start();
-
-    osc.stop(
-      audioCtx.currentTime +
-      duration
-    );
-
+    osc.stop(audioCtx.currentTime + duration);
   }
 
 
   function speak(text) {
-
     if (!synth) return;
-
     synth.cancel();
 
-
-    const utterance =
-      new SpeechSynthesisUtterance(text);
-
-
-    if (trainerVoice) {
-      utterance.voice =
-        trainerVoice;
-    }
-
-
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (trainerVoice) utterance.voice = trainerVoice;
     utterance.rate = 1.0;
-
     utterance.pitch = 0.8;
 
-
     synth.speak(utterance);
-
   }
 
 
   function updateDisplay() {
-
-    const hrs =
-      String(
-        Math.floor(seconds / 3600)
-      ).padStart(2, '0');
-
-
-    const mins =
-      String(
-        Math.floor(
-          (seconds % 3600) / 60
-        )
-      ).padStart(2, '0');
-
-
-    const secs =
-      String(
-        seconds % 60
-      ).padStart(2, '0');
-
-
-    document.getElementById(
-      'mainTimer'
-    ).innerText =
-      `${hrs}:${mins}:${secs}`;
-
+    const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    document.getElementById('mainTimer').innerText = `${hrs}:${mins}:${secs}`;
   }
 
 
   function toggleSession() {
-
     if (!active) {
-
       active = true;
-
       seconds = 0;
-
       edges = 0;
 
+      document.getElementById('edgeCount').innerText = '0';
+      document.getElementById('modeSelect').disabled = true;
+      document.getElementById('intensitySelect').disabled = true;
+      document.getElementById('startBtn').innerText = 'Stop Session';
+      document.getElementById('edgeBtn').style.display = 'block';
+      document.getElementById('techniqueTag').style.display = 'inline-block';
 
-      document.getElementById(
-        'edgeCount'
-      ).innerText = '0';
+      timerInterval = setInterval(() => {
+        seconds++;
+        updateDisplay();
+      }, 1000);
 
-
-      document.getElementById(
-        'modeSelect'
-      ).disabled = true;
-
-
-      document.getElementById(
-        'startBtn'
-      ).innerText =
-        'Stop Session';
-
-
-      document.getElementById(
-        'edgeBtn'
-      ).style.display =
-        'block';
-
-
-      document.getElementById(
-        'techniqueTag'
-      ).style.display =
-        'inline-block';
-
-
-      timerInterval =
-        setInterval(
-          () => {
-            seconds++;
-            updateDisplay();
-          },
-          1000
-        );
-
-
-      playTone(
-        660,
-        'sine',
-        0.2
-      );
-
-
-      speak(
-        "Session started. Follow the visual rhythm and maintain steady control."
-      );
-
-
-      startNextPhase(
-        'action'
-      );
-
+      playTone(660, 'sine', 0.2);
+      speak("Session started. Focus on your edge control and follow the rhythmic visual cues.");
+      startNextPhase('action');
     } else {
-
       endSession();
-
     }
-
   }
 
 
-  function startNextPhase(
-    forcedPhase = null
-  ) {
-
-    clearInterval(
-      phaseInterval
-    );
-
+  function startNextPhase(forcedPhase = null) {
+    clearInterval(phaseInterval);
 
     if (forcedPhase) {
-
-      currentPhase =
-        forcedPhase;
-
+      currentPhase = forcedPhase;
     } else {
-
-      currentPhase =
-        currentPhase === 'action'
-          ? 'pause'
-          : 'action';
-
+      currentPhase = currentPhase === 'action' ? 'pause' : 'action';
     }
 
+    const mode = document.getElementById('modeSelect').value;
+    const intensity = parseFloat(document.getElementById('intensitySelect').value) || 1;
 
-    const mode =
-      document.getElementById(
-        'modeSelect'
-      ).value;
+    const box = document.getElementById('statusBox');
+    const prompt = document.getElementById('promptText');
+    const sub = document.getElementById('subPrompt');
+    const tag = document.getElementById('techniqueTag');
 
+    if (currentPhase === 'action') {
+      box.classList.remove('pause');
+      playTone(520, 'sine', 0.15);
 
-    const box =
-      document.getElementById(
-        'statusBox'
-      );
-
-
-    const prompt =
-      document.getElementById(
-        'promptText'
-      );
-
-
-    const sub =
-      document.getElementById(
-        'subPrompt'
-      );
-
-
-    const tag =
-      document.getElementById(
-        'techniqueTag'
-      );
-
-
-    if (
-      currentPhase === 'action'
-    ) {
-
-      box.classList.remove(
-        'pause'
-      );
-
-
-      playTone(
-        520,
-        'sine',
-        0.15
-      );
-
-
-      if (
-        mode === 'endurance'
-      ) {
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 30
-          ) + 40;
-
-      } else if (
-        mode === 'chaos'
-      ) {
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 25
-          ) + 10;
-
+      if (mode === 'endurance') {
+        phaseTimeLeft = Math.floor((Math.random() * 30 + 40) / (intensity * 0.5));
+      } else if (mode === 'chaos') {
+        phaseTimeLeft = Math.floor((Math.random() * 25 + 10) / intensity);
       } else {
-
-        phaseTimeLeft =
-          Math.floor(
-            Math.random() * 20
-          ) + 25;
-
+        phaseTimeLeft = Math.floor((Math.random() * 20 + 25) / intensity);
       }
 
+      phaseTimeLeft = Math.max(5, phaseTimeLeft);
 
       const instructions = [
-
         {
           rhythm: 'Slow steady pace',
-          style: 'Full Range',
+          style: 'Full Range Edging',
           vocal: 'Maintain a slow steady rhythm.',
-          speed: 0.02,
+          baseSpeed: 0.02,
           min: 0.0,
           max: 0.85,
           hands: 1,
           side: 'right'
         },
-
         {
           rhythm: 'Medium rhythm',
-          style: 'Controlled Motion',
+          style: 'Controlled Edging',
           vocal: 'Switch direction and maintain the rhythm.',
-          speed: 0.035,
+          baseSpeed: 0.035,
           min: 0.1,
           max: 0.7,
           hands: 1,
           side: 'left'
         },
-
         {
           rhythm: 'Gradual speed build',
-          style: 'Two-Handed Motion',
+          style: 'Two-Handed Edging',
           vocal: 'Gradually increase the motion speed.',
-          speed: 0.05,
+          baseSpeed: 0.05,
           min: 0.1,
           max: 0.85,
           hands: 2,
           side: 'right'
         },
-
         {
           rhythm: 'Light pressure',
-          style: 'Reduced Range',
-          vocal: 'Ease the motion and reduce the range.',
-          speed: 0.025,
+          style: 'Edge Hold',
+          vocal: 'Ease the motion and approach your edge gently.',
+          baseSpeed: 0.025,
           min: 0.4,
           max: 0.85,
           hands: 1,
           side: 'right'
         },
-
         {
           rhythm: 'Controlled cadence',
-          style: 'Short Range',
-          vocal: 'Use a short controlled range of motion.',
-          speed: 0.03,
+          style: 'High-Grip Edging',
+          vocal: 'Use a short controlled range near the tip.',
+          baseSpeed: 0.03,
           min: 0.0,
           max: 0.3,
           hands: 2,
           side: 'right'
         }
-
       ];
 
+      const chosen = instructions[Math.floor(Math.random() * instructions.length)];
 
-      const chosen =
-        instructions[
-          Math.floor(
-            Math.random() *
-            instructions.length
-          )
-        ];
+      strokeSpeed = chosen.baseSpeed * intensity;
+      strokeRangeMin = chosen.min;
+      strokeRangeMax = chosen.max;
+      handsCount = chosen.hands;
+      activeHandSide = chosen.side;
 
+      prompt.innerText = 'STROKE / BUILD';
+      sub.innerText = chosen.rhythm;
+      tag.innerText = `Focus: ${chosen.style}`;
 
-      strokeSpeed =
-        chosen.speed;
-
-      strokeRangeMin =
-        chosen.min;
-
-      strokeRangeMax =
-        chosen.max;
-
-      handsCount =
-        chosen.hands;
-
-      activeHandSide =
-        chosen.side;
-
-
-      prompt.innerText =
-        'ACTION';
-
-
-      sub.innerText =
-        chosen.rhythm;
-
-
-      tag.innerText =
-        `Focus: ${chosen.style}`;
-
-
-      speak(
-        chosen.vocal
-      );
-
+      speak(chosen.vocal);
 
     } else {
+      box.classList.add('pause');
+      playTone(280, 'triangle', 0.3);
 
-      box.classList.add(
-        'pause'
-      );
-
-
-      playTone(
-        280,
-        'triangle',
-        0.3
-      );
-
-
-      phaseTimeLeft =
-        mode === 'chaos'
-          ? Math.floor(
-              Math.random() * 10
-            ) + 5
-          : Math.floor(
-              Math.random() * 15
-            ) + 10;
-
+      phaseTimeLeft = mode === 'chaos'
+        ? Math.floor(Math.random() * 10) + 5
+        : Math.floor(Math.random() * 15) + 10;
 
       const pausePhrases = [
-
-        'Pause now and take a controlled breath.',
-
-        'Hold the position and relax.',
-
-        'Stop the movement and reset your rhythm.'
-
+        'Halt immediately and hold your edge.',
+        'Hands off. Take a deep breath and steady your arousal.',
+        'Freeze motion and clear your tension.'
       ];
 
+      const chosenPause = pausePhrases[Math.floor(Math.random() * pausePhrases.length)];
 
-      const chosenPause =
-        pausePhrases[
-          Math.floor(
-            Math.random() *
-            pausePhrases.length
-          )
-        ];
+      prompt.innerText = 'HALT / HOLD';
+      sub.innerText = 'Hands off and cool down.';
+      tag.innerText = 'Focus: Controlled breathing';
 
-
-      prompt.innerText =
-        'HALT / HOLD';
-
-
-      sub.innerText =
-        'Pause and reset.';
-
-
-      tag.innerText =
-        'Focus: Controlled breathing';
-
-
-      speak(
-        chosenPause
-      );
-
+      speak(chosenPause);
     }
 
-
-    totalPhaseDuration =
-      phaseTimeLeft;
-
-
+    totalPhaseDuration = phaseTimeLeft;
     updateProgressBar();
 
+    document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
 
-    document.getElementById(
-      'phaseTimer'
-    ).innerText =
-      `${phaseTimeLeft}s`;
+    phaseInterval = setInterval(() => {
+      phaseTimeLeft--;
+      document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
+      updateProgressBar();
 
-
-    phaseInterval =
-      setInterval(
-        () => {
-
-          phaseTimeLeft--;
-
-
-          document.getElementById(
-            'phaseTimer'
-          ).innerText =
-            `${phaseTimeLeft}s`;
-
-
-          updateProgressBar();
-
-
-          if (
-            phaseTimeLeft <= 0
-          ) {
-
-            startNextPhase();
-
-          }
-
-        },
-        1000
-      );
-
+      if (phaseTimeLeft <= 0) {
+        startNextPhase();
+      }
+    }, 1000);
   }
 
 
   function updateProgressBar() {
-
-    const percentage =
-      (
-        (
-          totalPhaseDuration -
-          phaseTimeLeft
-        ) /
-        totalPhaseDuration
-      ) * 100;
-
-
-    document.getElementById(
-      'phaseProgressBar'
-    ).style.width =
-      `${Math.min(
-        100,
-        Math.max(
-          0,
-          percentage
-        )
-      )}%`;
-
+    const percentage = ((totalPhaseDuration - phaseTimeLeft) / totalPhaseDuration) * 100;
+    document.getElementById('phaseProgressBar').style.width = `${Math.min(100, Math.max(0, percentage))}%`;
   }
 
 
   function logEdge() {
-
     if (!active) return;
 
-
     edges++;
+    document.getElementById('edgeCount').innerText = edges;
 
+    playTone(200, 'sawtooth', 0.4);
+    speak('Edge recorded! Stop all motion and hold the reset.');
 
-    document.getElementById(
-      'edgeCount'
-    ).innerText =
-      edges;
-
-
-    playTone(
-      200,
-      'sawtooth',
-      0.4
-    );
-
-
-    speak(
-      'Cycle registered. Hold the pause and reset.'
-    );
-
-
-    startNextPhase(
-      'pause'
-    );
-
+    startNextPhase('pause');
   }
 
 
   function endSession() {
-
     active = false;
 
+    clearInterval(timerInterval);
+    clearInterval(phaseInterval);
 
-    clearInterval(
-      timerInterval
-    );
+    document.getElementById('modeSelect').disabled = false;
+    document.getElementById('intensitySelect').disabled = false;
+    document.getElementById('startBtn').innerText = 'Start Session';
+    document.getElementById('edgeBtn').style.display = 'none';
+    document.getElementById('techniqueTag').style.display = 'none';
 
-    clearInterval(
-      phaseInterval
-    );
+    document.getElementById('promptText').innerText = 'COMPLETE';
+    document.getElementById('subPrompt').innerText = 'Training session finished';
+    document.getElementById('statusBox').classList.remove('pause');
+    document.getElementById('phaseTimer').innerText = '--';
+    document.getElementById('phaseProgressBar').style.width = '0%';
 
-
-    document.getElementById(
-      'modeSelect'
-    ).disabled = false;
-
-
-    document.getElementById(
-      'startBtn'
-    ).innerText =
-      'Start Session';
-
-
-    document.getElementById(
-      'edgeBtn'
-    ).style.display =
-      'none';
-
-
-    document.getElementById(
-      'techniqueTag'
-    ).style.display =
-      'none';
-
-
-    document.getElementById(
-      'promptText'
-    ).innerText =
-      'COMPLETE';
-
-
-    document.getElementById(
-      'subPrompt'
-    ).innerText =
-      'Session finished';
-
-
-    document.getElementById(
-      'statusBox'
-    ).classList.remove(
-      'pause'
-    );
-
-
-    document.getElementById(
-      'phaseTimer'
-    ).innerText =
-      '--';
-
-
-    document.getElementById(
-      'phaseProgressBar'
-    ).style.width =
-      '0%';
-
-
-    playTone(
-      440,
-      'sine',
-      0.3
-    );
-
-
-    speak(
-      `Session finished. You completed ${Math.floor(seconds / 60)} minutes and ${edges} cycles.`
-    );
-
+    playTone(440, 'sine', 0.3);
+    speak(`Session finished. Total training time: ${Math.floor(seconds / 60)} minutes with ${edges} total edges achieved.`);
   }
 
 </script>
