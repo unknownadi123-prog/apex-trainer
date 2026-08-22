@@ -228,15 +228,24 @@
     const strokeColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     const fillColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
 
-    // Shaft Geometry
+    // Seamless Combined Contour Path
     strokeCtx.beginPath();
-    strokeCtx.moveTo(midX - 25, bottomY);
-    strokeCtx.lineTo(midX - 25, topY + 48);
+    // Top Glans Contour
+    strokeCtx.moveTo(midX - 25, topY + 48);
     strokeCtx.lineTo(midX - 32, topY + 42);
     strokeCtx.bezierCurveTo(midX - 32, topY + 12, midX - 18, topY, midX, topY);
     strokeCtx.bezierCurveTo(midX + 18, topY, midX + 32, topY + 12, midX + 32, topY + 42);
     strokeCtx.lineTo(midX + 25, topY + 48);
-    strokeCtx.lineTo(midX + 25, bottomY);
+    
+    // Right Shaft Down
+    strokeCtx.lineTo(midX + 25, bottomY - 5);
+    
+    // Smooth Continuous Base Curve
+    strokeCtx.bezierCurveTo(midX + 42, bottomY + 15, midX + 15, bottomY + 42, midX, bottomY + 38);
+    strokeCtx.bezierCurveTo(midX - 15, bottomY + 42, midX - 42, bottomY + 15, midX - 25, bottomY - 5);
+    
+    // Left Shaft Up
+    strokeCtx.lineTo(midX - 25, topY + 48);
     strokeCtx.closePath();
 
     strokeCtx.fillStyle = fillColor;
@@ -247,20 +256,15 @@
     strokeCtx.lineJoin = 'round';
     strokeCtx.stroke();
 
-    // Cleaned Base Circles (No Stray Line Artifacts)
+    // Subtle Internal Contour Divider Line
     strokeCtx.beginPath();
-    strokeCtx.arc(midX - 18, bottomY + 18, 20, 0.25 * Math.PI, 1.25 * Math.PI, false);
-    strokeCtx.strokeStyle = strokeColor;
-    strokeCtx.lineWidth = 2;
+    strokeCtx.moveTo(midX, bottomY + 10);
+    strokeCtx.bezierCurveTo(midX, bottomY + 25, midX, bottomY + 35, midX, bottomY + 38);
+    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.4)' : 'rgba(255, 0, 85, 0.4)';
+    strokeCtx.lineWidth = 1.5;
     strokeCtx.stroke();
 
-    strokeCtx.beginPath();
-    strokeCtx.arc(midX + 18, bottomY + 18, 20, 0.75 * Math.PI, 1.75 * Math.PI, false);
-    strokeCtx.strokeStyle = strokeColor;
-    strokeCtx.lineWidth = 2;
-    strokeCtx.stroke();
-
-    // Vascular Branches (Isolated Paths)
+    // Isolated Vessel Tracks
     strokeCtx.beginPath();
     strokeCtx.moveTo(midX - 8, bottomY - 10);
     strokeCtx.bezierCurveTo(midX - 20, bottomY - 60, midX - 4, topY + 110, midX - 18, topY + 60);
