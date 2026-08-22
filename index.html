@@ -147,14 +147,14 @@
       box-shadow: 0 0 10px var(--stop);
     }
 
-    /* Dynamic Intensity Controller Styles */
+    /* Auto Dynamic Intensity Controller Styles */
     .intensity-container {
       width: 100%;
       margin: 15px 0;
       background: #06060c;
       border: 1px solid #1a1a29;
       border-radius: 12px;
-      padding: 10px 14px;
+      padding: 12px 16px;
     }
 
     .intensity-header {
@@ -174,37 +174,8 @@
       font-weight: 700;
     }
 
-    .intensity-bar-wrapper {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .intensity-btn {
-      background: #121220;
-      color: var(--primary);
-      border: 1px solid #22223a;
-      width: 30px;
-      height: 30px;
-      border-radius: 6px;
-      font-size: 1.1rem;
-      font-weight: bold;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      padding: 0;
-      transition: all 0.2s ease;
-    }
-
-    .intensity-btn:hover {
-      background: var(--primary);
-      color: #040406;
-      box-shadow: 0 0 10px var(--primary);
-    }
-
     .intensity-bar-bg {
-      flex: 1;
+      width: 100%;
       height: 10px;
       background: #000;
       border-radius: 5px;
@@ -214,10 +185,10 @@
 
     .intensity-bar-fill {
       height: 100%;
-      width: 50%;
+      width: 20%;
       background: linear-gradient(90deg, #00f0ff, #7000ff);
       box-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
-      transition: width 0.2s ease, background 0.3s ease;
+      transition: width 0.5s ease-out, background 0.3s ease;
     }
 
     .status-box {
@@ -397,18 +368,14 @@
       <div class="progress-bar-fill" id="phaseProgressBar"></div>
     </div>
 
-    <!-- Active Interactive Intensity Controller -->
+    <!-- Automatic Dynamic Intensity Meter -->
     <div class="intensity-container">
       <div class="intensity-header">
-        <span>Current Intensity Goal</span>
-        <span id="intensityLabel">50% (Moderate)</span>
+        <span>Target Intensity Level</span>
+        <span id="intensityLabel">20% (Low)</span>
       </div>
-      <div class="intensity-bar-wrapper">
-        <button class="intensity-btn" onclick="adjustIntensity(-10)">-</button>
-        <div class="intensity-bar-bg">
-          <div class="intensity-bar-fill" id="intensityBarFill"></div>
-        </div>
-        <button class="intensity-btn" onclick="adjustIntensity(10)">+</button>
+      <div class="intensity-bar-bg">
+        <div class="intensity-bar-fill" id="intensityBarFill"></div>
       </div>
     </div>
 
@@ -419,7 +386,7 @@
       </div>
 
       <div class="sub-prompt" id="subPrompt">
-        Select mode and set intensity to start training
+        Select mode to start guided training session
       </div>
 
       <div class="technique-tag"
@@ -497,7 +464,8 @@
   let totalPhaseDuration = 1;
 
   let currentPhase = 'idle';
-  let currentIntensityPct = 50; // Dynamic intensity scale (10% to 100%)
+  let targetIntensity = 20; // Automatically computed intensity percentage (0-100)
+  let ladderStep = 0;       // State for progressive modes
 
   const synth = window.speechSynthesis;
 
@@ -552,30 +520,32 @@
   let activeHandSide = 'right';
 
 
-  function adjustIntensity(delta) {
-    currentIntensityPct = Math.min(100, Math.max(10, currentIntensityPct + delta));
-    updateIntensityUI();
-  }
-
-  function updateIntensityUI() {
+  function updateIntensityMeter(value) {
+    targetIntensity = Math.min(100, Math.max(5, value));
     const bar = document.getElementById('intensityBarFill');
     const label = document.getElementById('intensityLabel');
 
-    bar.style.width = `${currentIntensityPct}%`;
+    bar.style.width = `${targetIntensity}%`;
 
     let desc = "Low";
-    if (currentIntensityPct >= 80) {
-      desc = "Extreme";
+    if (targetIntensity >= 85) {
+      desc = "Extreme Overload";
       bar.style.background = 'linear-gradient(90deg, #ff0055, #ff5500)';
-    } else if (currentIntensityPct >= 50) {
-      desc = "Moderate";
+    } else if (targetIntensity >= 65) {
+      desc = "High Edge";
+      bar.style.background = 'linear-gradient(90deg, #7000ff, #ff0055)';
+    } else if (targetIntensity >= 40) {
+      desc = "Moderate Build";
       bar.style.background = 'linear-gradient(90deg, #00f0ff, #7000ff)';
-    } else {
-      desc = "Low";
+    } else if (targetIntensity >= 20) {
+      desc = "Low Controlled";
       bar.style.background = 'linear-gradient(90deg, #00f0ff, #00ffaa)';
+    } else {
+      desc = "Cooling Down";
+      bar.style.background = '#00ffaa';
     }
 
-    label.innerText = `${currentIntensityPct}% (${desc})`;
+    label.innerText = `${Math.round(targetIntensity)}% (${desc})`;
   }
 
 
@@ -620,7 +590,7 @@
     const centerX = mainCanvas.width / 2;
     const centerY = mainCanvas.height / 2;
 
-    const intensityMult = currentIntensityPct / 50;
+    const intensityMult = targetIntensity / 50;
 
     if (active) {
       pulseAngle += (currentPhase === 'action' ? 0.05 : 0.02) * intensityMult;
@@ -787,6 +757,7 @@
       active = true;
       seconds = 0;
       edges = 0;
+      ladderStep = 0;
 
       document.getElementById('edgeCount').innerText = '0';
       document.getElementById('modeSelect').disabled = true;
@@ -800,7 +771,7 @@
       }, 1000);
 
       playTone(660, 'sine', 0.2);
-      speak("Session started. Keep your intensity locked and follow the cues.");
+      speak("Session started. Pay attention to the dynamic intensity level and match your speed.");
       startNextPhase('action');
     } else {
       endSession();
@@ -818,8 +789,6 @@
     }
 
     const mode = document.getElementById('modeSelect').value;
-    const intensityMult = currentIntensityPct / 50;
-
     const box = document.getElementById('statusBox');
     const prompt = document.getElementById('promptText');
     const sub = document.getElementById('subPrompt');
@@ -828,19 +797,28 @@
     if (currentPhase === 'action') {
       box.classList.remove('pause');
       playTone(520, 'sine', 0.15);
+      ladderStep++;
 
+      // Automatically calculate intensity based on Mode & Goal Strategy
       if (mode === 'warmup') {
-        phaseTimeLeft = Math.floor((Math.random() * 15 + 30) / (intensityMult * 0.7));
+        updateIntensityMeter(25 + Math.sin(ladderStep) * 10);
+        phaseTimeLeft = Math.floor(Math.random() * 10 + 25);
+      } else if (mode === 'standard') {
+        updateIntensityMeter(Math.min(85, 40 + ladderStep * 6));
+        phaseTimeLeft = Math.floor(Math.random() * 15 + 20);
       } else if (mode === 'endurance') {
-        phaseTimeLeft = Math.floor((Math.random() * 30 + 45) / (intensityMult * 0.5));
+        updateIntensityMeter(60 + (ladderStep % 3) * 10);
+        phaseTimeLeft = Math.floor(Math.random() * 20 + 35);
       } else if (mode === 'ladder') {
-        phaseTimeLeft = Math.floor((Math.random() * 15 + 15) / intensityMult);
-      } else if (mode === 'extreme') {
-        phaseTimeLeft = Math.floor((Math.random() * 20 + 35) / (intensityMult * 0.8));
+        const stepVal = (ladderStep % 5) * 18 + 20;
+        updateIntensityMeter(stepVal);
+        phaseTimeLeft = 15;
       } else if (mode === 'chaos') {
-        phaseTimeLeft = Math.floor((Math.random() * 25 + 10) / intensityMult);
-      } else {
-        phaseTimeLeft = Math.floor((Math.random() * 20 + 25) / intensityMult);
+        updateIntensityMeter(Math.floor(Math.random() * 75) + 20);
+        phaseTimeLeft = Math.floor(Math.random() * 20 + 10);
+      } else if (mode === 'extreme') {
+        updateIntensityMeter(Math.min(98, 70 + ladderStep * 5));
+        phaseTimeLeft = Math.floor(Math.random() * 15 + 25);
       }
 
       phaseTimeLeft = Math.max(5, phaseTimeLeft);
@@ -859,7 +837,7 @@
         {
           rhythm: 'Medium rhythm',
           style: 'Controlled Edging',
-          vocal: 'Switch direction and maintain the rhythm.',
+          vocal: 'Switch hand and maintain current rhythm.',
           baseSpeed: 0.035,
           min: 0.1,
           max: 0.7,
@@ -869,8 +847,8 @@
         {
           rhythm: 'Gradual speed build',
           style: 'Two-Handed Edging',
-          vocal: 'Gradually increase the motion speed.',
-          baseSpeed: 0.05,
+          vocal: 'Increase motion speed and focus on intensity.',
+          baseSpeed: 0.045,
           min: 0.1,
           max: 0.85,
           hands: 2,
@@ -879,7 +857,7 @@
         {
           rhythm: 'Light pressure',
           style: 'Edge Hold',
-          vocal: 'Ease the motion and approach your edge gently.',
+          vocal: 'Approach your edge gently.',
           baseSpeed: 0.025,
           min: 0.4,
           max: 0.85,
@@ -887,10 +865,10 @@
           side: 'right'
         },
         {
-          rhythm: 'Controlled cadence',
-          style: 'High-Grip Edging',
-          vocal: 'Use a short controlled range near the tip.',
-          baseSpeed: 0.03,
+          rhythm: 'Fast short strokes',
+          style: 'High-Grip Tip Control',
+          vocal: 'Short controlled range near the tip.',
+          baseSpeed: 0.05,
           min: 0.0,
           max: 0.3,
           hands: 2,
@@ -900,21 +878,14 @@
 
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
 
-      if (mode === 'extreme') {
-        strokeSpeed = chosen.baseSpeed * 1.5;
-      } else if (mode === 'warmup') {
-        strokeSpeed = chosen.baseSpeed * 0.7;
-      } else {
-        strokeSpeed = chosen.baseSpeed;
-      }
-
+      strokeSpeed = chosen.baseSpeed;
       strokeRangeMin = chosen.min;
       strokeRangeMax = chosen.max;
       handsCount = chosen.hands;
       activeHandSide = chosen.side;
 
       prompt.innerText = 'STROKE / BUILD';
-      sub.innerText = chosen.rhythm;
+      sub.innerText = `${chosen.rhythm} — Aim for ${Math.round(targetIntensity)}% Intensity`;
       tag.innerText = `Focus: ${chosen.style}`;
 
       speak(chosen.vocal);
@@ -923,26 +894,27 @@
       box.classList.add('pause');
       playTone(280, 'triangle', 0.3);
 
+      // Automatically set intensity drop during Hold / Halt
+      updateIntensityMeter(Math.max(5, targetIntensity * 0.2));
+
       if (mode === 'extreme') {
-        phaseTimeLeft = Math.floor(Math.random() * 5) + 4;
+        phaseTimeLeft = Math.floor(Math.random() * 4) + 4;
       } else if (mode === 'warmup') {
-        phaseTimeLeft = Math.floor(Math.random() * 10) + 15;
-      } else if (mode === 'chaos') {
-        phaseTimeLeft = Math.floor(Math.random() * 10) + 5;
+        phaseTimeLeft = Math.floor(Math.random() * 8) + 12;
       } else {
-        phaseTimeLeft = Math.floor(Math.random() * 15) + 10;
+        phaseTimeLeft = Math.floor(Math.random() * 10) + 8;
       }
 
       const pausePhrases = [
         'Halt immediately and hold your edge.',
-        'Hands off. Clear your tension.',
-        'Freeze motion and steady your breath.'
+        'Hands off. Let your intensity drop.',
+        'Freeze motion and steady your breathing.'
       ];
 
       const chosenPause = pausePhrases[Math.floor(Math.random() * pausePhrases.length)];
 
       prompt.innerText = 'HALT / HOLD';
-      sub.innerText = 'Hands off and cool down.';
+      sub.innerText = 'Hands off! Cool down to lower intensity.';
       tag.innerText = 'Focus: Controlled breathing';
 
       speak(chosenPause);
@@ -978,7 +950,7 @@
     document.getElementById('edgeCount').innerText = edges;
 
     playTone(200, 'sawtooth', 0.4);
-    speak('Edge recorded! Stop all motion and hold the reset.');
+    speak('Edge recorded! Stop all motion immediately.');
 
     startNextPhase('pause');
   }
@@ -1001,11 +973,13 @@
     document.getElementById('phaseTimer').innerText = '--';
     document.getElementById('phaseProgressBar').style.width = '0%';
 
+    updateIntensityMeter(10);
+
     playTone(440, 'sine', 0.3);
     speak(`Session finished. Total training time: ${Math.floor(seconds / 60)} minutes with ${edges} total edges achieved.`);
   }
 
-  updateIntensityUI();
+  updateIntensityMeter(20);
 
 </script>
 
