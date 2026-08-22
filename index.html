@@ -468,7 +468,7 @@ Start Session
 class="action-btn edge-btn"
 onclick="logEdge()"
 style="display:none;">
-Round Reached
+GOT CLOSE OR EDGED
 </button>
 
 <button id="cummedBtn"
@@ -622,11 +622,11 @@ pause:[
 ],
 
 edge:[
-"Round recorded. Freeze there and recover.",
-"Nice. That's one logged. Now calm down.",
-"Good catch. Stop and reset before the next push.",
+"Edge recorded. Freeze there and recover.",
+"Nice catch. That's another edge logged.",
+"Good control. Stop and reset before the next push.",
 "Recorded. Don't get carried away. Take your break.",
-"That's another one. Breathe and get ready.",
+"You edged again. Breathe and get ready.",
 "Logged. Stay calm and wait for the next cue."
 ],
 
@@ -1767,7 +1767,7 @@ function finishClimaxSession(){
 playTone(990,'sine',.6);
 
 speak(
-`${randomRawLine('finish')} You logged ${edges} rounds.`
+`${randomRawLine('finish')} You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
 );
 
 endSession('climax');
@@ -2170,7 +2170,7 @@ document.getElementById(
 ).innerText=
 reason==='climax'
 ?
-`Session completed. Total edges: ${edges}`
+`Session completed. You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
 :
 'Training session stopped.';
 
@@ -2200,7 +2200,7 @@ playTone(
 );
 
 speak(
-`${randomRawLine('manualStop')} You logged ${edges} edges.`
+`${randomRawLine('manualStop')} You edged ${edges} ${edges === 1 ? 'time' : 'times'}.`
 );
 
 }
