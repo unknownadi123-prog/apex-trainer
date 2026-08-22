@@ -154,6 +154,46 @@
   let strokeSpeed = 0.03;
   let strokeRangeMin = 0.2;
   let strokeRangeMax = 0.8;
+  
+  // State control for grip configuration
+  let handsCount = 1;      // 1 or 2 hands
+  let activeHandSide = 'right'; // 'right' or 'left' for single hand mode
+
+  function drawHandGrip(x, y, isRightSide, color) {
+    strokeCtx.save();
+    const flip = isRightSide ? 1 : -1;
+    
+    // Main Palm Block
+    strokeCtx.beginPath();
+    strokeCtx.moveTo(x - (30 * flip), y - 12);
+    strokeCtx.bezierCurveTo(x - (38 * flip), y - 6, x - (38 * flip), y + 16, x - (24 * flip), y + 18);
+    strokeCtx.lineTo(x + (24 * flip), y + 18);
+    strokeCtx.bezierCurveTo(x + (34 * flip), y + 16, x + (34 * flip), y - 8, x + (24 * flip), y - 12);
+    strokeCtx.closePath();
+
+    strokeCtx.fillStyle = color;
+    strokeCtx.shadowBlur = 12;
+    strokeCtx.shadowColor = color;
+    strokeCtx.fill();
+
+    // Thumb Grip
+    strokeCtx.beginPath();
+    strokeCtx.ellipse(x - (18 * flip), y - 8, 12, 8, (isRightSide ? -1 : 1) * Math.PI / 6, 0, Math.PI * 2);
+    strokeCtx.fill();
+
+    // Finger Segments
+    strokeCtx.shadowBlur = 0;
+    strokeCtx.strokeStyle = '#040406';
+    strokeCtx.lineWidth = 2;
+    for (let i = -4; i <= 8; i += 6) {
+      strokeCtx.beginPath();
+      strokeCtx.moveTo(x - (8 * flip), y + i);
+      strokeCtx.lineTo(x + (26 * flip), y + i);
+      strokeCtx.stroke();
+    }
+    
+    strokeCtx.restore();
+  }
 
   function renderAnimations() {
     // 1. Circular Timer Visualizer
@@ -188,21 +228,21 @@
     const h = strokeCanvas.height;
     const midX = w / 2;
     const topY = 30;
-    const bottomY = h - 60;
+    const bottomY = h - 65;
     const totalLen = bottomY - topY;
 
     const strokeColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
     const fillColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
 
-    // Anatomical Shaft Outline
+    // Shaft Outline
     strokeCtx.beginPath();
-    strokeCtx.moveTo(midX - 24, bottomY);
-    strokeCtx.lineTo(midX - 24, topY + 48);
-    strokeCtx.lineTo(midX - 30, topY + 42);
-    strokeCtx.bezierCurveTo(midX - 30, topY + 12, midX - 18, topY, midX, topY);
-    strokeCtx.bezierCurveTo(midX + 18, topY, midX + 30, topY + 12, midX + 30, topY + 42);
-    strokeCtx.lineTo(midX + 24, topY + 48);
-    strokeCtx.lineTo(midX + 24, bottomY);
+    strokeCtx.moveTo(midX - 25, bottomY);
+    strokeCtx.lineTo(midX - 25, topY + 48);
+    strokeCtx.lineTo(midX - 32, topY + 42);
+    strokeCtx.bezierCurveTo(midX - 32, topY + 12, midX - 18, topY, midX, topY);
+    strokeCtx.bezierCurveTo(midX + 18, topY, midX + 32, topY + 12, midX + 32, topY + 42);
+    strokeCtx.lineTo(midX + 25, topY + 48);
+    strokeCtx.lineTo(midX + 25, bottomY);
     strokeCtx.closePath();
 
     strokeCtx.fillStyle = fillColor;
@@ -211,26 +251,20 @@
     strokeCtx.strokeStyle = strokeColor;
     strokeCtx.stroke();
 
-    // Natural Scrotal Base Contour
+    // Round Base Geometry
     strokeCtx.beginPath();
-    strokeCtx.bezierCurveTo(midX - 48, bottomY + 5, midX - 42, bottomY + 38, midX - 2, bottomY + 28);
-    strokeCtx.bezierCurveTo(midX + 2, bottomY + 28, midX + 42, bottomY + 38, midX + 48, bottomY + 5);
+    strokeCtx.arc(midX - 22, bottomY + 22, 22, 0, Math.PI * 2);
+    strokeCtx.arc(midX + 22, bottomY + 22, 22, 0, Math.PI * 2);
     strokeCtx.strokeStyle = strokeColor;
     strokeCtx.lineWidth = 2;
     strokeCtx.stroke();
 
-    // Vascular Branching Overlay Lines
+    // Vascular Branches
     strokeCtx.beginPath();
-    // Left Main Vessel Branch
-    strokeCtx.moveTo(midX - 6, bottomY - 10);
-    strokeCtx.bezierCurveTo(midX - 18, bottomY - 60, midX - 4, topY + 110, midX - 16, topY + 60);
-    strokeCtx.moveTo(midX - 10, topY + 100);
-    strokeCtx.quadraticCurveTo(midX - 20, topY + 80, midX - 22, topY + 65);
-    
-    // Right Vessel Branch
+    strokeCtx.moveTo(midX - 8, bottomY - 10);
+    strokeCtx.bezierCurveTo(midX - 20, bottomY - 60, midX - 4, topY + 110, midX - 18, topY + 60);
     strokeCtx.moveTo(midX + 8, bottomY - 20);
-    strokeCtx.bezierCurveTo(midX + 20, bottomY - 70, midX + 6, topY + 100, midX + 18, topY + 55);
-    
+    strokeCtx.bezierCurveTo(midX + 22, bottomY - 70, midX + 6, topY + 100, midX + 20, topY + 55);
     strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.35)' : 'rgba(255, 0, 85, 0.35)';
     strokeCtx.lineWidth = 1.8;
     strokeCtx.stroke();
@@ -252,40 +286,18 @@
     }
 
     const currentY = topY + strokePos * totalLen;
+    const handColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.88)' : 'rgba(255, 0, 85, 0.88)';
 
-    // Defined Hand & Grip Visualizer
-    strokeCtx.save();
-    
-    // Palm and Wrist Base Contour
-    strokeCtx.beginPath();
-    strokeCtx.moveTo(midX - 38, currentY - 14);
-    strokeCtx.bezierCurveTo(midX - 45, currentY - 8, midX - 45, currentY + 18, midX - 30, currentY + 22);
-    strokeCtx.lineTo(midX + 28, currentY + 22);
-    strokeCtx.bezierCurveTo(midX + 42, currentY + 20, midX + 42, currentY - 10, midX + 28, currentY - 14);
-    strokeCtx.closePath();
-
-    strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.88)' : 'rgba(255, 0, 85, 0.88)';
-    strokeCtx.shadowBlur = 18;
-    strokeCtx.shadowColor = strokeColor;
-    strokeCtx.fill();
-
-    // Thumb Grip Wrap
-    strokeCtx.beginPath();
-    strokeCtx.ellipse(midX - 22, currentY - 10, 14, 10, -Math.PI / 6, 0, Math.PI * 2);
-    strokeCtx.fill();
-
-    // Articulated Finger Divisions
-    strokeCtx.shadowBlur = 0;
-    strokeCtx.strokeStyle = '#040406';
-    strokeCtx.lineWidth = 2;
-    for (let i = -6; i <= 10; i += 8) {
-      strokeCtx.beginPath();
-      strokeCtx.moveTo(midX - 10, currentY + i);
-      strokeCtx.lineTo(midX + 32, currentY + i);
-      strokeCtx.stroke();
+    // Dynamic Multi-Hand Visualizer Logic
+    if (handsCount === 2) {
+      // Primary Lower Hand
+      drawHandGrip(midX, currentY + 12, true, handColor);
+      // Secondary Upper Hand
+      drawHandGrip(midX, currentY - 18, false, handColor);
+    } else {
+      // Single Hand (Left or Right)
+      drawHandGrip(midX, currentY, activeHandSide === 'right', handColor);
     }
-    
-    strokeCtx.restore();
 
     requestAnimationFrame(renderAnimations);
   }
@@ -371,11 +383,11 @@
       }
 
       const instructions = [
-        { rhythm: "Slow steady pace", style: "Full length strokes", vocal: "Alright, work it slow and smooth. Full strokes, base to tip. Stay locked in.", speed: 0.02, min: 0.0, max: 0.85 },
-        { rhythm: "Medium rhythm", style: "Tip focus only", vocal: "Now focus strictly on the head. Keep the pace steady, don't rush it.", speed: 0.04, min: 0.0, max: 0.35 },
-        { rhythm: "Light pressure", style: "Base to mid shaft", vocal: "Ease up on the grip. Stroke the shaft gently and stay in total control.", speed: 0.025, min: 0.4, max: 0.85 },
-        { rhythm: "Gradual speed build", style: "Two-handed grip", vocal: "Pick up the speed now! Two hands, match my pace and push through it.", speed: 0.05, min: 0.1, max: 0.85 },
-        { rhythm: "Controlled cadence", style: "Twist motion at head", vocal: "Back to action. Give it a tight twist right at the tip. Control it.", speed: 0.03, min: 0.0, max: 0.25 }
+        { rhythm: "Slow steady pace", style: "Full length (Right Hand)", vocal: "Alright, work it slow with your right hand. Full strokes, base to tip.", speed: 0.02, min: 0.0, max: 0.85, hands: 1, side: 'right' },
+        { rhythm: "Medium rhythm", style: "Left Hand Switch", vocal: "Switch hands! Use your left hand now. Keep the pace steady.", speed: 0.035, min: 0.1, max: 0.7, hands: 1, side: 'left' },
+        { rhythm: "Gradual speed build", style: "Two-Handed Grip", vocal: "Pick up the speed! Use both hands now, match my pace and push through.", speed: 0.05, min: 0.1, max: 0.85, hands: 2, side: 'right' },
+        { rhythm: "Light pressure", style: "Right Hand (Base to Mid)", vocal: "Ease up on the grip. Back to right hand, stroke gently.", speed: 0.025, min: 0.4, max: 0.85, hands: 1, side: 'right' },
+        { rhythm: "Controlled cadence", style: "Two-Handed Twist", vocal: "Both hands back on! Give it a tight twist near the top. Control it.", speed: 0.03, min: 0.0, max: 0.3, hands: 2, side: 'right' }
       ];
       
       const chosen = instructions[Math.floor(Math.random() * instructions.length)];
@@ -383,6 +395,8 @@
       strokeSpeed = chosen.speed;
       strokeRangeMin = chosen.min;
       strokeRangeMax = chosen.max;
+      handsCount = chosen.hands;
+      activeHandSide = chosen.side;
 
       prompt.innerText = "ACTION";
       sub.innerText = chosen.rhythm;
