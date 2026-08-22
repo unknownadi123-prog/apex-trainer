@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Apex Edge Trainer</title>
+  <style>
+    :root {
+      --bg: #050508;
+      --card: #0d0d14;
+      --primary: #00f0ff;
+      --accent: #7000ff;
+      --stop: #ff0055;
+      --text: #e0e6ed;
+      --glow: rgba(0, 240, 255, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, system-ui, sans-serif; }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    
+    .container { width: 100%; max-width: 480px; background: var(--card); border: 1px solid #1a1a29; border-radius: 20px; padding: 28px; box-shadow: 0 0 40px var(--glow); text-align: center; position: relative; overflow: hidden; }
+    
+    h1 { color: var(--primary); font-size: 1.4rem; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 20px; text-shadow: 0 0 12px rgba(0, 240, 255, 0.6); }
+    
+    .timer-display { font-size: 3.8rem; font-weight: 700; color: #fff; margin: 10px 0; text-shadow: 0 0 20px var(--primary); font-variant-numeric: tabular-nums; }
+    
+    .status-box { background: #080811; border: 2px solid var(--primary); border-radius: 14px; padding: 22px; margin: 18px 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 20px rgba(0, 240, 255, 0.1); }
+    .status-box.pause { border-color: var(--stop); box-shadow: 0 0 30px rgba(255, 0, 85, 0.35); }
+    
+    .prompt-text { font-size: 1.4rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--primary); }
+    .status-box.pause .prompt-text { color: var(--stop); }
+    .sub-prompt { font-size: 0.95rem; color: #8a8a9e; margin-top: 8px; font-weight: 500; }
+
+    .control-panel { display: flex; flex-direction: column; gap: 12px; margin-top: 15px; }
+    .mode-select { background: #080811; color: var(--primary); border: 1px solid #22223a; padding: 10px; border-radius: 8px; font-weight: bold; width: 100%; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; outline: none; }
+    
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
+    .stat-card { background: #070710; padding: 12px; border-radius: 10px; border: 1px solid #161626; }
+    .stat-val { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .stat-lbl { font-size: 0.7rem; color: #6c6c80; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+
+    button { background: linear-gradient(135deg, var(--accent), var(--primary)); color: #fff; border: none; padding: 16px; border-radius: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 1.5px; transition: transform 0.1s, opacity 0.2s; font-size: 0.9rem; }
+    button:active { transform: scale(0.98); }
+    button.edge-btn { background: linear-gradient(135deg, #ff0055, #ff5500); margin-top: 5px; }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1>Apex Edge Trainer</h1>
+  
+  <select id="modeSelect" class="mode-select">
+    <option value="standard">Mode: Standard Balanced</option>
+    <option value="endurance">Mode: Endurance (Long Action)</option>
+    <option value="chaos">Mode: Chaos (Randomized Burst)</option>
+  </select>
+
+  <div class="timer-display" id="mainTimer">00:00:00</div>
+  
+  <div class="status-box" id="statusBox">
+    <div class="prompt-text" id="promptText">READY</div>
+    <div class="sub-prompt" id="subPrompt">Select mode and press Start</div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="stat-val" id="edgeCount">0</div>
+      <div class="stat-lbl">Edges This Session</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="phaseTimer">--</div>
+      <div class="stat-lbl">Next Cue</div>
+    </div>
+  </div>
+
+  <div class="control-panel">
+    <button id="startBtn" onclick="toggleSession()">Start Session</button>
+    <button id="edgeBtn" class="edge-btn" onclick="logEdge()" style="display:none;">Edge Reached (Halt)</button>
+  </div>
+</div>
+
+<script>
+  let active = false;
+  let seconds = 0;
+  let edges = 0;
+  let timerInterval = null;
+  let phaseInterval = null;
+  let phaseTimeLeft = 0;
+  let currentPhase = 'idle';
+
+  const synth = window.speechSynthesis;
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playTone(freq = 440, type = 'sine', duration = 0.15) {
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = type;
+    osc.frequency.value = freq;
+    gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  function speak(text) {
+    if (!synth) return;
+    synth.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    synth.speak(utterance);
+  }
+
+  function updateDisplay() {
+    const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(seconds % 60).padStart(2, '0');
+    document.getElementById('mainTimer').innerText = `${hrs}:${mins}:${secs}`;
+  }
+
+  function toggleSession() {
+    if (!active) {
+      active = true;
+      seconds = 0;
+      edges = 0;
+      document.getElementById('edgeCount').innerText = '0';
+      document.getElementById('modeSelect').disabled = true;
+      document.getElementById('startBtn').innerText = 'Stop Session';
+      document.getElementById('edgeBtn').style.display = 'block';
+      
+      timerInterval = setInterval(() => { seconds++; updateDisplay(); }, 1000);
+      playTone(660, 'sine', 0.2);
+      speak("Session started. Focus on control.");
+      startNextPhase('action');
+    } else {
+      endSession();
+    }
+  }
+
+  function startNextPhase(forcedPhase = null) {
+    clearInterval(phaseInterval);
+    
+    if (forcedPhase) {
+      currentPhase = forcedPhase;
+    } else {
+      currentPhase = currentPhase === 'action' ? 'pause' : 'action';
+    }
+
+    const mode = document.getElementById('modeSelect').value;
+    const box = document.getElementById('statusBox');
+    const prompt = document.getElementById('promptText');
+    const sub = document.getElementById('subPrompt');
+
+    if (currentPhase === 'action') {
+      box.classList.remove('pause');
+      playTone(520, 'sine', 0.15);
+      
+      if (mode === 'endurance') {
+        phaseTimeLeft = Math.floor(Math.random() * 30) + 40;
+      } else if (mode === 'chaos') {
+        phaseTimeLeft = Math.floor(Math.random() * 25) + 10;
+      } else {
+        phaseTimeLeft = Math.floor(Math.random() * 20) + 25;
+      }
+
+      const speeds = ["Slow steady rhythm", "Medium tempo", "Maintain light pressure", "Controlled strokes", "Build pace gradually"];
+      const chosenSpeed = speeds[Math.floor(Math.random() * speeds.length)];
+      
+      prompt.innerText = "ACTION";
+      sub.innerText = chosenSpeed;
+      speak(`Action. ${chosenSpeed}.`);
+    } else {
+      box.classList.add('pause');
+      playTone(280, 'triangle', 0.3);
+      
+      phaseTimeLeft = mode === 'chaos' ? Math.floor(Math.random() * 10) + 5 : Math.floor(Math.random() * 15) + 10;
+      
+      prompt.innerText = "HALT / HOLD";
+      sub.innerText = "Hands off completely. Breath and regulate.";
+      speak("Halt. Hands off completely.");
+    }
+
+    document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
+
+    phaseInterval = setInterval(() => {
+      phaseTimeLeft--;
+      document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
+      if (phaseTimeLeft <= 0) {
+        startNextPhase();
+      }
+    }, 1000);
+  }
+
+  function logEdge() {
+    if (!active) return;
+    edges++;
+    document.getElementById('edgeCount').innerText = edges;
+    playTone(200, 'sawtooth', 0.4);
+    speak("Edge registered. Pause immediately.");
+    startNextPhase('pause');
+  }
+
+  function endSession() {
+    active = false;
+    clearInterval(timerInterval);
+    clearInterval(phaseInterval);
+    
+    document.getElementById('modeSelect').disabled = false;
+    document.getElementById('startBtn').innerText = 'Start Session';
+    document.getElementById('edgeBtn').style.display = 'none';
+    document.getElementById('promptText').innerText = 'COMPLETE';
+    document.getElementById('subPrompt').innerText = 'Session finished cleanly';
+    document.getElementById('statusBox').classList.remove('pause');
+    document.getElementById('phaseTimer').innerText = '--';
+
+    playTone(440, 'sine', 0.3);
+    speak(`Session ended. Total run time ${Math.floor(seconds / 60)} minutes with ${edges} edges reached.`);
+  }
+</script>
+</body>
+</html>
