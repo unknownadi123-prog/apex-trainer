@@ -181,34 +181,52 @@
       mainCtx.stroke();
     }
 
-    // 2. Proportional Motion Guide Visualizer
+    // 2. Motion Guide Visualizer Canvas
     strokeCtx.clearRect(0, 0, strokeCanvas.width, strokeCanvas.height);
     
     const w = strokeCanvas.width;
     const h = strokeCanvas.height;
     const midX = w / 2;
-    const topY = 40;
-    const bottomY = h - 40;
+    const topY = 35;
+    const bottomY = h - 55;
     const totalLen = bottomY - topY;
 
-    // Silhouette Guide Outline
+    const strokeColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    const fillColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
+
+    // Shaft & Crown Outline
     strokeCtx.beginPath();
-    strokeCtx.moveTo(midX - 35, bottomY);
-    strokeCtx.quadraticCurveTo(midX - 16, bottomY - 10, midX - 16, topY + 45);
-    
-    strokeCtx.lineTo(midX - 22, topY + 40);
-    strokeCtx.bezierCurveTo(midX - 22, topY + 15, midX - 14, topY, midX, topY);
-    strokeCtx.bezierCurveTo(midX + 14, topY, midX + 22, topY + 15, midX + 22, topY + 40);
-    strokeCtx.lineTo(midX + 16, topY + 45);
-    
-    strokeCtx.quadraticCurveTo(midX + 16, bottomY - 10, midX + 35, bottomY);
-    strokeCtx.quadraticCurveTo(midX, bottomY + 8, midX - 35, bottomY);
+    strokeCtx.moveTo(midX - 22, bottomY);
+    strokeCtx.lineTo(midX - 22, topY + 45);
+    strokeCtx.lineTo(midX - 28, topY + 40);
+    strokeCtx.bezierCurveTo(midX - 28, topY + 15, midX - 16, topY, midX, topY);
+    strokeCtx.bezierCurveTo(midX + 16, topY, midX + 28, topY + 15, midX + 28, topY + 40);
+    strokeCtx.lineTo(midX + 22, topY + 45);
+    strokeCtx.lineTo(midX + 22, bottomY);
     strokeCtx.closePath();
 
-    strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
+    strokeCtx.fillStyle = fillColor;
     strokeCtx.fill();
     strokeCtx.lineWidth = 2;
-    strokeCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    strokeCtx.strokeStyle = strokeColor;
+    strokeCtx.stroke();
+
+    // Base Profile Curves
+    strokeCtx.beginPath();
+    strokeCtx.arc(midX - 22, bottomY + 16, 18, Math.PI * 0.9, Math.PI * 1.9, true);
+    strokeCtx.arc(midX + 22, bottomY + 16, 18, Math.PI * 1.1, Math.PI * 0.1, true);
+    strokeCtx.strokeStyle = strokeColor;
+    strokeCtx.lineWidth = 2;
+    strokeCtx.stroke();
+
+    // Internal Surface Guide Lines
+    strokeCtx.beginPath();
+    strokeCtx.moveTo(midX - 5, topY + 50);
+    strokeCtx.quadraticCurveTo(midX - 10, topY + 100, midX - 3, bottomY - 10);
+    strokeCtx.moveTo(midX + 6, topY + 65);
+    strokeCtx.quadraticCurveTo(midX + 12, topY + 120, midX + 8, bottomY - 20);
+    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.25)' : 'rgba(255, 0, 85, 0.25)';
+    strokeCtx.lineWidth = 1.5;
     strokeCtx.stroke();
 
     // Calculate Motion Position
@@ -222,33 +240,41 @@
         strokeDirection = 1;
       }
     } else if (active && currentPhase === 'pause') {
-      strokePos += (0.88 - strokePos) * 0.1;
+      strokePos += (0.85 - strokePos) * 0.1;
     } else {
-      strokePos = 0.88;
+      strokePos = 0.85;
     }
 
     const currentY = topY + strokePos * totalLen;
 
-    // Hand Grip Silhouette
-    strokeCtx.beginPath();
-    strokeCtx.roundRect(midX - 30, currentY - 14, 60, 28, [10, 10, 10, 10]);
-    strokeCtx.arc(midX - 20, currentY - 6, 12, 0, Math.PI * 2);
+    // Hand Vector Grip Indicator
+    strokeCtx.save();
     
+    // Main Palm Block
+    strokeCtx.beginPath();
+    strokeCtx.roundRect(midX - 36, currentY - 16, 72, 32, [12, 12, 12, 12]);
     strokeCtx.fillStyle = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.9)' : 'rgba(255, 0, 85, 0.9)';
     strokeCtx.shadowBlur = 18;
-    strokeCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+    strokeCtx.shadowColor = strokeColor;
     strokeCtx.fill();
 
-    // Finger Grip Details
+    // Thumb Contour
+    strokeCtx.beginPath();
+    strokeCtx.arc(midX - 24, currentY - 8, 14, 0, Math.PI * 2);
+    strokeCtx.fill();
+
+    // Finger Segments
     strokeCtx.shadowBlur = 0;
     strokeCtx.strokeStyle = '#040406';
-    strokeCtx.lineWidth = 2;
-    for (let i = -7; i <= 7; i += 7) {
+    strokeCtx.lineWidth = 2.5;
+    for (let i = -8; i <= 8; i += 8) {
       strokeCtx.beginPath();
-      strokeCtx.moveTo(midX - 10, currentY + i);
-      strokeCtx.lineTo(midX + 24, currentY + i);
+      strokeCtx.moveTo(midX - 14, currentY + i);
+      strokeCtx.lineTo(midX + 28, currentY + i);
       strokeCtx.stroke();
     }
+    
+    strokeCtx.restore();
 
     requestAnimationFrame(renderAnimations);
   }
@@ -334,9 +360,9 @@
       }
 
       const instructions = [
-        { rhythm: "Slow steady pace", style: "Full length strokes", vocal: "Alright, work it slow and smooth. Full strokes, base to tip. Stay locked in.", speed: 0.02, min: 0.0, max: 0.9 },
+        { rhythm: "Slow steady pace", style: "Full length strokes", vocal: "Alright, work it slow and smooth. Full strokes, base to tip. Stay locked in.", speed: 0.02, min: 0.0, max: 0.85 },
         { rhythm: "Medium rhythm", style: "Tip focus only", vocal: "Now focus strictly on the head. Keep the pace steady, don't rush it.", speed: 0.04, min: 0.0, max: 0.35 },
-        { rhythm: "Light pressure", style: "Base to mid shaft", vocal: "Ease up on the grip. Stroke the shaft gently and stay in total control.", speed: 0.025, min: 0.4, max: 0.9 },
+        { rhythm: "Light pressure", style: "Base to mid shaft", vocal: "Ease up on the grip. Stroke the shaft gently and stay in total control.", speed: 0.025, min: 0.4, max: 0.85 },
         { rhythm: "Gradual speed build", style: "Two-handed grip", vocal: "Pick up the speed now! Two hands, match my pace and push through it.", speed: 0.05, min: 0.1, max: 0.85 },
         { rhythm: "Controlled cadence", style: "Twist motion at head", vocal: "Back to action. Give it a tight twist right at the tip. Control it.", speed: 0.03, min: 0.0, max: 0.25 }
       ];
