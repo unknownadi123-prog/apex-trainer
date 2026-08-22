@@ -1247,7 +1247,28 @@ utterance.volume=1;
 synth.speak(utterance);
 
 }
+/* Additional styles for adult video player */
+#videoContainer {
+  background: #000;
+}
 
+#directVideoPlayer {
+  object-fit: contain;
+}
+
+#siteSelect {
+  cursor: pointer;
+  outline: none;
+}
+
+#siteSelect:focus {
+  border-color: var(--primary);
+}
+
+#videoFallback a {
+  color: var(--primary);
+  text-decoration: underline;
+}
 
 /* Dynamic Finish Lines */
 const finishCompliments = [
