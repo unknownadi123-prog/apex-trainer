@@ -12,6 +12,7 @@
       --primary: #00f0ff;
       --accent: #7000ff;
       --stop: #ff0055;
+      --cum: #00ffaa;
       --text: #e0e6ed;
       --glow: rgba(0, 240, 255, 0.15);
     }
@@ -118,7 +119,7 @@
     .timer-overlay {
       position: relative;
       z-index: 2;
-      font-size: 2.5rem;
+      font-size: 2.2rem;
       font-weight: 700;
       color: #fff;
       text-shadow: 0 0 15px var(--primary);
@@ -147,7 +148,11 @@
       box-shadow: 0 0 10px var(--stop);
     }
 
-    /* Auto Dynamic Intensity Controller Styles */
+    .status-box.release .progress-bar-fill {
+      background: var(--cum);
+      box-shadow: 0 0 10px var(--cum);
+    }
+
     .intensity-container {
       width: 100%;
       margin: 15px 0;
@@ -206,6 +211,11 @@
       box-shadow: 0 0 35px rgba(255, 0, 85, 0.35);
     }
 
+    .status-box.release {
+      border-color: var(--cum);
+      box-shadow: 0 0 45px rgba(0, 255, 170, 0.6);
+    }
+
     .prompt-text {
       font-size: 1.3rem;
       font-weight: 700;
@@ -216,6 +226,10 @@
 
     .status-box.pause .prompt-text {
       color: var(--stop);
+    }
+
+    .status-box.release .prompt-text {
+      color: var(--cum);
     }
 
     .sub-prompt {
@@ -243,6 +257,12 @@
       border-color: var(--stop);
       color: var(--stop);
       background: rgba(255, 0, 85, 0.1);
+    }
+
+    .status-box.release .technique-tag {
+      border-color: var(--cum);
+      color: var(--cum);
+      background: rgba(0, 255, 170, 0.1);
     }
 
     .control-panel {
@@ -345,30 +365,23 @@
     <h1>Apex Edge Trainer</h1>
 
     <select id="modeSelect" class="mode-select">
-      <option value="warmup">Mode: Warm-Up</option>
-      <option value="standard" selected>Mode: Standard Balanced</option>
-      <option value="endurance">Mode: Endurance Hold</option>
-      <option value="ladder">Mode: Ladder Surge</option>
-      <option value="chaos">Mode: Chaos Randomizer</option>
-      <option value="extreme">Mode: Overload Edge</option>
+      <option value="quick">Mode: Quick Edge (3-5 mins)</option>
+      <option value="warmup">Mode: Warm-Up (15 mins)</option>
+      <option value="standard" selected>Mode: Standard Balanced (25 mins)</option>
+      <option value="endurance">Mode: Endurance Hold (40 mins)</option>
+      <option value="ladder">Mode: Ladder Surge (20 mins)</option>
+      <option value="toy">Mode: Toy Sleeve Marathon (2-3 hrs)</option>
     </select>
 
     <div class="visualizer-wrapper">
-      <canvas id="pulseCanvas"
-              class="main-canvas"
-              width="200"
-              height="200"></canvas>
-
-      <div class="timer-overlay" id="mainTimer">
-        00:00:00
-      </div>
+      <canvas id="pulseCanvas" class="main-canvas" width="200" height="200"></canvas>
+      <div class="timer-overlay" id="mainTimer">00:00:00</div>
     </div>
 
     <div class="progress-bar-container">
-      <div class="progress-bar-fill" id="phaseProgressBar"></div>
+      <div class="progress-bar-fill" id="sessionProgressBar"></div>
     </div>
 
-    <!-- Automatic Dynamic Intensity Meter -->
     <div class="intensity-container">
       <div class="intensity-header">
         <span>Target Intensity Level</span>
@@ -380,116 +393,61 @@
     </div>
 
     <div class="status-box" id="statusBox">
-
-      <div class="prompt-text" id="promptText">
-        READY
-      </div>
-
-      <div class="sub-prompt" id="subPrompt">
-        Select mode to start guided training session
-      </div>
-
-      <div class="technique-tag"
-           id="techniqueTag"
-           style="display:none;">
-        Technique
-      </div>
-
+      <div class="prompt-text" id="promptText">READY</div>
+      <div class="sub-prompt" id="subPrompt">Select mode to start guided training session</div>
+      <div class="technique-tag" id="techniqueTag" style="display:none;">Technique</div>
     </div>
 
     <div class="stats-row">
-
       <div class="stat-card">
         <div class="stat-val" id="edgeCount">0</div>
         <div class="stat-lbl">Edges Logged</div>
       </div>
-
       <div class="stat-card">
         <div class="stat-val" id="phaseTimer">--</div>
         <div class="stat-lbl">Next Cue</div>
       </div>
-
     </div>
 
     <div class="control-panel">
-
-      <button id="startBtn"
-              class="action-btn"
-              onclick="toggleSession()">
-        Start Session
-      </button>
-
-      <button id="edgeBtn"
-              class="action-btn edge-btn"
-              onclick="logEdge()"
-              style="display:none;">
-        Edge Reached
-      </button>
-
+      <button id="startBtn" class="action-btn" onclick="toggleSession()">Start Session</button>
+      <button id="edgeBtn" class="action-btn edge-btn" onclick="logEdge()" style="display:none;">Edge Reached</button>
     </div>
 
   </div>
 
-
   <div class="stroke-panel">
-
-    <div class="stroke-title">
-      Anatomy Motion
-    </div>
-
+    <div class="stroke-title">Anatomy Motion</div>
     <div class="stroke-canvas-container">
-
-      <canvas id="strokeCanvas"
-              width="160"
-              height="300">
-      </canvas>
-
+      <canvas id="strokeCanvas" width="160" height="300"></canvas>
     </div>
-
   </div>
 
 </div>
 
-
 <script>
-
   let active = false;
   let seconds = 0;
   let edges = 0;
+  let totalSessionSeconds = 1800; // Default 30 mins
 
   let timerInterval = null;
   let phaseInterval = null;
 
   let phaseTimeLeft = 0;
-  let totalPhaseDuration = 1;
-
   let currentPhase = 'idle';
-  let targetIntensity = 20; // Automatically computed intensity percentage (0-100)
-  let ladderStep = 0;       // State for progressive modes
+  let targetIntensity = 20;
+  let ladderStep = 0;
 
   const synth = window.speechSynthesis;
-
-  const audioCtx =
-    new (window.AudioContext ||
-         window.webkitAudioContext)();
-
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   let trainerVoice = null;
-
 
   function setTrainerVoice() {
     if (!synth) return;
     const voices = synth.getVoices();
-    trainerVoice =
-      voices.find(v =>
-        v.lang.includes('en') &&
-        (
-          v.name.includes('Male') ||
-          v.name.includes('David') ||
-          v.name.includes('Daniel')
-        )
-      ) || voices[0];
+    trainerVoice = voices.find(v => v.lang.includes('en') && (v.name.includes('Male') || v.name.includes('David') || v.name.includes('Daniel'))) || voices[0];
   }
-
 
   if (synth) {
     setTrainerVoice();
@@ -498,18 +456,12 @@
     }
   }
 
-
-  const mainCanvas =
-    document.getElementById('pulseCanvas');
-  const mainCtx =
-    mainCanvas.getContext('2d');
+  const mainCanvas = document.getElementById('pulseCanvas');
+  const mainCtx = mainCanvas.getContext('2d');
   let pulseAngle = 0;
 
-
-  const strokeCanvas =
-    document.getElementById('strokeCanvas');
-  const strokeCtx =
-    strokeCanvas.getContext('2d');
+  const strokeCanvas = document.getElementById('strokeCanvas');
+  const strokeCtx = strokeCanvas.getContext('2d');
 
   let strokePos = 0;
   let strokeDirection = 1;
@@ -518,7 +470,6 @@
   let strokeRangeMax = 0.8;
   let handsCount = 1;
   let activeHandSide = 'right';
-
 
   function updateIntensityMeter(value) {
     targetIntensity = Math.min(100, Math.max(5, value));
@@ -547,7 +498,6 @@
 
     label.innerText = `${Math.round(targetIntensity)}% (${desc})`;
   }
-
 
   function drawHandGrip(x, y, isRightSide, color) {
     strokeCtx.save();
@@ -583,26 +533,23 @@
     strokeCtx.restore();
   }
 
-
   function renderAnimations() {
     mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
 
     const centerX = mainCanvas.width / 2;
     const centerY = mainCanvas.height / 2;
-
     const intensityMult = targetIntensity / 50;
 
     if (active) {
-      pulseAngle += (currentPhase === 'action' ? 0.05 : 0.02) * intensityMult;
-
-      const radius = 75 + Math.sin(pulseAngle) * (currentPhase === 'action' ? 7 : 2);
+      pulseAngle += (currentPhase === 'action' || currentPhase === 'release' ? 0.05 : 0.02) * intensityMult;
+      const radius = 75 + Math.sin(pulseAngle) * (currentPhase === 'action' || currentPhase === 'release' ? 7 : 2);
 
       mainCtx.beginPath();
       mainCtx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-      mainCtx.strokeStyle = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+      mainCtx.strokeStyle = currentPhase === 'release' ? '#00ffaa' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
       mainCtx.lineWidth = 4;
       mainCtx.shadowBlur = 15;
-      mainCtx.shadowColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
+      mainCtx.shadowColor = currentPhase === 'release' ? '#00ffaa' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
       mainCtx.stroke();
     } else {
       mainCtx.beginPath();
@@ -622,8 +569,8 @@
     const bottomY = h - 65;
     const totalLen = bottomY - topY;
 
-    const strokeColor = currentPhase === 'action' ? '#00f0ff' : '#ff0055';
-    const fillColor = currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)';
+    const strokeColor = currentPhase === 'release' ? '#00ffaa' : (currentPhase === 'action' ? '#00f0ff' : '#ff0055');
+    const fillColor = currentPhase === 'release' ? 'rgba(0, 255, 170, 0.12)' : (currentPhase === 'action' ? 'rgba(0, 240, 255, 0.08)' : 'rgba(255, 0, 85, 0.08)');
 
     const shaftHalfWidth = 25;
     const lowerWidth = 40;
@@ -636,7 +583,6 @@
     strokeCtx.lineTo(midX + 25, topY + 48);
 
     strokeCtx.lineTo(midX + shaftHalfWidth, bottomY - 7);
-
     strokeCtx.bezierCurveTo(midX + lowerWidth, bottomY + 8, midX + lowerWidth, bottomY + 30, midX + 24, bottomY + 40);
     strokeCtx.bezierCurveTo(midX + 16, bottomY + 44, midX + 7, bottomY + 45, midX, bottomY + 43);
     strokeCtx.bezierCurveTo(midX - 7, bottomY + 45, midX - 16, bottomY + 44, midX - 24, bottomY + 40);
@@ -653,41 +599,10 @@
     strokeCtx.lineJoin = 'round';
     strokeCtx.stroke();
 
-    strokeCtx.beginPath();
-    strokeCtx.moveTo(midX, bottomY + 5);
-    strokeCtx.bezierCurveTo(midX - 2, bottomY + 18, midX - 2, bottomY + 34, midX, bottomY + 43);
-    strokeCtx.strokeStyle = currentPhase === 'action' ? 'rgba(0,240,255,0.42)' : 'rgba(255,0,85,0.42)';
-    strokeCtx.lineWidth = 1.5;
-    strokeCtx.stroke();
-
-    const veinColor = currentPhase === 'action' ? 'rgba(0,240,255,0.35)' : 'rgba(255,0,85,0.35)';
-
-    strokeCtx.beginPath();
-    strokeCtx.moveTo(midX - 8, bottomY - 12);
-    strokeCtx.bezierCurveTo(midX - 18, bottomY - 40, midX - 7, bottomY - 65, midX - 15, bottomY - 100);
-    strokeCtx.bezierCurveTo(midX - 21, bottomY - 125, midX - 10, topY + 120, midX - 18, topY + 62);
-    strokeCtx.strokeStyle = veinColor;
-    strokeCtx.lineWidth = 1.7;
-    strokeCtx.stroke();
-
-    strokeCtx.beginPath();
-    strokeCtx.moveTo(midX + 9, bottomY - 14);
-    strokeCtx.bezierCurveTo(midX + 19, bottomY - 45, midX + 8, bottomY - 75, midX + 16, bottomY - 108);
-    strokeCtx.bezierCurveTo(midX + 22, bottomY - 130, midX + 10, topY + 115, midX + 19, topY + 58);
-    strokeCtx.strokeStyle = veinColor;
-    strokeCtx.lineWidth = 1.7;
-    strokeCtx.stroke();
-
-    if (active && currentPhase === 'action') {
+    if (active && (currentPhase === 'action' || currentPhase === 'release')) {
       strokePos += strokeSpeed * strokeDirection * intensityMult;
-
-      if (strokePos >= strokeRangeMax) {
-        strokePos = strokeRangeMax;
-        strokeDirection = -1;
-      } else if (strokePos <= strokeRangeMin) {
-        strokePos = strokeRangeMin;
-        strokeDirection = 1;
-      }
+      if (strokePos >= strokeRangeMax) { strokePos = strokeRangeMax; strokeDirection = -1; }
+      else if (strokePos <= strokeRangeMin) { strokePos = strokeRangeMin; strokeDirection = 1; }
     } else if (active && currentPhase === 'pause') {
       strokePos += (0.85 - strokePos) * 0.1;
     } else {
@@ -695,7 +610,7 @@
     }
 
     const currentY = topY + strokePos * totalLen;
-    const handColor = currentPhase === 'action' ? 'rgba(0,240,255,0.88)' : 'rgba(255,0,85,0.88)';
+    const handColor = currentPhase === 'release' ? 'rgba(0,255,170,0.95)' : (currentPhase === 'action' ? 'rgba(0,240,255,0.88)' : 'rgba(255,0,85,0.88)');
 
     if (handsCount === 2) {
       drawHandGrip(midX, currentY + 12, true, handColor);
@@ -709,48 +624,58 @@
 
   renderAnimations();
 
-
   function playTone(freq = 440, type = 'sine', duration = 0.15) {
-    if (audioCtx.state === 'suspended') {
-      audioCtx.resume();
-    }
+    if (audioCtx.state === 'suspended') { audioCtx.resume(); }
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
 
     osc.type = type;
     osc.frequency.value = freq;
-
     gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
     gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
 
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
     osc.start();
     osc.stop(audioCtx.currentTime + duration);
   }
 
-
   function speak(text) {
     if (!synth) return;
     synth.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
     if (trainerVoice) utterance.voice = trainerVoice;
     utterance.rate = 1.0;
     utterance.pitch = 0.8;
-
     synth.speak(utterance);
   }
-
 
   function updateDisplay() {
     const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
     const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
     const secs = String(seconds % 60).padStart(2, '0');
     document.getElementById('mainTimer').innerText = `${hrs}:${mins}:${secs}`;
+
+    // Overall session progress bar
+    const progress = Math.min(100, (seconds / totalSessionSeconds) * 100);
+    document.getElementById('sessionProgressBar').style.width = `${progress}%`;
   }
 
+  function setSessionDuration(mode) {
+    if (mode === 'quick') {
+      totalSessionSeconds = Math.floor(Math.random() * 120) + 180; // 3 to 5 minutes
+    } else if (mode === 'warmup') {
+      totalSessionSeconds = 900; // 15 mins
+    } else if (mode === 'standard') {
+      totalSessionSeconds = 1500; // 25 mins
+    } else if (mode === 'endurance') {
+      totalSessionSeconds = 2400; // 40 mins
+    } else if (mode === 'ladder') {
+      totalSessionSeconds = 1200; // 20 mins
+    } else if (mode === 'toy') {
+      totalSessionSeconds = Math.floor(Math.random() * 3600) + 7200; // 2 to 3 hours (120-180 mins)
+    }
+  }
 
   function toggleSession() {
     if (!active) {
@@ -758,6 +683,9 @@
       seconds = 0;
       edges = 0;
       ladderStep = 0;
+
+      const selectedMode = document.getElementById('modeSelect').value;
+      setSessionDuration(selectedMode);
 
       document.getElementById('edgeCount').innerText = '0';
       document.getElementById('modeSelect').disabled = true;
@@ -768,18 +696,43 @@
       timerInterval = setInterval(() => {
         seconds++;
         updateDisplay();
+
+        if (seconds >= totalSessionSeconds && currentPhase !== 'release') {
+          triggerReleasePhase();
+        }
       }, 1000);
 
       playTone(660, 'sine', 0.2);
-      speak("Session started. Pay attention to the dynamic intensity level and match your speed.");
+      speak("Session started. Prepare yourself.");
       startNextPhase('action');
     } else {
       endSession();
     }
   }
 
+  function triggerReleasePhase() {
+    clearInterval(phaseInterval);
+    currentPhase = 'release';
+
+    const box = document.getElementById('statusBox');
+    box.className = 'status-box release';
+
+    updateIntensityMeter(100);
+
+    document.getElementById('promptText').innerText = 'FULL RELEASE';
+    document.getElementById('subPrompt').innerText = 'Goal reached! Stroke freely and climax now.';
+    document.getElementById('techniqueTag').innerText = 'Status: Final Climax Allowed';
+    document.getElementById('phaseTimer').innerText = 'GO!';
+
+    playTone(880, 'sine', 0.5);
+    speak("Target session time achieved. You are now authorized for full release. Climax now!");
+
+    document.getElementById('edgeBtn').style.display = 'none';
+  }
 
   function startNextPhase(forcedPhase = null) {
+    if (currentPhase === 'release') return;
+
     clearInterval(phaseInterval);
 
     if (forcedPhase) {
@@ -795,12 +748,14 @@
     const tag = document.getElementById('techniqueTag');
 
     if (currentPhase === 'action') {
-      box.classList.remove('pause');
+      box.className = 'status-box';
       playTone(520, 'sine', 0.15);
       ladderStep++;
 
-      // Automatically calculate intensity based on Mode & Goal Strategy
-      if (mode === 'warmup') {
+      if (mode === 'quick') {
+        updateIntensityMeter(Math.min(95, 50 + ladderStep * 15));
+        phaseTimeLeft = 20;
+      } else if (mode === 'warmup') {
         updateIntensityMeter(25 + Math.sin(ladderStep) * 10);
         phaseTimeLeft = Math.floor(Math.random() * 10 + 25);
       } else if (mode === 'standard') {
@@ -813,76 +768,32 @@
         const stepVal = (ladderStep % 5) * 18 + 20;
         updateIntensityMeter(stepVal);
         phaseTimeLeft = 15;
-      } else if (mode === 'chaos') {
-        updateIntensityMeter(Math.floor(Math.random() * 75) + 20);
-        phaseTimeLeft = Math.floor(Math.random() * 20 + 10);
-      } else if (mode === 'extreme') {
-        updateIntensityMeter(Math.min(98, 70 + ladderStep * 5));
-        phaseTimeLeft = Math.floor(Math.random() * 15 + 25);
+      } else if (mode === 'toy') {
+        updateIntensityMeter(Math.min(80, 35 + ladderStep * 3));
+        phaseTimeLeft = Math.floor(Math.random() * 30 + 45); // Extended 45-75s strokes for toys
       }
 
       phaseTimeLeft = Math.max(5, phaseTimeLeft);
 
-      const instructions = [
-        {
-          rhythm: 'Slow steady pace',
-          style: 'Full Range Edging',
-          vocal: 'Maintain a slow steady rhythm.',
-          baseSpeed: 0.02,
-          min: 0.0,
-          max: 0.85,
-          hands: 1,
-          side: 'right'
-        },
-        {
-          rhythm: 'Medium rhythm',
-          style: 'Controlled Edging',
-          vocal: 'Switch hand and maintain current rhythm.',
-          baseSpeed: 0.035,
-          min: 0.1,
-          max: 0.7,
-          hands: 1,
-          side: 'left'
-        },
-        {
-          rhythm: 'Gradual speed build',
-          style: 'Two-Handed Edging',
-          vocal: 'Increase motion speed and focus on intensity.',
-          baseSpeed: 0.045,
-          min: 0.1,
-          max: 0.85,
-          hands: 2,
-          side: 'right'
-        },
-        {
-          rhythm: 'Light pressure',
-          style: 'Edge Hold',
-          vocal: 'Approach your edge gently.',
-          baseSpeed: 0.025,
-          min: 0.4,
-          max: 0.85,
-          hands: 1,
-          side: 'right'
-        },
-        {
-          rhythm: 'Fast short strokes',
-          style: 'High-Grip Tip Control',
-          vocal: 'Short controlled range near the tip.',
-          baseSpeed: 0.05,
-          min: 0.0,
-          max: 0.3,
-          hands: 2,
-          side: 'right'
-        }
+      const toyInstructions = [
+        { rhythm: 'Full-length steady glide', style: 'Sleeve Deep Stroke', vocal: 'Full depth gliding motion with sleeve.' },
+        { rhythm: 'Slow tip friction focus', style: 'Sleeve Cap Control', vocal: 'Target the tip area with slow rotation.' },
+        { rhythm: 'Twist on up-stroke', style: 'Twist & Pull Motion', vocal: 'Apply gentle rotation on every upward stroke.' }
       ];
 
-      const chosen = instructions[Math.floor(Math.random() * instructions.length)];
+      const standardInstructions = [
+        { rhythm: 'Slow steady pace', style: 'Full Range Edging', vocal: 'Maintain a slow steady rhythm.' },
+        { rhythm: 'Medium rhythm', style: 'Controlled Edging', vocal: 'Switch hand and maintain current rhythm.' },
+        { rhythm: 'Gradual speed build', style: 'Two-Handed Edging', vocal: 'Increase motion speed and focus on intensity.' }
+      ];
 
-      strokeSpeed = chosen.baseSpeed;
-      strokeRangeMin = chosen.min;
-      strokeRangeMax = chosen.max;
-      handsCount = chosen.hands;
-      activeHandSide = chosen.side;
+      const chosen = (mode === 'toy') ? toyInstructions[Math.floor(Math.random() * toyInstructions.length)] : standardInstructions[Math.floor(Math.random() * standardInstructions.length)];
+
+      strokeSpeed = mode === 'quick' ? 0.06 : 0.035;
+      strokeRangeMin = 0.1;
+      strokeRangeMax = 0.85;
+      handsCount = 1;
+      activeHandSide = 'right';
 
       prompt.innerText = 'STROKE / BUILD';
       sub.innerText = `${chosen.rhythm} — Aim for ${Math.round(targetIntensity)}% Intensity`;
@@ -891,44 +802,39 @@
       speak(chosen.vocal);
 
     } else {
-      box.classList.add('pause');
+      box.className = 'status-box pause';
       playTone(280, 'triangle', 0.3);
 
-      // Automatically set intensity drop during Hold / Halt
       updateIntensityMeter(Math.max(5, targetIntensity * 0.2));
 
-      if (mode === 'extreme') {
-        phaseTimeLeft = Math.floor(Math.random() * 4) + 4;
-      } else if (mode === 'warmup') {
-        phaseTimeLeft = Math.floor(Math.random() * 8) + 12;
+      if (mode === 'quick') {
+        phaseTimeLeft = 5;
+      } else if (mode === 'toy') {
+        phaseTimeLeft = Math.floor(Math.random() * 15) + 15; // Longer recovery holds for toys
       } else {
         phaseTimeLeft = Math.floor(Math.random() * 10) + 8;
       }
 
-      const pausePhrases = [
-        'Halt immediately and hold your edge.',
-        'Hands off. Let your intensity drop.',
-        'Freeze motion and steady your breathing.'
-      ];
-
-      const chosenPause = pausePhrases[Math.floor(Math.random() * pausePhrases.length)];
-
-      prompt.innerText = 'HALT / HOLD';
-      sub.innerText = 'Hands off! Cool down to lower intensity.';
-      tag.innerText = 'Focus: Controlled breathing';
-
-      speak(chosenPause);
+      // Special periodic lube check prompt for Toy Mode every ~30 mins
+      if (mode === 'toy' && seconds > 0 && Math.floor(seconds / 60) % 30 === 0) {
+        prompt.innerText = 'LUBE & SUCTION CHECK';
+        sub.innerText = 'Extended 30s pause: Re-apply lube or adjust sleeve suction.';
+        tag.innerText = 'Focus: Toy Maintenance';
+        phaseTimeLeft = 30;
+        speak('30 minute milestone. Reapply lubricant or adjust suction if needed.');
+      } else {
+        prompt.innerText = 'HALT / HOLD';
+        sub.innerText = 'Hands off! Cool down to lower intensity.';
+        tag.innerText = 'Focus: Controlled breathing';
+        speak('Halt immediately and hold your edge.');
+      }
     }
-
-    totalPhaseDuration = phaseTimeLeft;
-    updateProgressBar();
 
     document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
 
     phaseInterval = setInterval(() => {
       phaseTimeLeft--;
       document.getElementById('phaseTimer').innerText = `${phaseTimeLeft}s`;
-      updateProgressBar();
 
       if (phaseTimeLeft <= 0) {
         startNextPhase();
@@ -936,15 +842,8 @@
     }, 1000);
   }
 
-
-  function updateProgressBar() {
-    const percentage = ((totalPhaseDuration - phaseTimeLeft) / totalPhaseDuration) * 100;
-    document.getElementById('phaseProgressBar').style.width = `${Math.min(100, Math.max(0, percentage))}%`;
-  }
-
-
   function logEdge() {
-    if (!active) return;
+    if (!active || currentPhase === 'release') return;
 
     edges++;
     document.getElementById('edgeCount').innerText = edges;
@@ -954,7 +853,6 @@
 
     startNextPhase('pause');
   }
-
 
   function endSession() {
     active = false;
@@ -969,18 +867,17 @@
 
     document.getElementById('promptText').innerText = 'COMPLETE';
     document.getElementById('subPrompt').innerText = 'Training session finished';
-    document.getElementById('statusBox').classList.remove('pause');
+    document.getElementById('statusBox').className = 'status-box';
     document.getElementById('phaseTimer').innerText = '--';
-    document.getElementById('phaseProgressBar').style.width = '0%';
+    document.getElementById('sessionProgressBar').style.width = '0%';
 
     updateIntensityMeter(10);
 
     playTone(440, 'sine', 0.3);
-    speak(`Session finished. Total training time: ${Math.floor(seconds / 60)} minutes with ${edges} total edges achieved.`);
+    speak(`Session finished. Total time: ${Math.floor(seconds / 60)} minutes with ${edges} edges recorded.`);
   }
 
   updateIntensityMeter(20);
-
 </script>
 
 </body>
